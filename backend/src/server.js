@@ -6,15 +6,16 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5001
+const PORT = process.env.PORT || 5001;
 
 connectDB();
 
-//prefixing
+// middleware
+app.use(express.json());
+
+// prefixing
 app.use("/api/notes", notesRoutes);
 
-
 app.listen(PORT, () => {
-    console.log("Server started on PORT: ",PORT);
+  console.log("Server started on PORT: ", PORT);
 });
-
