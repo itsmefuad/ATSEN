@@ -13,10 +13,10 @@ const PORT = process.env.PORT || 5001;
 app.use(express.json()); // for parsing JSON bodies: req.body
 app.use(rateLimter);
 
-app.use((req, res, next) => {
-  console.log(`Req Method: ${req.method}\nReq URL: ${req.url}`);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log(`Req Method: ${req.method}\nReq URL: ${req.url}`);
+//   next();
+// });
 
 // prefixing
 app.use("/api/notes", notesRoutes);
