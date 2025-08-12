@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 const App = () => {
   return (
     <div data-theme="nord">
-      <button className="btn btn-outline">click me</button>
+      {/* <button className="btn btn-outline">click me</button> */}
       <Routes>
         <Route path="/teacher/dashboard" element={<T_Dashboard />} />
         <Route path="/teacher/classroom/:id" element={<T_Classroom />} />

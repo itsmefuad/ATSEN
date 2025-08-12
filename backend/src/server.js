@@ -1,5 +1,5 @@
 import express from "express";
-import notesRoutes from "./routes/notesRoutes.js";
+import roomsRoutes from "./routes/roomsRoutes.js";
 import { connectDB } from "./config/db.js";
 import dotenv from "dotenv";
 import rateLimter from "./middlewares/rateLimiter.js";
@@ -19,7 +19,7 @@ app.use(rateLimter);
 // });
 
 // prefixing
-app.use("/api/notes", notesRoutes);
+app.use("/api/rooms", roomsRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
