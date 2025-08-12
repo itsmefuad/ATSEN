@@ -43,7 +43,7 @@ const Navbar = () => {
       </div>
 
       <div className="flex-none m-4">
-        <Link to={"/teacher/classroom/:id"} className="btn btn-Neutral">
+        <Link to={"/teacher/dashboard"} className="btn btn-Neutral">
           <CircleUserRoundIcon className="size-5" />
           <span>Profile</span>{" "}
         </Link>
@@ -55,9 +55,6 @@ const Navbar = () => {
     //       <div className="flex items-center gap-4">
     //         <MenuIcon className="size-5" />
     //       </div>
-
-    //
-
     //       <div className="flex items-center">
     //         <Link to={"/teacher/classroom/:id"} className="btn btn-Neutral">
     //           <CircleUserRoundIcon className="size-5" />

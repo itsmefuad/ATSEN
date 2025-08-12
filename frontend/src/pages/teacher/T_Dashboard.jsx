@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RateLimitedUi from "../../components/RateLimitedUi";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import RoomCard from "../../components/RoomCard";
+import { Link } from "react-router";
+import { Plus } from "lucide-react";
 
 const T_Dashboard = () => {
   const [isRateLimited, setIsRateLimited] = useState(false);
@@ -13,7 +15,7 @@ const T_Dashboard = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const res = await axios.get("http://localhost:5001/api/rooms");
+        const res = await api.get("/rooms");
         console.log(res.data);
         setRooms(res.data);
         setIsRateLimited(false);
@@ -48,6 +50,15 @@ const T_Dashboard = () => {
             {rooms.map((room) => (
               <RoomCard key={room._id} room={room} />
             ))}
+            <Link
+              to={"/teacher/create/room"}
+              className="flex flex-col items-center justify-center border-2 border-dashed border-primary rounded-lg p-6 hover:bg-primary/5 transition"
+            >
+              <Plus className="w-16 h-16 text-primary" />
+              <span className="mt-4 text-primary font-medium text-lg">
+                Create a Room
+              </span>
+            </Link>
           </div>
         )}
       </div>
