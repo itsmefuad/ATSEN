@@ -37,9 +37,9 @@ const Navbar = () => {
 
       <div className="flex-1">
         {/* <a className="btn btn-ghost text-xl">Teacher's Dashboard</a> */}
-        <hi className="text-3xl font-bold text-primary font-mono tracking-tight">
+        <h1 className="text-3xl font-bold text-primary font-mono tracking-tight">
           Teacher's Dashboard
-        </hi>
+        </h1>
       </div>
 
       <div className="flex-none m-4">

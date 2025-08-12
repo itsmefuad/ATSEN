@@ -26,8 +26,8 @@ export async function getRoomById(req, res) {
 
 export async function createRoom(req, res) {
   try {
-    const { title, content } = req.body;
-    const room = new Room({ title, content });
+    const { course_name, description } = req.body;
+    const room = new Room({ course_name, description });
 
     const savedRoom = await room.save();
     res.status(201).json(savedRoom);
@@ -39,10 +39,10 @@ export async function createRoom(req, res) {
 
 export async function updateRoom(req, res) {
   try {
-    const { title, content } = req.body;
+    const { course_name, description } = req.body;
     const updatedRoom = await Room.findByIdAndUpdate(
       req.params.id,
-      { title, content },
+      { course_name, description },
       {
         new: true,
       }
