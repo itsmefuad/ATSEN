@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+function logMongoDetails(label) {
+	const { host, name, port, user } = mongoose.connection;
+	console.log(`${label}:`, { host, db: name, port, user: user || undefined });
+}
+
 export const connectDB = async () => {
 	const primaryMongoUri = process.env.MONGO_URI;
 	const fallbackMongoUri = process.env.MONGO_URI_LOCAL || "mongodb://127.0.0.1:27017/atsen";
@@ -38,12 +43,14 @@ export const connectDB = async () => {
 	try {
 		await mongoose.connect(primaryMongoUri);
 		console.log("MongoDB connected using primary URI (Atlas)");
+		logMongoDetails("Mongo connection");
 	} catch (primaryError) {
 		console.error("Primary MongoDB connection failed:", primaryError?.message || primaryError);
 		console.warn("Attempting to connect to fallback local MongoDB...");
 		try {
 			await mongoose.connect(fallbackMongoUri);
 			console.log("MongoDB connected using fallback URI (local)");
+			logMongoDetails("Mongo connection");
 		} catch (fallbackError) {
 			console.error("Fallback MongoDB connection failed:", fallbackError?.message || fallbackError);
 			if (process.env.USE_MEMORY_DB === "true") {
@@ -52,8 +59,9 @@ export const connectDB = async () => {
 					const { MongoMemoryServer } = await import("mongodb-memory-server");
 					const mongod = await MongoMemoryServer.create({ instance: { dbName: "atsen" } });
 					const memoryUri = mongod.getUri();
-					await mongoose.connect(memoryUri);
-					console.log("MongoDB connected using in-memory server (development fallback)");
+				await mongoose.connect(memoryUri);
+				console.log("MongoDB connected using in-memory server (development fallback)");
+				logMongoDetails("Mongo connection");
 					process.on("SIGINT", async () => {
 						await mongoose.connection.close();
 						await mongod.stop();
