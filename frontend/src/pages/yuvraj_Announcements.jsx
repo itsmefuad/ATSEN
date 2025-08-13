@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import YuvrajAnnouncementCard from "../components/yuvraj_AnnouncementCard.jsx";
-import {
-  yuvrajEnsureSeededAndList,
-  yuvrajGetRole,
-} from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole } from "../services/yuvraj_announcements.js";
+import { yuvrajListAnnouncements } from "../services/yuvraj_announcements_api.js";
+import { yuvrajSeedData } from "../services/yuvraj_seed.js";
 
 const NavPill = ({ children, active = false }) => (
   <div
@@ -23,7 +22,12 @@ const Yuvraj_Announcements = () => {
 
   useEffect(() => {
     setRole(yuvrajGetRole());
-    yuvrajEnsureSeededAndList(7).then(setAnnouncements);
+    yuvrajListAnnouncements(7)
+      .then(setAnnouncements)
+      .catch(async () => {
+        const seed = await yuvrajSeedData();
+        setAnnouncements(seed);
+      });
   }, []);
 
   const visible = useMemo(() => announcements.slice(0, 7), [announcements]);

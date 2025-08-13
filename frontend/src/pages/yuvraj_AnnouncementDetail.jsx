@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import YuvrajAnnouncementCard from "../components/yuvraj_AnnouncementCard.jsx";
-import {
-  yuvrajGetAnnouncementById,
-  yuvrajGetRole,
-} from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole } from "../services/yuvraj_announcements.js";
+import { yuvrajGetAnnouncementById } from "../services/yuvraj_announcements_api.js";
+import { yuvrajSeedData } from "../services/yuvraj_seed.js";
 
 const NavPill = ({ children }) => (
   <div className="rounded-full bg-white/20 px-4 py-2 text-white shadow backdrop-blur">{children}</div>
@@ -17,7 +16,12 @@ const Yuvraj_AnnouncementDetail = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    yuvrajGetAnnouncementById(id).then(setData);
+    yuvrajGetAnnouncementById(id)
+      .then(setData)
+      .catch(async () => {
+        const seed = await yuvrajSeedData();
+        setData(seed.find((x) => x.id === id) || seed[0]);
+      });
     setRole(yuvrajGetRole());
   }, [id]);
 

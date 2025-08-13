@@ -1,0 +1,32 @@
+backend notes: 
+run: 
+     cd /home/yuv/ATSEN/backend
+     npm run dev
+
+website: 
+1) Backend (already running on 5001 in your last run). If needed:
+Set MONGO_URI in backend/.env (you already tested one-liner).
+Start:
+
+2) Frontend:
+Ensure .env in frontend has:
+     VITE_API_URL=http://localhost:5001
+     VITE_ADMIN_KEY=change-this
+Start:
+Visit http://localhost:5173/yuvraj/announcements.
+
+
+
+
+
+Endpoints now available:
+GET http://localhost:5001/api/yuvraj/announcements?limit=7
+GET http://localhost:5001/api/yuvraj/announcements/:id
+
+
+change roles: 
+
+Student: run in browser console -> localStorage.setItem('yuvraj_role','student'); location.reload();
+Instructor: run -> localStorage.setItem('yuvraj_role','instructor'); location.reload();
+Admin: run -> localStorage.setItem('yuvraj_role','admin'); location.reload();
+Reset to default: run -> localStorage.removeItem('yuvraj_role'); location.reload();

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { yuvrajGetRole } from "../services/yuvraj_announcements.js";
 import {
   yuvrajCreateAnnouncement,
   yuvrajGetAnnouncementById,
-  yuvrajGetRole,
   yuvrajUpdateAnnouncement,
-} from "../services/yuvraj_announcements.js";
+} from "../services/yuvraj_announcements_api.js";
 
 const Field = ({ label, children }) => (
   <label className="form-control w-full">
@@ -50,12 +50,16 @@ const Yuvraj_AnnouncementEditor = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isCreate) {
-      const newItem = await yuvrajCreateAnnouncement({ title, content, pinned, author: "Admin" });
-      navigate(`/yuvraj/announcements/${newItem.id}`);
-    } else {
-      await yuvrajUpdateAnnouncement(id, { title, content, pinned });
-      navigate(`/yuvraj/announcements/${id}`);
+    try {
+      if (isCreate) {
+        await yuvrajCreateAnnouncement({ title, content, pinned, author: "Admin" });
+      } else {
+        await yuvrajUpdateAnnouncement(id, { title, content, pinned });
+      }
+      navigate("/yuvraj/announcements", { replace: true });
+    } catch (e) {
+      console.error(e);
+      alert("Failed to submit. Check backend is running and ADMIN key if required.");
     }
   };
 

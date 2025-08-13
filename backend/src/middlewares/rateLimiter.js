@@ -2,6 +2,10 @@ import ratelimit from "../config/upstash.js";
 
 const rateLimter = async (req, res, next) => {
   try {
+    // If Upstash is not configured, skip limiting in local/dev
+    if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+      return next();
+    }
     const { success } = await ratelimit.limit("my-limit-key");
 
     if (!success) {
@@ -12,7 +16,8 @@ const rateLimter = async (req, res, next) => {
     next();
   } catch (error) {
     console.log("Rate limiter error:", error);
-    next(error);
+    // Do not block requests if limiter fails in dev
+    next();
   }
 };
 
