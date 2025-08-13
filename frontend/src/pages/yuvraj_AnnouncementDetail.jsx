@@ -27,12 +27,18 @@ const Yuvraj_AnnouncementDetail = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-600 p-6">
       <div className="mx-auto max-w-6xl">
-        <nav className="mb-8 flex items-center gap-4">
-          <Link to="/yuvraj/announcements" className="rounded-full bg-white/40 px-4 py-2 text-white shadow backdrop-blur">Home</Link>
-          <NavPill>Dashboard</NavPill>
-          <NavPill>Notifications</NavPill>
-          <NavPill>Profile</NavPill>
-        </nav>
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src="/yuvraj_bracu_logo.svg" alt="BRAC University" className="h-10 w-10 drop-shadow" />
+            <span className="hidden text-white/90 sm:inline">BRAC University</span>
+          </div>
+          <nav className="flex items-center gap-4">
+            <Link to="/yuvraj/announcements" className="rounded-full bg-white/40 px-4 py-2 text-white shadow backdrop-blur">Home</Link>
+            <NavPill>Dashboard</NavPill>
+            <NavPill>Notifications</NavPill>
+            <NavPill>Profile</NavPill>
+          </nav>
+        </div>
 
         <div className="rounded-3xl bg-white/20 p-5 shadow-2xl backdrop-blur">
           <YuvrajAnnouncementCard title={title}>
