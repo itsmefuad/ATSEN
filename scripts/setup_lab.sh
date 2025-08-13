@@ -160,25 +160,17 @@ disable_rate_limiter_locally() {
 }
 
 install_dependencies() {
-  echo "[8/9] Installing dependencies (backend, frontend)"
-  cd "$CLONE_DIR/backend" && npm ci --no-audit --no-fund
-  cd "$CLONE_DIR/frontend" && npm ci --no-audit --no-fund
+echo "[8/9] Installing dependencies (backend, frontend)"
+cd "$CLONE_DIR/backend" && npm ci --no-audit --no-fund
+# ensure dev helpers installed for combined run
+npm install --no-audit --no-fund --no-progress open-cli wait-on
+cd "$CLONE_DIR/frontend" && npm ci --no-audit --no-fund
 }
 
 start_services() {
-  echo "[9/9] Starting backend and frontend (detached)"
-  cd "$CLONE_DIR/backend"
-  nohup npm run start > server.log 2>&1 &
-  BACKEND_PID=$!
-  echo "- Backend started (PID: $BACKEND_PID) | Log: $CLONE_DIR/backend/server.log | http://localhost:5001"
-
-  cd "$CLONE_DIR/frontend"
-  nohup npm run dev -- --host > vite.log 2>&1 &
-  FRONTEND_PID=$!
-  echo "- Frontend started (PID: $FRONTEND_PID) | Log: $CLONE_DIR/frontend/vite.log | http://localhost:5173"
-
-  echo ""
-  echo "Done. Visit: http://localhost:5173"
+echo "[9/9] Starting backend and frontend together and opening browser"
+cd "$CLONE_DIR/backend"
+npm run dev:all:open
 }
 
 main() {
