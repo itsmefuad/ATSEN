@@ -11,7 +11,7 @@ const RoomCard = ({ room, setRooms }) => {
     if (!window.confirm("Are you sure you want to delete this room?")) return;
 
     try {
-      await api.delete(`/teacher/room/${id}`);
+      await api.delete(`/rooms/${id}`);
       setRooms((prev) => prev.filter((room) => room._id !== id)); // get rid of the deleted one
       toast.success("Room deleted successfully");
     } catch (error) {
