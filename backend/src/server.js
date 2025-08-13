@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 import roomsRoutes from "./routes/roomsRoutes.js";
 import { connectDB } from "./config/db.js";
 import rateLimter from "./middlewares/rateLimiter.js";
-import cors from "cors";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
 
 dotenv.config();
