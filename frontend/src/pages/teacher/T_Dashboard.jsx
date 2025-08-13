@@ -48,7 +48,7 @@ const T_Dashboard = () => {
         {rooms.length > 0 && !isRateLimited && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rooms.map((room) => (
-              <RoomCard key={room._id} room={room} />
+              <RoomCard key={room._id} room={room} setRooms={setRooms} />
             ))}
             <Link
               to={"/teacher/create/room"}
