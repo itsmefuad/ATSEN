@@ -3,7 +3,6 @@ import { Route, Routes } from "react-router";
 import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
 import T_CreateRoom from "./pages/teacher/T_CreateRoom.jsx";
 import T_Room from "./pages/teacher/T_Room.jsx";
-import toast from "react-hot-toast";
 
 const App = () => {
   return (

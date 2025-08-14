@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 import roomsRoutes from "./routes/roomsRoutes.js";
 import { connectDB } from "./config/db.js";
-import rateLimter from "./middlewares/rateLimiter.js";
+import rateLimiter from "./middlewares/rateLimiter.js";
 
 dotenv.config();
 
@@ -19,7 +19,7 @@ app.use(
   })
 );
 app.use(express.json()); // for parsing JSON bodies: req.body
-app.use(rateLimter);
+app.use(rateLimiter);
 
 // app.use((req, res, next) => {
 //   console.log(`Req Method: ${req.method}\nReq URL: ${req.url}`);

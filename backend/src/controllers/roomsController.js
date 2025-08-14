@@ -1,4 +1,3 @@
-import { json } from "express";
 import Room from "../models/Room.js";
 
 export async function getAllRooms(req, res) {
