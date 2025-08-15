@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import api from "../../lib/axios";
 
 const T_CreateRoom = () => {
-  const [room_name, setCourseName] = useState("");
+  const [room_name, setRoomName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -58,14 +58,14 @@ const T_CreateRoom = () => {
               <form onSubmit={handleSubmit}>
                 <div className="form-control mb-4">
                   <label className="label">
-                    <span className="label-text">Course Name</span>
+                    <span className="label-text">Room Name</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="Course Name"
+                    placeholder="room Name"
                     className="input input-bordered"
                     value={room_name}
-                    onChange={(e) => setCourseName(e.target.value)}
+                    onChange={(e) => setRoomName(e.target.value)}
                   />
                 </div>
                 <div className="form-control mb-4">
