@@ -4,15 +4,15 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 
 export default function AddRoom() {
   const { idOrName } = useParams();
-  const navigate     = useNavigate();
+  const navigate = useNavigate();
 
   // Form state
-  const [roomName, setRoomName]           = useState("");
-  const [description, setDescription]     = useState("");
-  const [capacity, setCapacity]           = useState(30);
-  const [searchQuery, setSearchQuery]     = useState("");
-  const [instructors, setInstructors]     = useState([]);
-  const [filtered, setFiltered]           = useState([]);
+  const [roomName, setRoomName] = useState("");
+  const [description, setDescription] = useState("");
+  const [capacity, setCapacity] = useState(30);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [instructors, setInstructors] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
 
   // Fetch instructors for this institution
@@ -108,11 +108,19 @@ export default function AddRoom() {
           <label>
             Capacity
             <br />
-            <button type="button" onClick={decrement} style={{ marginRight: "0.5rem" }}>
+            <button
+              type="button"
+              onClick={decrement}
+              style={{ marginRight: "0.5rem" }}
+            >
               −
             </button>
             <span>{capacity}</span>
-            <button type="button" onClick={increment} style={{ marginLeft: "0.5rem" }}>
+            <button
+              type="button"
+              onClick={increment}
+              style={{ marginLeft: "0.5rem" }}
+            >
               +
             </button>
           </label>

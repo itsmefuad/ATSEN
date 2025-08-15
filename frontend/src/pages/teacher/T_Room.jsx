@@ -42,7 +42,7 @@ const T_Room = () => {
     }
   };
   const handleSave = async () => {
-    if (!room.course_name.trim() || !room.description.trim()) {
+    if (!room.room_name.trim() || !room.description.trim()) {
       toast.error("All fields are required");
       return;
     }
@@ -98,9 +98,9 @@ const T_Room = () => {
                   type="text"
                   placeholder="course name"
                   className="input input-bordered"
-                  value={room.course_name}
+                  value={room.room_name}
                   onChange={(e) =>
-                    setRoom({ ...room, course_name: e.target.value })
+                    setRoom({ ...room, room_name: e.target.value })
                   }
                 />
               </div>
