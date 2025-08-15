@@ -92,11 +92,11 @@ const T_Room = () => {
             <div className="card-body">
               <div className="form-control mb-4">
                 <label className="label">
-                  <span className="label-text">Course name</span>
+                  <span className="label-text">Room name</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="course name"
+                  placeholder="room name"
                   className="input input-bordered"
                   value={room.room_name}
                   onChange={(e) =>
