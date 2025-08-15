@@ -16,7 +16,7 @@ const Navbar = () => {
               <MenuIcon className="size-5" />
             </label>
           </div>
-          <div className="drawer-side">
+          <div className="drawer-side fixed inset-0 z-50">
             <label
               htmlFor="my-drawer"
               aria-label="close sidebar"

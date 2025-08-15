@@ -40,7 +40,7 @@ const T_Dashboard = () => {
 
       {isRateLimited && <RateLimitedUi />}
 
-      <div className="mx-w-7xl mx-auto p-4 mt-6">
+      <div className="max-w-7xl mx-auto p-4 mt-6">
         {loading && (
           <div className="text-center text-primary py-10">Loading rooms...</div>
         )}
