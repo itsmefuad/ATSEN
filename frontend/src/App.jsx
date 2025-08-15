@@ -1,27 +1,36 @@
-import { Route, Routes, Navigate } from "react-router";
-import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
-import T_Classroom from "./pages/teacher/T_Classroom.jsx";
-import Yuvraj_Announcements from "./pages/yuvraj_Announcements.jsx";
-import Yuvraj_AnnouncementDetail from "./pages/yuvraj_AnnouncementDetail.jsx";
-import Yuvraj_AnnouncementEditor from "./pages/yuvraj_AnnouncementEditor.jsx";
+// frontend/src/App.jsx
+import { Routes, Route } from "react-router-dom";
+import InstitutionLayout from "./pages/institution/InstitutionLayout.jsx";
+import I_Dashboard       from "./pages/institution/I_Dashboard.jsx";
+import AddRoom           from "./pages/institution/addRoom.jsx";
+import InstitutionRooms  from "./pages/institution/InstitutionRooms.jsx";
 
-const App = () => {
+import T_Dashboard   from "./pages/teacher/T_Dashboard.jsx";
+import T_CreateRoom  from "./pages/teacher/T_CreateRoom.jsx";
+import T_Room        from "./pages/teacher/T_Room.jsx";
+
+export default function App() {
   return (
     <div data-theme="nord">
       <Routes>
-        {/* Existing teacher routes */}
+        <Route path="/:idOrName" element={<InstitutionLayout />}>
+          <Route index element={<I_Dashboard />} />
+          <Route path="dashboard" element={<I_Dashboard />} />
+          <Route path="add_room" element={<AddRoom />} />
+          <Route path="rooms" element={<InstitutionRooms />} />
+        </Route>
+
+        {/* Teacher routes */}
         <Route path="/teacher/dashboard" element={<T_Dashboard />} />
-        <Route path="/teacher/classroom/:id" element={<T_Classroom />} />
+        <Route path="/teacher/create/room" element={<T_CreateRoom />} />
+        <Route path="/teacher/room/:id" element={<T_Room />} />
 
-        {/* Yuvraj-announcements feature */}
-        <Route path="/yuvraj/announcements" element={<Yuvraj_Announcements />} />
-        <Route path="/yuvraj/announcements/:id" element={<Yuvraj_AnnouncementDetail />} />
-        <Route path="/yuvraj/admin/announcements/:id" element={<Yuvraj_AnnouncementEditor />} />
-
-        {/* Default route for quick access during demo */}
-        <Route path="/" element={<Navigate to="/yuvraj/announcements" replace />} />
+        {/* Fallback */}
+        <Route
+          path="*"
+          element={<p>Page not found: {window.location.pathname}</p>}
+        />
       </Routes>
     </div>
   );
-};
-export default App;
+}
