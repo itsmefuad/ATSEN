@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Institution from "../models/institution.js";
-import Room from "../models/room.js";
+import Room from "../models/Room.js";
 import Student from "../models/student.js";
 import Instructor from "../models/instructor.js";
 

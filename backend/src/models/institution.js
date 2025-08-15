@@ -1,21 +1,32 @@
+// backend/models/Institution.js
 import mongoose from "mongoose";
 
 const institutionSchema = new mongoose.Schema(
   {
-    name: String,
-    eiin: String,
-    email: String,
-    phone: String,
-    address: String,
-    description: String,
-    active: Boolean,
-    createdAt: Date,
-    updatedAt: Date
+    name:        { type: String, required: true },
+    eiin:        { type: String, required: true, unique: true },
+    email:       { type: String, required: true },
+    phone:       { type: String },
+    address:     { type: String },
+    description: { type: String },
+    active:      { type: Boolean, default: true },
+
+    // ← NEW: array of Room _ids
+    rooms: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Room",
+      }
+    ],
   },
   {
-    collection: "institutions" // explicitly match your DB collection name
+    collection: "institutions",
+    timestamps: true,    // auto-manages createdAt & updatedAt
   }
 );
 
-// Also explicitly pass the collection name to be extra safe:
-export default mongoose.model("Institution", institutionSchema, "institutions");
+export default mongoose.model(
+  "Institution",
+  institutionSchema,
+  "institutions"
+);
