@@ -1,0 +1,160 @@
+// frontend/src/pages/I_Dashboard.jsx
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router";
+
+
+
+export default function I_Dashboard() {
+  const { idOrName } = useParams(); // comes from /dashboard/:idOrName
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errMsg, setErrMsg] = useState("");
+
+  useEffect(() => {
+    if (!idOrName) return;
+
+    const url = `http://localhost:5001/api/institutions/${encodeURIComponent(
+      idOrName
+    )}/dashboard`;
+
+    setLoading(true);
+    setErrMsg("");
+    fetch(url)
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `Request failed with ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((json) => {
+        setData(json);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching dashboard:", err);
+        setErrMsg("Failed to load dashboard data.");
+        setLoading(false);
+      });
+  }, [idOrName]);
+
+  if (loading) return <p>Loading...</p>;
+  if (errMsg) return <p>{errMsg}</p>;
+  if (!data) return <p>No data available</p>;
+
+  const bubbleBase = {
+    borderRadius: "1rem",
+    padding: "1rem 2rem",
+    minWidth: "160px",
+    textAlign: "center",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  };
+
+  const addBtnStyle = {
+    textDecoration: "none",
+    padding: "0.6rem 1.2rem",
+    borderRadius: "10px",
+    fontWeight: 600,
+    color: "#0b1220",
+    background: "#e6f7ff",
+    border: "1px solid #b3e1ff",
+    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+  };
+
+  return (
+    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+      <h1 style={{ fontSize: "2.5rem", marginBottom: "0.2rem" }}>
+        {data.name}
+      </h1>
+      <h2
+        style={{
+          fontSize: "1.5rem",
+          fontWeight: "normal",
+          color: "#555",
+          marginTop: 0,
+        }}
+      >
+        Admin Dashboard
+      </h2>
+
+      {/* Active stats */}
+      <div
+        style={{
+          display: "flex",
+          gap: "1rem",
+          flexWrap: "wrap",
+          margin: "1.5rem 0",
+        }}
+      >
+        <div style={{ ...bubbleBase, background: "#e0f2fe" }}>
+          <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+            {data.totalRooms ?? 0}
+          </div>
+          <div style={{ fontSize: "0.9rem", color: "#333" }}>Active Rooms</div>
+        </div>
+
+        <div style={{ ...bubbleBase, background: "#dcfce7" }}>
+          <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+            {data.activeStudents ?? 0}
+          </div>
+          <div style={{ fontSize: "0.9rem", color: "#333" }}>
+            Active Students
+          </div>
+        </div>
+
+        <div style={{ ...bubbleBase, background: "#fde68a" }}>
+          <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+            {data.activeInstructors ?? 0}
+          </div>
+          <div style={{ fontSize: "0.9rem", color: "#333" }}>
+            Active Instructors
+          </div>
+        </div>
+      </div>
+
+      {/* Add new buttons */}
+      <div
+        style={{
+          display: "flex",
+          gap: "0.75rem",
+          flexWrap: "wrap",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <Link
+          to={`/dashboard/${encodeURIComponent(idOrName)}/add_room`}
+          style={addBtnStyle}
+        >
+          Add Room +
+        </Link>
+        <Link
+          to={`/dashboard/${encodeURIComponent(idOrName)}/add_student`}
+          style={addBtnStyle}
+        >
+          Add Student +
+        </Link>
+        <Link
+          to={`/dashboard/${encodeURIComponent(idOrName)}/add_instructor`}
+          style={addBtnStyle}
+        >
+          Add Instructor +
+        </Link>
+      </div>
+
+      {/* Details */}
+      <p>
+        <strong>EIIN:</strong> {data.eiin}
+      </p>
+      <p>
+        <strong>Email:</strong> {data.email}
+      </p>
+      <p>
+        <strong>Phone:</strong> {data.phone}
+      </p>
+      <p>
+        <strong>Address:</strong> {data.address}
+      </p>
+      <p>{data.description}</p>
+    </div>
+  );
+}
