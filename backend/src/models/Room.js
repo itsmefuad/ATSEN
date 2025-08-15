@@ -1,21 +1,48 @@
 import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-const roomSchema = new mongoose.Schema(
+const roomSchema = new Schema(
   {
-    course_name: {
+    room_name: {
       type: String,
       required: true,
+      trim: true
     },
     description: {
       type: String,
-      required: true,
+      required: true
     },
+
+    institution: {
+      type: Schema.Types.ObjectId,
+      ref: "institutions",
+      required: false
+    },
+
+    maxCapacity: {
+      type: Number,
+      default: 30,
+      min: 1
+    },
+
+    students: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "students"
+      }
+    ],
+
+    instructors: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "instructors"
+      }
+    ]
   },
-  { timestamps: true } //createdAt, updatedAt
+  {
+    timestamps: true
+  }
 );
 
 const Room = mongoose.models.Room || mongoose.model("Room", roomSchema);
-
-
-
 export default Room;

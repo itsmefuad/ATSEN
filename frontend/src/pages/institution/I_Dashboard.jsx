@@ -1,11 +1,9 @@
-// frontend/src/pages/I_Dashboard.jsx
+// frontend/src/pages/institution/I_Dashboard.jsx
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router";
-
-
+import { useParams, Link } from "react-router-dom";
 
 export default function I_Dashboard() {
-  const { idOrName } = useParams(); // comes from /dashboard/:idOrName
+  const { idOrName } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
@@ -39,8 +37,8 @@ export default function I_Dashboard() {
   }, [idOrName]);
 
   if (loading) return <p>Loading...</p>;
-  if (errMsg) return <p>{errMsg}</p>;
-  if (!data) return <p>No data available</p>;
+  if (errMsg)  return <p>{errMsg}</p>;
+  if (!data)   return <p>No data available</p>;
 
   const bubbleBase = {
     borderRadius: "1rem",
@@ -63,6 +61,7 @@ export default function I_Dashboard() {
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+      {/* Header */}
       <h1 style={{ fontSize: "2.5rem", marginBottom: "0.2rem" }}>
         {data.name}
       </h1>
@@ -77,7 +76,7 @@ export default function I_Dashboard() {
         Admin Dashboard
       </h2>
 
-      {/* Active stats */}
+      {/* Stats */}
       <div
         style={{
           display: "flex",
@@ -112,7 +111,7 @@ export default function I_Dashboard() {
         </div>
       </div>
 
-      {/* Add new buttons */}
+      {/* “Add” Buttons */}
       <div
         style={{
           display: "flex",
@@ -122,19 +121,19 @@ export default function I_Dashboard() {
         }}
       >
         <Link
-          to={`/dashboard/${encodeURIComponent(idOrName)}/add_room`}
+          to={`/${encodeURIComponent(idOrName)}/add_room`}
           style={addBtnStyle}
         >
           Add Room +
         </Link>
         <Link
-          to={`/dashboard/${encodeURIComponent(idOrName)}/add_student`}
+          to={`/${encodeURIComponent(idOrName)}/add_student`}
           style={addBtnStyle}
         >
           Add Student +
         </Link>
         <Link
-          to={`/dashboard/${encodeURIComponent(idOrName)}/add_instructor`}
+          to={`/${encodeURIComponent(idOrName)}/add_instructor`}
           style={addBtnStyle}
         >
           Add Instructor +

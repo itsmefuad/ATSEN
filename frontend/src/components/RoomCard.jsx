@@ -26,7 +26,7 @@ const RoomCard = ({ room, setRooms }) => {
         border-t-4 border-solid border-[#4f46e5]"
     >
       <div className="card-body">
-        <h3 className="card-title text-base-content">{room.course_name}</h3>
+        <h3 className="card-title text-base-content">{room.room_name}</h3>
         <p className="text-base-content/70 line-clamp-3">{room.description}</p>
         <div className="card-actions justify-between items-center mt-4">
           <span className="text-sm text-base-content/60">

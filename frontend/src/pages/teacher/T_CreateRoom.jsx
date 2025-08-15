@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import api from "../../lib/axios";
 
 const T_CreateRoom = () => {
-  const [course_name, setCourseName] = useState("");
+  const [room_name, setCourseName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -15,7 +15,7 @@ const T_CreateRoom = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!course_name.trim() || !description.trim()) {
+    if (!room_name.trim() || !description.trim()) {
       toast.error("All fields are required");
       return;
     }
@@ -23,7 +23,7 @@ const T_CreateRoom = () => {
     setLoading(true);
     try {
       await api.post("/rooms", {
-        course_name,
+        room_name,
         description,
       });
 
@@ -64,7 +64,7 @@ const T_CreateRoom = () => {
                     type="text"
                     placeholder="Course Name"
                     className="input input-bordered"
-                    value={course_name}
+                    value={room_name}
                     onChange={(e) => setCourseName(e.target.value)}
                   />
                 </div>
