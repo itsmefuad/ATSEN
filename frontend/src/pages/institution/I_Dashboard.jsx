@@ -11,13 +11,11 @@ export default function I_Dashboard() {
   useEffect(() => {
     if (!idOrName) return;
 
-    const url = `http://localhost:5001/api/institutions/${encodeURIComponent(
-      idOrName
-    )}/dashboard`;
-
-    setLoading(true);
-    setErrMsg("");
-    fetch(url)
+    fetch(
+      `http://localhost:5001/api/institutions/${encodeURIComponent(
+        idOrName
+      )}/dashboard`
+    )
       .then(async (res) => {
         if (!res.ok) {
           const text = await res.text();
@@ -37,8 +35,8 @@ export default function I_Dashboard() {
   }, [idOrName]);
 
   if (loading) return <p>Loading...</p>;
-  if (errMsg)  return <p>{errMsg}</p>;
-  if (!data)   return <p>No data available</p>;
+  if (errMsg) return <p>{errMsg}</p>;
+  if (!data) return <p>No data available</p>;
 
   const bubbleBase = {
     borderRadius: "1rem",
@@ -61,20 +59,8 @@ export default function I_Dashboard() {
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      {/* Header */}
-      <h1 style={{ fontSize: "2.5rem", marginBottom: "0.2rem" }}>
-        {data.name}
-      </h1>
-      <h2
-        style={{
-          fontSize: "1.5rem",
-          fontWeight: "normal",
-          color: "#555",
-          marginTop: 0,
-        }}
-      >
-        Admin Dashboard
-      </h2>
+      {/* Page Title */}
+      <h1 style={{ fontSize: "2.5rem", margin: 0 }}>Dashboard</h1>
 
       {/* Stats */}
       <div
@@ -85,12 +71,17 @@ export default function I_Dashboard() {
           margin: "1.5rem 0",
         }}
       >
-        <div style={{ ...bubbleBase, background: "#e0f2fe" }}>
-          <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
-            {data.totalRooms ?? 0}
+        {/* Make this Link clickable */}
+        <Link to="rooms" style={{ textDecoration: "none" }}>
+          <div style={{ ...bubbleBase, background: "#e0f2fe" }}>
+            <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+              {data.totalRooms ?? 0}
+            </div>
+            <div style={{ fontSize: "0.9rem", color: "#333" }}>
+              Active Rooms
+            </div>
           </div>
-          <div style={{ fontSize: "0.9rem", color: "#333" }}>Active Rooms</div>
-        </div>
+        </Link>
 
         <div style={{ ...bubbleBase, background: "#dcfce7" }}>
           <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
@@ -120,22 +111,13 @@ export default function I_Dashboard() {
           marginBottom: "1.5rem",
         }}
       >
-        <Link
-          to={`/${encodeURIComponent(idOrName)}/add_room`}
-          style={addBtnStyle}
-        >
+        <Link to="add_room" style={addBtnStyle}>
           Add Room +
         </Link>
-        <Link
-          to={`/${encodeURIComponent(idOrName)}/add_student`}
-          style={addBtnStyle}
-        >
+        <Link to="add_student" style={addBtnStyle}>
           Add Student +
         </Link>
-        <Link
-          to={`/${encodeURIComponent(idOrName)}/add_instructor`}
-          style={addBtnStyle}
-        >
+        <Link to="add_instructor" style={addBtnStyle}>
           Add Instructor +
         </Link>
       </div>
