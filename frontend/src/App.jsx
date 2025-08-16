@@ -14,6 +14,8 @@ import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
 import T_CreateRoom from "./pages/teacher/T_CreateRoom.jsx";
 import T_Room from "./pages/teacher/T_Room.jsx";
 
+import S_Room from "./pages/student/S_Room.jsx";
+
 export default function App() {
   return (
     <div data-theme="nord">
@@ -31,10 +33,16 @@ export default function App() {
           <Route path="instructors" element={<InstructorList />} />
         </Route>
 
-        {/* Teacher routes */}
-        <Route path="/teacher/dashboard" element={<T_Dashboard />} />
-        <Route path="/teacher/create/room" element={<T_CreateRoom />} />
-        <Route path="/teacher/edit/room/:id" element={<T_Room />} />
+                        {/* Teacher routes */}
+                <Route path="/teacher/dashboard" element={<T_Dashboard />} />
+                <Route path="/teacher/create/room" element={<T_CreateRoom />} />
+                <Route path="/teacher/room/:id/forum" element={<T_Room />} />
+                <Route path="/teacher/edit/room/:id/edit" element={<T_Room />} />
+                {/* Redirect old URL to new forum URL for backward compatibility */}
+                <Route path="/teacher/edit/room/:id" element={<T_Room />} />
+
+                {/* Student routes */}
+                <Route path="/student/room/:id" element={<S_Room />} />
 
         {/* Catch-all 404 */}
         <Route
