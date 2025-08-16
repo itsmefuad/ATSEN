@@ -1,14 +1,17 @@
+// backend/src/server.js
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
-import roomsRoutes from "./routes/roomsRoutes.js";
-import institutionRoute from "./routes/institutionRoutes.js";      // ← import it
+import roomsRoutes           from "./routes/roomsRoutes.js";
+import institutionRoutes     from "./routes/institutionRoutes.js";
+import institutionRoomRoutes from "./routes/institution/InstitutionRoomRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
 import materialRoutes from "./routes/materialRoutes.js";
-import { connectDB } from "./config/db.js";
-// import rateLimter from "./middlewares/rateLimiter.js";
+import { connectDB }         from "./config/db.js";
+import rateLimter           from "./middlewares/rateLimiter.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
 
 dotenv.config();
@@ -47,8 +50,14 @@ app.get("/api/db-status", (req, res) => {
 
 // prefixing
 app.use("/api/rooms", roomsRoutes);
+
+// institution CRUD
+app.use("/api/institutions", institutionRoutes);
+
+// room‐creation under institutions
+app.use("/api/institutions", institutionRoomRoutes);
 app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
-app.use("/api/institutions", institutionRoute);
+//app.use("/api/institutions", institutionRoute);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/materials", materialRoutes);
 

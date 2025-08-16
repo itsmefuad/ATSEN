@@ -4,11 +4,13 @@ import { Routes, Route, Navigate } from "react-router";
 import InstitutionLayout from "./pages/institution/InstitutionLayout.jsx";
 import I_Dashboard from "./pages/institution/I_Dashboard.jsx";
 import InstitutionRooms from "./pages/institution/InstitutionRooms.jsx";
-import AddRoom from "./pages/institution/addRoom.jsx";
+import AddRoom from "./pages/institution/AddRoom.jsx";
 import StudentList from "./pages/institution/StudentList.jsx";
 //import AddStudent         from "./pages/institution/AddStudent.jsx";
 import InstructorList from "./pages/institution/InstructorList.jsx";
 //import AddInstructor      from "./pages/institution/AddInstructor.jsx";
+import InstitutionSettings from "./pages/institution/InstitutionSettings";
+
 import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
 import T_CreateRoom from "./pages/teacher/T_CreateRoom.jsx";
 import T_Room from "./pages/teacher/T_Room.jsx";
@@ -33,6 +35,7 @@ export default function App() {
           <Route path="students" element={<StudentList />} />
 
           <Route path="instructors" element={<InstructorList />} />
+          <Route path="/:idOrName/settings" element={<InstitutionSettings />} />
         </Route>
 
                         {/* Teacher routes */}

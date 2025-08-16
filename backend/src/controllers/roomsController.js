@@ -28,7 +28,6 @@ export async function getRoomById(req, res) {
 
 export async function createRoom(req, res) {
   try {
-    // minimal change: map incoming `name` to schema's `room_name`
     const { room_name, description } = req.body;
     const room = new Room({ room_name, description });
 
