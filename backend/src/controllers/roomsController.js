@@ -1,9 +1,11 @@
+// backend/controllers/roomsController.js
+
 import { json } from "express";
 import Room from "../models/Room.js";
 
 export async function getAllRooms(req, res) {
   try {
-    const rooms = await Room.find().sort({ createdAt: -1 }); //newest first
+    const rooms = await Room.find().sort({ createdAt: -1 }); // newest first
     res.status(200).json(rooms);
   } catch (error) {
     console.error("Error in getAllRooms controller", error);
@@ -26,6 +28,7 @@ export async function getRoomById(req, res) {
 
 export async function createRoom(req, res) {
   try {
+    // minimal change: map incoming `name` to schema's `room_name`
     const { room_name, description } = req.body;
     const room = new Room({ room_name, description });
 
@@ -43,9 +46,7 @@ export async function updateRoom(req, res) {
     const updatedRoom = await Room.findByIdAndUpdate(
       req.params.id,
       { room_name, description },
-      {
-        new: true,
-      }
+      { new: true }
     );
 
     if (!updatedRoom)

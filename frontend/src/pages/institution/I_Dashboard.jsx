@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router";   // keep your existing import
+import { useParams, Link } from "react-router";  
 
 export default function I_Dashboard() {
   const { idOrName } = useParams();

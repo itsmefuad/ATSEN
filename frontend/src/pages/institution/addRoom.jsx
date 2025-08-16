@@ -1,38 +1,41 @@
 // frontend/src/pages/institution/AddRoom.jsx
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router";
+import { useParams, useNavigate, Link } from "react-router";
 
 export default function AddRoom() {
   const { idOrName } = useParams();
   const navigate = useNavigate();
 
   // Form state
-  const [roomName, setRoomName] = useState("");
-  const [description, setDescription] = useState("");
-  const [capacity, setCapacity] = useState(30);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [instructors, setInstructors] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const [roomName, setRoomName]               = useState("");
+  const [description, setDescription]         = useState("");
+  const [capacity, setCapacity]               = useState(30);
+  const [searchQuery, setSearchQuery]         = useState("");
+  const [instructors, setInstructors]         = useState([]);
+  const [filtered, setFiltered]               = useState([]);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
 
-  // Fetch instructors for this institution
+  // Fetch instructors once
   useEffect(() => {
     if (!idOrName) return;
     fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
-        idOrName
-      )}/instructors`
+      `http://localhost:5001/api/institutions/${encodeURIComponent(idOrName)}/instructors`
     )
       .then((res) => res.json())
       .then((list) => setInstructors(list))
       .catch((err) => console.error("Fetch instructors:", err));
   }, [idOrName]);
 
-  // Filter search results
+  // Filter list as user types
   useEffect(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) {
+      setFiltered([]);
+      return;
+    }
     setFiltered(
       instructors.filter((tutor) =>
-        tutor.name.toLowerCase().includes(searchQuery.toLowerCase())
+        tutor.name.toLowerCase().includes(q)
       )
     );
   }, [searchQuery, instructors]);
@@ -41,7 +44,7 @@ export default function AddRoom() {
   const decrement = () => setCapacity((n) => Math.max(0, n - 1));
   const increment = () => setCapacity((n) => Math.min(10000, n + 1));
 
-  // Submit handler
+  // Submit form
   const handleCreate = async (e) => {
     e.preventDefault();
     const payload = {
@@ -62,7 +65,6 @@ export default function AddRoom() {
         const text = await res.text();
         throw new Error(text || "Failed to create room");
       }
-      // Redirect to nested dashboard
       navigate(`/${encodeURIComponent(idOrName)}/dashboard`);
     } catch (err) {
       console.error(err);
@@ -74,11 +76,11 @@ export default function AddRoom() {
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
       <h1>Add New Room</h1>
       <form onSubmit={handleCreate}>
+
         {/* Room Name */}
         <div style={{ marginBottom: "1rem" }}>
           <label>
-            Room Name
-            <br />
+            Room Name<br />
             <input
               type="text"
               value={roomName}
@@ -92,8 +94,7 @@ export default function AddRoom() {
         {/* Description */}
         <div style={{ marginBottom: "1rem" }}>
           <label>
-            Description
-            <br />
+            Description<br />
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -106,37 +107,27 @@ export default function AddRoom() {
         {/* Capacity Counter */}
         <div style={{ marginBottom: "1rem" }}>
           <label>
-            Capacity
-            <br />
-            <button
-              type="button"
-              onClick={decrement}
-              style={{ marginRight: "0.5rem" }}
-            >
-              −
-            </button>
+            Capacity<br />
+            <button type="button" onClick={decrement} style={{ marginRight: "0.5rem" }}>−</button>
             <span>{capacity}</span>
-            <button
-              type="button"
-              onClick={increment}
-              style={{ marginLeft: "0.5rem" }}
-            >
-              +
-            </button>
+            <button type="button" onClick={increment} style={{ marginLeft: "0.5rem" }}>+</button>
           </label>
         </div>
 
-        {/* Assign Instructor */}
-        <div style={{ marginBottom: "1rem" }}>
+        {/* Assign Instructor Search */}
+        <div style={{ marginBottom: "1rem", position: "relative" }}>
           <label>
-            Assign Instructor
-            <br />
+            Assign Instructor<br />
             <input
               type="text"
-              placeholder="Search by name…"
+              placeholder="Search instructors…"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSelectedInstructor(null);
+              }}
               style={{ width: "100%", padding: "0.5rem" }}
+              autoComplete="off"
             />
           </label>
 
@@ -145,29 +136,41 @@ export default function AddRoom() {
               style={{
                 listStyle: "none",
                 padding: 0,
-                marginTop: "0.5rem",
+                margin: "4px 0 0",
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
                 maxHeight: "150px",
                 overflowY: "auto",
                 border: "1px solid #ccc",
+                background: "#fff",
+                zIndex: 10,
               }}
             >
-              {filtered.map((tutor) => (
-                <li
-                  key={tutor._id}
-                  onClick={() => {
-                    setSelectedInstructor(tutor);
-                    setSearchQuery("");
-                  }}
-                  style={{
-                    padding: "0.5rem",
-                    cursor: "pointer",
-                    background:
-                      selectedInstructor?._id === tutor._id ? "#def" : "#fff",
-                  }}
-                >
-                  {tutor.name}
+              {filtered.length > 0 ? (
+                filtered.map((tutor) => (
+                  <li
+                    key={tutor._id}
+                    onClick={() => {
+                      setSelectedInstructor(tutor);
+                      setSearchQuery("");
+                    }}
+                    style={{
+                      padding: "0.5rem",
+                      cursor: "pointer",
+                      background:
+                        selectedInstructor?._id === tutor._id ? "#def" : "#fff",
+                    }}
+                  >
+                    {tutor.name}
+                  </li>
+                ))
+              ) : (
+                <li style={{ padding: "0.5rem", color: "#888" }}>
+                  No instructors found
                 </li>
-              ))}
+              )}
             </ul>
           )}
 
@@ -181,7 +184,7 @@ export default function AddRoom() {
           )}
         </div>
 
-        {/* Form Actions */}
+        {/* Actions */}
         <div style={{ display: "flex", gap: "1rem" }}>
           <button
             type="submit"
@@ -196,15 +199,11 @@ export default function AddRoom() {
           >
             Create Room
           </button>
-
-          {/* Cancel back to nested dashboard */}
-          <Link
-            to={`/${encodeURIComponent(idOrName)}/dashboard`}
-            style={{ alignSelf: "center", color: "#555" }}
-          >
+          <Link to={`/${encodeURIComponent(idOrName)}/dashboard`} style={{ alignSelf: "center", color: "#555" }}>
             Cancel
           </Link>
         </div>
+
       </form>
     </div>
   );
