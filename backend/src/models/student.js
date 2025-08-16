@@ -21,11 +21,13 @@ const studentSchema = new mongoose.Schema(
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Please fill a valid email address"]
     },
-    institution: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Institution",
-      required: false // changed from true -> false
-    },
+    // changed: institution is now an array so a student can belong to multiple institutions
+    institution: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Institution"
+      }
+    ],
     // changed: room is now an array so a student can belong to multiple rooms
     room: [
       {
