@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import roomsRoutes from "./routes/roomsRoutes.js";
 import institutionRoute from "./routes/institutionRoutes.js";      // ← import it
 import announcementRoutes from "./routes/announcementRoutes.js";
+import materialRoutes from "./routes/materialRoutes.js";
 import { connectDB } from "./config/db.js";
 // import rateLimter from "./middlewares/rateLimiter.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
@@ -49,6 +50,7 @@ app.use("/api/rooms", roomsRoutes);
 app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
 app.use("/api/institutions", institutionRoute);
 app.use("/api/announcements", announcementRoutes);
+app.use("/api/materials", materialRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {

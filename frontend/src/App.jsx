@@ -35,11 +35,14 @@ export default function App() {
           <Route path="instructors" element={<InstructorList />} />
         </Route>
 
-        {/* Teacher routes */}
-        <Route path="/teacher/dashboard" element={<T_Dashboard />} />
-        <Route path="/teacher/create/room" element={<T_CreateRoom />} />
-        <Route path="/teacher/room/:id/forum" element={<T_Room />} />
-        <Route path="/teacher/edit/room/:id/edit" element={<T_Room />} />
+                        {/* Teacher routes */}
+                <Route path="/teacher/dashboard" element={<T_Dashboard />} />
+                <Route path="/teacher/create/room" element={<T_CreateRoom />} />
+                <Route path="/teacher/room/:id/forum" element={<T_Room />} />
+                <Route path="/teacher/room/:id/materials" element={<T_Room />} />
+                <Route path="/teacher/room/:id/edit" element={<T_Room />} />
+                {/* Redirect old URL to new forum URL for backward compatibility */}
+                <Route path="/teacher/room/:id" element={<T_Room />} />
 
                 {/* Student routes */}
                 <Route path="/student/room/:id" element={<S_Room />} />
