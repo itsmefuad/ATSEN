@@ -21,7 +21,7 @@ const RoomCard = ({ room, setRooms }) => {
   };
   return (
     <Link
-      to={`/teacher/room/${room._id}`}
+      to={`/teacher/room/${room._id}/forum`}
       className="card bg-base-100 hover:shadow-lg transition-all duration-200
         border-t-4 border-solid border-[#4f46e5]"
     >

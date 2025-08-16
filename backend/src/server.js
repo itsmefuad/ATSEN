@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import roomsRoutes           from "./routes/roomsRoutes.js";
 import institutionRoutes     from "./routes/institutionRoutes.js";
 import institutionRoomRoutes from "./routes/institution/InstitutionRoomRoutes.js";
+import announcementRoutes from "./routes/announcementRoutes.js";
 import { connectDB }         from "./config/db.js";
 import rateLimiter           from "./middlewares/rateLimiter.js";
 
@@ -22,7 +23,7 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(rateLimiter);
+// app.use(rateLimiter); // Temporarily disabled for testing
 
 // mount your routes
 app.use("/api/rooms", roomsRoutes);
@@ -32,6 +33,7 @@ app.use("/api/institutions", institutionRoutes);
 
 // room‐creation under institutions
 app.use("/api/institutions", institutionRoomRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
