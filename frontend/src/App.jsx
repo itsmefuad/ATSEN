@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router";
 import InstitutionLayout  from "./pages/institution/InstitutionLayout.jsx";
 import I_Dashboard        from "./pages/institution/I_Dashboard.jsx";
 import InstitutionRooms   from "./pages/institution/InstitutionRooms.jsx";
-import AddRoom            from "./pages/institution/addRoom.jsx";
+import AddRoom            from "./pages/institution/AddRoom.jsx";
 import StudentList        from "./pages/institution/StudentList.jsx";
 //import AddStudent         from "./pages/institution/AddStudent.jsx";
 import InstructorList     from "./pages/institution/InstructorList.jsx";

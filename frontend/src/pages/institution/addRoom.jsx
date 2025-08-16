@@ -3,19 +3,19 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 
 export default function AddRoom() {
-  const { idOrName } = useParams();
-  const navigate = useNavigate();
+  const { idOrName }         = useParams();
+  const navigate             = useNavigate();
 
-  // Form state
-  const [roomName, setRoomName] = useState("");
-  const [description, setDescription] = useState("");
-  const [maxCapacity, setMaxCapacity] = useState(30);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [instructors, setInstructors] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  // form state
+  const [roomName, setRoomName]           = useState("");
+  const [description, setDescription]     = useState("");
+  const [maxCapacity, setMaxCapacity]     = useState(30);
+  const [searchQuery, setSearchQuery]     = useState("");
+  const [instructors, setInstructors]     = useState([]);
+  const [filtered, setFiltered]           = useState([]);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
 
-  // Fetch instructors once
+  // load all instructors for this institution
   useEffect(() => {
     if (!idOrName) return;
     fetch(
@@ -24,35 +24,32 @@ export default function AddRoom() {
       )}/instructors`
     )
       .then((res) => res.json())
-      .then((list) => setInstructors(list))
+      .then(setInstructors)
       .catch((err) => console.error("Fetch instructors:", err));
   }, [idOrName]);
 
-  // Filter list as user types
+  // live‐filter instructor list
   useEffect(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) {
-      setFiltered([]);
-      return;
-    }
+    if (!q) return setFiltered([]);
     setFiltered(
-      instructors.filter((tutor) =>
-        tutor.name.toLowerCase().includes(q)
+      instructors.filter((t) =>
+        t.name.toLowerCase().includes(q)
       )
     );
   }, [searchQuery, instructors]);
 
-  // Capacity handlers
+  // capacity controls
   const decrement = () =>
     setMaxCapacity((n) => Math.max(0, n - 1));
   const increment = () =>
     setMaxCapacity((n) => Math.min(10000, n + 1));
 
-  // Submit form
+  // submit handler
   const handleCreate = async (e) => {
     e.preventDefault();
     const payload = {
-      room_name: roomName,
+      room_name:   roomName,
       description,
       maxCapacity,
       instructors: selectedInstructor
@@ -60,28 +57,26 @@ export default function AddRoom() {
         : [],
       institution: idOrName,
     };
-    console.log("Creating room payload:", payload)
-
-
 
     try {
       const res = await fetch(
-        "http://localhost:5001/api/institutions/" +
-          encodeURIComponent(idOrName) +
-          "/add-room",
+        `http://localhost:5001/api/institutions/${encodeURIComponent(
+          idOrName
+        )}/add-room`,
         {
-          method: "POST",
+          method:  "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body:    JSON.stringify(payload),
         }
       );
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || "Failed to create room");
       }
+      // redirect back to your dashboard or rooms list
       navigate(`/${encodeURIComponent(idOrName)}/dashboard`);
     } catch (err) {
-      console.error(err);
+      console.error("Error creating room:", err);
       alert("Error: " + err.message);
     }
   };
@@ -97,9 +92,7 @@ export default function AddRoom() {
             <input
               type="text"
               value={roomName}
-              onChange={(e) =>
-                setRoomName(e.target.value)
-              }
+              onChange={(e) => setRoomName(e.target.value)}
               required
               style={{ width: "100%", padding: "0.5rem" }}
             />
@@ -112,44 +105,30 @@ export default function AddRoom() {
             Description<br />
             <textarea
               value={description}
-              onChange={(e) =>
-                setDescription(e.target.value)
-              }
+              onChange={(e) => setDescription(e.target.value)}
               rows={4}
+              required
               style={{ width: "100%", padding: "0.5rem" }}
             />
           </label>
         </div>
 
-        {/* Maximum Capacity Counter */}
+        {/* Maximum Capacity */}
         <div style={{ marginBottom: "1rem" }}>
           <label>
             Maximum Capacity<br />
-            <button
-              type="button"
-              onClick={decrement}
-              style={{ marginRight: "0.5rem" }}
-            >
+            <button type="button" onClick={decrement} style={{ marginRight: "0.5rem" }}>
               −
             </button>
             <span>{maxCapacity}</span>
-            <button
-              type="button"
-              onClick={increment}
-              style={{ marginLeft: "0.5rem" }}
-            >
+            <button type="button" onClick={increment} style={{ marginLeft: "0.5rem" }}>
               +
             </button>
           </label>
         </div>
 
-        {/* Assign Instructor Search */}
-        <div
-          style={{
-            marginBottom: "1rem",
-            position: "relative",
-          }}
-        >
+        {/* Assign Instructor */}
+        <div style={{ marginBottom: "1rem", position: "relative" }}>
           <label>
             Assign Instructor<br />
             <input
@@ -194,8 +173,7 @@ export default function AddRoom() {
                       padding: "0.5rem",
                       cursor: "pointer",
                       background:
-                        selectedInstructor?._id ===
-                        tutor._id
+                        selectedInstructor?._id === tutor._id
                           ? "#def"
                           : "#fff",
                     }}
@@ -204,12 +182,7 @@ export default function AddRoom() {
                   </li>
                 ))
               ) : (
-                <li
-                  style={{
-                    padding: "0.5rem",
-                    color: "#888",
-                  }}
-                >
+                <li style={{ padding: "0.5rem", color: "#888" }}>
                   No instructors found
                 </li>
               )}
@@ -218,16 +191,8 @@ export default function AddRoom() {
 
           {selectedInstructor && (
             <div style={{ marginTop: "0.5rem" }}>
-              Assigned to:{" "}
-              <strong>
-                {selectedInstructor.name}
-              </strong>{" "}
-              <button
-                type="button"
-                onClick={() =>
-                  setSelectedInstructor(null)
-                }
-              >
+              Assigned to: <strong>{selectedInstructor.name}</strong>{" "}
+              <button type="button" onClick={() => setSelectedInstructor(null)}>
                 ×
               </button>
             </div>
@@ -250,13 +215,8 @@ export default function AddRoom() {
             Create Room
           </button>
           <Link
-            to={`/${encodeURIComponent(
-              idOrName
-            )}/dashboard`}
-            style={{
-              alignSelf: "center",
-              color: "#555",
-            }}
+            to={`/${encodeURIComponent(idOrName)}/dashboard`}
+            style={{ alignSelf: "center", color: "#555" }}
           >
             Cancel
           </Link>
