@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 
 import roomsRoutes from "./routes/roomsRoutes.js";
 import institutionRoute from "./routes/institutionRoutes.js";      // ← import it
+import announcementRoutes from "./routes/announcementRoutes.js";
 import { connectDB } from "./config/db.js";
 // import rateLimter from "./middlewares/rateLimiter.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
@@ -22,7 +23,7 @@ app.use(
   })
 );
 app.use(express.json());
-// app.use(rateLimiter);
+// // app.use(rateLimiter); // Temporarily disabled for testing
 
 // app.use((req, res, next) => {
 //   console.log(`Req Method: ${req.method}\nReq URL: ${req.url}`);
@@ -47,6 +48,7 @@ app.get("/api/db-status", (req, res) => {
 app.use("/api/rooms", roomsRoutes);
 app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
 app.use("/api/institutions", institutionRoute);
+app.use("/api/announcements", announcementRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
