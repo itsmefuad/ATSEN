@@ -1,11 +1,14 @@
+// backend/src/server.js
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
-import roomsRoutes from "./routes/roomsRoutes.js";
-import institutionRoute from "./routes/institutionRoutes.js";      // ← import it
-import { connectDB } from "./config/db.js";
-import rateLimiter from "./middlewares/rateLimiter.js";
+import roomsRoutes           from "./routes/roomsRoutes.js";
+import institutionRoutes     from "./routes/institutionRoutes.js";
+import institutionRoomRoutes from "./routes/institution/InstitutionRoomRoutes.js";
+import { connectDB }         from "./config/db.js";
+import rateLimiter           from "./middlewares/rateLimiter.js";
 
 dotenv.config();
 
@@ -23,7 +26,12 @@ app.use(rateLimiter);
 
 // mount your routes
 app.use("/api/rooms", roomsRoutes);
-app.use("/api/institutions", institutionRoute);               // ← mount it
+
+// institution CRUD
+app.use("/api/institutions", institutionRoutes);
+
+// room‐creation under institutions
+app.use("/api/institutions", institutionRoomRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {

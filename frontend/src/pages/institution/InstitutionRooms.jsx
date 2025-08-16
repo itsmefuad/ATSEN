@@ -54,7 +54,7 @@ export default function InstitutionRooms() {
                 borderRadius: "0.5rem",
               }}
             >
-              <strong>{room.name}</strong>
+              <strong>{room.room_name}</strong>
               {/* Optional: link into a room detail page */}
               <Link
                 to={`room/${room._id}`}
