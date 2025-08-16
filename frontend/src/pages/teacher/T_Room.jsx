@@ -91,13 +91,6 @@ const T_Room = () => {
               <ArrowLeft className="h-5 w-5" />
               Back to rooms
             </Link>
-            <button
-              onClick={handleDelete}
-              className="btn btn-error btn-outline"
-            >
-              <Trash2 className="h-5 w-5" />
-              Delete Room
-            </button>
           </div>
 
           {/* Room Info Header */}
@@ -158,7 +151,15 @@ const T_Room = () => {
                 />
               </div>
 
-              <div className="card-actions justify-end">
+              <div className="card-actions justify-between">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="btn btn-error btn-outline"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete Room
+                </button>
                 <button
                   className="btn btn-primary"
                   disabled={saving}
