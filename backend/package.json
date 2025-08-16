@@ -6,7 +6,9 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "dev:all": "concurrently -n backend,frontend -c green,cyan \"npm:dev\" \"npm --prefix ../frontend run dev\"",
+    "dev:all:open": "concurrently -n backend,frontend,browser -c green,cyan,magenta \"npm:dev\" \"npm --prefix ../frontend run dev\" \"wait-on http://localhost:5173 && open-cli http://localhost:5173\""
   },
   "keywords": [],
   "author": "",
@@ -21,6 +23,9 @@
     "react-router": "^7.8.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "concurrently": "^9.2.0",
+    "nodemon": "^3.1.10",
+    "open-cli": "^7.2.0",
+    "wait-on": "^7.2.0"
   }
 }
