@@ -56,24 +56,38 @@ const CreateAnnouncement = ({ roomId, onAnnouncementCreated }) => {
 
   if (!isOpen) {
     return (
-      <button
+      <div 
         onClick={() => setIsOpen(true)}
-        className="btn btn-primary btn-sm gap-2"
+        className="card bg-gradient-to-r from-primary/5 to-secondary/5 border-2 border-dashed border-primary/30 hover:border-primary/50 hover:from-primary/10 hover:to-secondary/10 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
       >
-        <Plus className="h-4 w-4" />
-        New Announcement
-      </button>
+        <div className="card-body py-6">
+          <div className="flex items-center justify-center gap-3">
+            <div className="p-3 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors duration-300">
+              <Plus className="h-6 w-6 text-primary" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-primary">Create New Announcement</h3>
+              <p className="text-sm text-base-content/60">Click to add a new announcement to this room</p>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="card bg-base-100 shadow-lg border border-primary/20">
+    <div className="card bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 border-2 border-primary/20 shadow-lg animate-in slide-in-from-top-2 duration-300">
       <div className="card-body">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Create New Announcement</h3>
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-primary/10 rounded-full">
+              <Plus className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold text-primary">Create New Announcement</h3>
+          </div>
           <button
             onClick={handleCancel}
-            className="btn btn-ghost btn-sm btn-circle"
+            className="btn btn-ghost btn-sm btn-circle hover:bg-error/10 hover:text-error"
           >
             <X className="h-4 w-4" />
           </button>

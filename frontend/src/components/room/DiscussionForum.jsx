@@ -34,11 +34,15 @@ const DiscussionForum = ({ roomId }) => {
 
   const handleAnnouncementCreated = (newAnnouncement) => {
     setAnnouncements(prev => {
-      // Sort announcements properly: pinned first, then by creation date
+      // Sort announcements: pinned first (by pin time), then by creation date
       const updatedAnnouncements = [...prev, newAnnouncement];
       return updatedAnnouncements.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
+        if (a.isPinned && b.isPinned) {
+          // If both are pinned, sort by updatedAt (latest pinned first)
+          return new Date(b.updatedAt) - new Date(a.updatedAt);
+        }
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
     });
@@ -54,10 +58,14 @@ const DiscussionForum = ({ roomId }) => {
         announcement._id === updatedAnnouncement._id ? updatedAnnouncement : announcement
       );
       
-      // Sort announcements properly: pinned first, then by creation date
+      // Sort announcements: pinned first (by pin time), then by creation date
       return updatedAnnouncements.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
+        if (a.isPinned && b.isPinned) {
+          // If both are pinned, sort by updatedAt (latest pinned first)
+          return new Date(b.updatedAt) - new Date(a.updatedAt);
+        }
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
     });
@@ -86,16 +94,15 @@ const DiscussionForum = ({ roomId }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold">Discussion Forum</h2>
-        </div>
-        <CreateAnnouncement 
-          roomId={roomId} 
-          onAnnouncementCreated={handleAnnouncementCreated}
-        />
+      <div className="flex items-center gap-2">
+        <MessageSquare className="h-6 w-6 text-primary" />
+        <h2 className="text-2xl font-bold">Discussion Forum</h2>
       </div>
+
+      <CreateAnnouncement 
+        roomId={roomId} 
+        onAnnouncementCreated={handleAnnouncementCreated}
+      />
 
       {announcements.length === 0 ? (
         <div className="text-center py-12">
