@@ -45,7 +45,8 @@ app.get("/api/db-status", (req, res) => {
 
 // prefixing
 app.use("/api/rooms", roomsRoutes);
-app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);app.use("/api/institutions", institutionRoute);               // ← mount it
+app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
+app.use("/api/institutions", institutionRoute);
 
 connectDB().then(() => {
   app.listen(PORT, () => {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import YuvrajAnnouncementCard from "../components/yuvraj_AnnouncementCard.jsx";
 import { yuvrajGetRole } from "../services/yuvraj_announcements.js";
 import { yuvrajListAnnouncements } from "../services/yuvraj_announcements_api.js";
@@ -37,8 +37,8 @@ const Yuvraj_Announcements = () => {
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/yuvraj_bracu_logo.svg" alt="BRAC University" className="h-10 w-10 drop-shadow" />
-            <span className="hidden text-white/90 sm:inline">BRAC University</span>
+            <img src="/atsen-circular-logo.svg" alt="ATSEN" className="h-10 w-10 drop-shadow" />
+            <span className="hidden text-white/90 sm:inline">ATSEN</span>
           </div>
           <nav className="flex items-center gap-4">
             <NavPill active>Home</NavPill>
