@@ -1,42 +1,40 @@
-// frontend/src/pages/institution/I_Dashboard.jsx
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router";   // keep your existing import
 
 export default function I_Dashboard() {
   const { idOrName } = useParams();
-  const [data, setData] = useState(null);
+  const [data, setData]   = useState(null);
   const [loading, setLoading] = useState(true);
-  const [errMsg, setErrMsg] = useState("");
+  const [errMsg, setErrMsg]   = useState("");
 
   useEffect(() => {
     if (!idOrName) return;
-
     fetch(
       `http://localhost:5001/api/institutions/${encodeURIComponent(
         idOrName
       )}/dashboard`
     )
-      .then(async (res) => {
+      .then(async res => {
         if (!res.ok) {
           const text = await res.text();
-          throw new Error(text || `Request failed with ${res.status}`);
+          throw new Error(text || `Error ${res.status}`);
         }
         return res.json();
       })
-      .then((json) => {
+      .then(json => {
         setData(json);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("Error fetching dashboard:", err);
+      .catch(err => {
+        console.error(err);
         setErrMsg("Failed to load dashboard data.");
         setLoading(false);
       });
   }, [idOrName]);
 
   if (loading) return <p>Loading...</p>;
-  if (errMsg) return <p>{errMsg}</p>;
-  if (!data) return <p>No data available</p>;
+  if (errMsg)   return <p>{errMsg}</p>;
+  if (!data)    return <p>No data available</p>;
 
   const bubbleBase = {
     borderRadius: "1rem",
@@ -59,7 +57,6 @@ export default function I_Dashboard() {
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      {/* Page Title */}
       <h1 style={{ fontSize: "2.5rem", margin: 0 }}>Dashboard</h1>
 
       {/* Stats */}
@@ -71,8 +68,10 @@ export default function I_Dashboard() {
           margin: "1.5rem 0",
         }}
       >
-        {/* Make this Link clickable */}
-        <Link to="rooms" style={{ textDecoration: "none" }}>
+        <Link
+          to={`/${encodeURIComponent(idOrName)}/rooms`}
+          style={{ textDecoration: "none" }}
+        >
           <div style={{ ...bubbleBase, background: "#e0f2fe" }}>
             <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
               {data.totalRooms ?? 0}
@@ -102,7 +101,7 @@ export default function I_Dashboard() {
         </div>
       </div>
 
-      {/* “Add” Buttons */}
+      {/* Add Buttons (absolute paths) */}
       <div
         style={{
           display: "flex",
@@ -111,30 +110,31 @@ export default function I_Dashboard() {
           marginBottom: "1.5rem",
         }}
       >
-        <Link to="add_room" style={addBtnStyle}>
+        <Link
+          to={`/${encodeURIComponent(idOrName)}/add-room`}
+          style={addBtnStyle}
+        >
           Add Room +
         </Link>
-        <Link to="add_student" style={addBtnStyle}>
+        <Link
+          to={`/${encodeURIComponent(idOrName)}/add-student`}
+          style={addBtnStyle}
+        >
           Add Student +
         </Link>
-        <Link to="add_instructor" style={addBtnStyle}>
+        <Link
+          to={`/${encodeURIComponent(idOrName)}/add-instructor`}
+          style={addBtnStyle}
+        >
           Add Instructor +
         </Link>
       </div>
 
       {/* Details */}
-      <p>
-        <strong>EIIN:</strong> {data.eiin}
-      </p>
-      <p>
-        <strong>Email:</strong> {data.email}
-      </p>
-      <p>
-        <strong>Phone:</strong> {data.phone}
-      </p>
-      <p>
-        <strong>Address:</strong> {data.address}
-      </p>
+      <p><strong>EIIN:</strong> {data.eiin}</p>
+      <p><strong>Email:</strong> {data.email}</p>
+      <p><strong>Phone:</strong> {data.phone}</p>
+      <p><strong>Address:</strong> {data.address}</p>
       <p>{data.description}</p>
     </div>
   );

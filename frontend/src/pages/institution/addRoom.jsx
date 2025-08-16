@@ -1,6 +1,6 @@
 // frontend/src/pages/institution/AddRoom.jsx
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router";
 
 export default function AddRoom() {
   const { idOrName } = useParams();

@@ -1,6 +1,6 @@
 // frontend/src/pages/institution/InstitutionLayout.jsx
 import React, { useEffect, useState } from "react";
-import { useParams, Outlet } from "react-router-dom";
+import { useParams, Outlet } from "react-router";
 
 export default function InstitutionLayout() {
   const { idOrName } = useParams();
