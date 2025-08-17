@@ -17,7 +17,7 @@ const S_Room = () => {
       try {
         const [roomRes, announcementsRes] = await Promise.all([
           api.get(`/rooms/${id}`),
-          api.get(`/announcements/room/${id}`)
+          api.get(`/forum-content/room/${id}`)
         ]);
         
         setRoom(roomRes.data);

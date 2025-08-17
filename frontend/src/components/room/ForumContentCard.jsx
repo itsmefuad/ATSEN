@@ -12,7 +12,7 @@ import {
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
-const AnnouncementCard = ({ announcement, onUpdate, onDelete }) => {
+const ForumContentCard = ({ announcement, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     title: announcement.title,
@@ -252,4 +252,4 @@ const AnnouncementCard = ({ announcement, onUpdate, onDelete }) => {
   );
 };
 
-export default AnnouncementCard;
+export default ForumContentCard;
