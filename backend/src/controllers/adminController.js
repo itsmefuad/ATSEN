@@ -1,4 +1,7 @@
+// controllers/adminController.js
+
 import jwt from "jsonwebtoken";
+import InstitutionPass from "../models/passkeys/I_Pass.js";
 
 const ADMIN = {
   username: "admin",
@@ -22,19 +25,16 @@ function makePasskey(name) {
 // POST /api/admin/login
 export function loginAdmin(req, res) {
   const { username, password } = req.body;
-  if (
-    username !== ADMIN.username ||
-    password !== ADMIN.password
-  ) {
-    return res
-      .status(401)
-      .json({ message: "Invalid credentials" });
+  if (username !== ADMIN.username || password !== ADMIN.password) {
+    return res.status(401).json({ message: "Invalid credentials" });
   }
+
   const token = jwt.sign(
     { username: ADMIN.username, email: ADMIN.email },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
+
   res.json({ token, username: ADMIN.username });
 }
 
@@ -44,19 +44,32 @@ export function getPendingInstitutions(req, res) {
 }
 
 // POST /api/admin/institutions/:id/approve
-export function approveInstitution(req, res) {
+export async function approveInstitution(req, res) {
   const { id } = req.params;
-  const instIndex = pendingInstitutions.findIndex(
-    (i) => i.id === id
-  );
+  const instIndex = pendingInstitutions.findIndex(i => i.id === id);
+
   if (instIndex === -1) {
-    return res.status(404).json({ message: "Not found" });
+    return res.status(404).json({ message: "Institution request not found" });
   }
 
   const inst = pendingInstitutions[instIndex];
   const passkey = makePasskey(inst.name);
 
-  // Remove from pending
+  // Persist passkey & institution metadata to MongoDB
+  try {
+    await InstitutionPass.create({
+      passkey,
+      name: inst.name,
+      eiin: inst.eiin
+    });
+  } catch (error) {
+    console.error("Error saving passkey:", error);
+    return res
+      .status(500)
+      .json({ message: "Could not save passkey", error: error.message });
+  }
+
+  // Remove from in-memory pending list
   pendingInstitutions.splice(instIndex, 1);
 
   res.json({ passkey, institution: inst });
