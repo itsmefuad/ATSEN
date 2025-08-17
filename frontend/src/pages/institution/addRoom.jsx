@@ -3,16 +3,16 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 
 export default function AddRoom() {
-  const { idOrName }         = useParams();
-  const navigate             = useNavigate();
+  const { idOrName } = useParams();
+  const navigate = useNavigate();
 
   // form state
-  const [roomName, setRoomName]           = useState("");
-  const [description, setDescription]     = useState("");
-  const [maxCapacity, setMaxCapacity]     = useState(30);
-  const [searchQuery, setSearchQuery]     = useState("");
-  const [instructors, setInstructors]     = useState([]);
-  const [filtered, setFiltered]           = useState([]);
+  const [roomName, setRoomName] = useState("");
+  const [description, setDescription] = useState("");
+  const [maxCapacity, setMaxCapacity] = useState(30);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [instructors, setInstructors] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
 
   // load all instructors for this institution
@@ -28,7 +28,7 @@ export default function AddRoom() {
       .catch((err) => console.error("Fetch instructors:", err));
   }, [idOrName]);
 
-  // live‐filter instructor list
+  // live-filter instructor list
   useEffect(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return setFiltered([]);
@@ -48,14 +48,19 @@ export default function AddRoom() {
   // submit handler
   const handleCreate = async (e) => {
     e.preventDefault();
+
+    // capture createTime as now
+    const createTime = new Date();
+
     const payload = {
-      room_name:   roomName,
+      room_name: roomName,
       description,
       maxCapacity,
       instructors: selectedInstructor
         ? [selectedInstructor._id]
         : [],
       institution: idOrName,
+      createTime,           // ← added createTime here
     };
 
     try {
@@ -64,16 +69,15 @@ export default function AddRoom() {
           idOrName
         )}/add-room`,
         {
-          method:  "POST",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify(payload),
+          body: JSON.stringify(payload),
         }
       );
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || "Failed to create room");
       }
-      // redirect back to your dashboard or rooms list
       navigate(`/${encodeURIComponent(idOrName)}/dashboard`);
     } catch (err) {
       console.error("Error creating room:", err);
@@ -117,11 +121,19 @@ export default function AddRoom() {
         <div style={{ marginBottom: "1rem" }}>
           <label>
             Maximum Capacity<br />
-            <button type="button" onClick={decrement} style={{ marginRight: "0.5rem" }}>
+            <button
+              type="button"
+              onClick={decrement}
+              style={{ marginRight: "0.5rem" }}
+            >
               −
             </button>
             <span>{maxCapacity}</span>
-            <button type="button" onClick={increment} style={{ marginLeft: "0.5rem" }}>
+            <button
+              type="button"
+              onClick={increment}
+              style={{ marginLeft: "0.5rem" }}
+            >
               +
             </button>
           </label>
@@ -192,7 +204,10 @@ export default function AddRoom() {
           {selectedInstructor && (
             <div style={{ marginTop: "0.5rem" }}>
               Assigned to: <strong>{selectedInstructor.name}</strong>{" "}
-              <button type="button" onClick={() => setSelectedInstructor(null)}>
+              <button
+                type="button"
+                onClick={() => setSelectedInstructor(null)}
+              >
                 ×
               </button>
             </div>

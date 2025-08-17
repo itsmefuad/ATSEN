@@ -12,32 +12,35 @@ const roomSchema = new Schema(
       type: String,
       required: true
     },
-
     institution: {
       type: Schema.Types.ObjectId,
       ref: "institutions",
       required: false
     },
-
     maxCapacity: {
       type: Number,
       default: 30,
       min: 1
     },
-
     students: [
       {
         type: Schema.Types.ObjectId,
         ref: "students"
       }
     ],
-
     instructors: [
       {
         type: Schema.Types.ObjectId,
         ref: "instructors"
       }
-    ]
+    ],
+
+    createTime: {
+      type: Date,
+      required: true,
+      default: Date.now 
+
+    }
   },
   {
     timestamps: true

@@ -8,21 +8,24 @@ import Room from "../../models/Room.js";
  */
 export async function createRoom(req, res) {
   try {
-    // debug incoming body if needed:
-    // console.log("createRoom req.body:", req.body);
-
     const { idOrName } = req.params;
-    const { room_name, description, maxCapacity, instructors = [] } = req.body;
+    const {
+      room_name,
+      description,
+      maxCapacity,
+      instructors = [],
+      createTime: createTimeRaw
+    } = req.body;
 
-    // basic validation for required fields declared in the Room schema
+    // basic validation
     if (!room_name) {
       return res.status(400).json({ message: "room_name is required" });
     }
-    if (typeof description === "undefined" || description === null) {
+    if (description == null) {
       return res.status(400).json({ message: "description is required" });
     }
 
-    // find institution by id or name
+    // resolve institution
     const inst = mongoose.Types.ObjectId.isValid(idOrName)
       ? await Institution.findById(idOrName)
       : await Institution.findOne({ name: idOrName });
@@ -31,19 +34,28 @@ export async function createRoom(req, res) {
       return res.status(404).json({ message: "Institution not found" });
     }
 
+    // parse or default createTime
+    const createTime = createTimeRaw
+      ? new Date(createTimeRaw)
+      : new Date();
+
+    // create the room with createTime
     const room = await Room.create({
       room_name,
       description,
       maxCapacity,
       instructors: Array.isArray(instructors) ? instructors : [],
       institution: inst._id,
+      createTime
     });
 
     return res.status(201).json(room);
   } catch (err) {
     console.error("Error in createRoom:", err);
     if (err.name === "ValidationError") {
-      return res.status(400).json({ message: "Validation failed", errors: err.errors });
+      return res
+        .status(400)
+        .json({ message: "Validation failed", errors: err.errors });
     }
     return res.status(500).json({ message: "Internal server error" });
   }
@@ -56,7 +68,6 @@ export async function listRooms(req, res) {
   try {
     const { idOrName } = req.params;
 
-    // find institution by id or name
     const inst = mongoose.Types.ObjectId.isValid(idOrName)
       ? await Institution.findById(idOrName)
       : await Institution.findOne({ name: idOrName });
@@ -65,7 +76,6 @@ export async function listRooms(req, res) {
       return res.status(404).json({ message: "Institution not found" });
     }
 
-    // fetch all rooms for that institution
     const rooms = await Room.find({ institution: inst._id });
     return res.json(rooms);
   } catch (err) {
