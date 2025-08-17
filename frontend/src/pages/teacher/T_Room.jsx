@@ -1,18 +1,30 @@
 import { use, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useLocation } from "react-router";
 import api from "../../lib/axios";
-import { ArrowLeftIcon, LoaderIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeft, Loader, Trash2, Settings, MessageSquare } from "lucide-react";
 import Navbar from "../../components/Navbar";
+import DiscussionForum from "../../components/room/DiscussionForum";
 
 const T_Room = () => {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("forum"); // Default to forum
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { id } = useParams();
+
+  // Determine active tab based on URL
+  useEffect(() => {
+    if (location.pathname.includes('/edit')) {
+      setActiveTab("settings");
+    } else {
+      setActiveTab("forum");
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -64,7 +76,7 @@ const T_Room = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
-        <LoaderIcon className="animate-spin size-10" />
+        <Loader className="animate-spin size-10" />
       </div>
     );
   }
@@ -76,19 +88,40 @@ const T_Room = () => {
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <Link to="/teacher/dashboard" className="btn btn-ghost">
-              <ArrowLeftIcon className="h-5 w-5" />
+              <ArrowLeft className="h-5 w-5" />
               Back to rooms
             </Link>
-            <button
-              onClick={handleDelete}
-              className="btn btn-error btn-outline"
-            >
-              <Trash2Icon className="h-5 w-5" />
-              Delete Room
-            </button>
           </div>
 
-          <div className="card bg-base-100 shadow-lg">
+          {/* Room Info Header */}
+          <div className="card bg-base-100 shadow-lg mb-6">
+            <div className="card-body">
+              <h1 className="text-2xl font-bold">{room.room_name}</h1>
+              <p className="text-base-content/70">{room.description}</p>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="tabs tabs-boxed mb-6">
+            <Link
+              to={`/teacher/edit/room/${id}/edit`}
+              className={`tab ${activeTab === "settings" ? "tab-active" : ""}`}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Room Settings
+            </Link>
+            <Link
+              to={`/teacher/room/${id}/forum`}
+              className={`tab ${activeTab === "forum" ? "tab-active" : ""}`}
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Discussion Forum
+            </Link>
+          </div>
+
+          {/* Tab Content */}
+          {activeTab === "settings" && (
+            <div className="card bg-base-100 shadow-lg">
             <div className="card-body">
               <div className="form-control mb-4">
                 <label className="label">
@@ -118,7 +151,15 @@ const T_Room = () => {
                 />
               </div>
 
-              <div className="card-actions justify-end">
+              <div className="card-actions justify-between">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="btn btn-error btn-outline"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete Room
+                </button>
                 <button
                   className="btn btn-primary"
                   disabled={saving}
@@ -129,6 +170,11 @@ const T_Room = () => {
               </div>
             </div>
           </div>
+          )}
+
+          {activeTab === "forum" && (
+            <DiscussionForum roomId={id} />
+          )}
         </div>
       </div>
     </div>
