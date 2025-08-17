@@ -51,8 +51,8 @@ export default function InstitutionRooms() {
               ? room.instructors.length
               : 0;
 
-            const formattedTime = room.createTime
-              ? new Date(room.createTime).toLocaleString()
+            const formattedTime = room.createdAt
+              ? new Date(room.createdAt).toLocaleString()
               : "N/A";
 
             return (
