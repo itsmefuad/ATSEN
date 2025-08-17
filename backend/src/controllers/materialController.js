@@ -27,7 +27,7 @@ export const getMaterialsByRoom = async (req, res) => {
 export const createMaterial = async (req, res) => {
   try {
     const { roomId } = req.params;
-    const { title, description, section, fileType, fileUrl, fileName, author } = req.body;
+    const { title, description, section, fileType, fileUrl, fileName } = req.body;
     
     // Check if room exists
     const room = await Room.findById(roomId);
@@ -35,15 +35,23 @@ export const createMaterial = async (req, res) => {
       return res.status(404).json({ message: "Room not found" });
     }
 
+    // Validate required fields
+    if (!title || !title.trim()) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (!description || !description.trim()) {
+      return res.status(400).json({ message: "Description is required" });
+    }
+
     // Create material
     const material = new Material({
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       section,
       fileType,
-      fileUrl,
+      fileUrl: fileUrl || "",
       fileName,
-      author: author || '',
       room: roomId
     });
 
@@ -52,6 +60,12 @@ export const createMaterial = async (req, res) => {
     res.status(201).json(savedMaterial);
   } catch (error) {
     console.error("Error creating material:", error);
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack,
+      roomId,
+      body: req.body
+    });
     res.status(500).json({ message: "Internal server error", details: error.message });
   }
 };
@@ -60,28 +74,42 @@ export const createMaterial = async (req, res) => {
 export const updateMaterial = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, section, fileType, fileUrl, fileName, author, isExpanded } = req.body;
+    const { title, description, section, fileType, fileUrl, fileName, isExpanded } = req.body;
 
     const material = await Material.findById(id);
     if (!material) {
       return res.status(404).json({ message: "Material not found" });
     }
 
+    // Validate required fields if provided
+    if (title !== undefined && (!title || !title.trim())) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (description !== undefined && (!description || !description.trim())) {
+      return res.status(400).json({ message: "Description is required" });
+    }
+
     // Update fields
-    if (title) material.title = title;
-    if (description) material.description = description;
+    if (title) material.title = title.trim();
+    if (description !== undefined) material.description = description.trim();
     if (section) material.section = section;
     if (fileType) material.fileType = fileType;
-    if (fileUrl) material.fileUrl = fileUrl;
+    if (fileUrl !== undefined) material.fileUrl = fileUrl || "";
     if (fileName) material.fileName = fileName;
-    if (author !== undefined) material.author = author;
     if (typeof isExpanded === 'boolean') material.isExpanded = isExpanded;
 
     const updatedMaterial = await material.save();
     res.status(200).json(updatedMaterial);
   } catch (error) {
     console.error("Error updating material:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack,
+      materialId: id,
+      body: req.body
+    });
+    res.status(500).json({ message: "Internal server error", details: error.message });
   }
 };
 

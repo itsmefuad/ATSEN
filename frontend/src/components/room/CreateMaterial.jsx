@@ -13,18 +13,32 @@ const CreateMaterial = ({ roomId, onMaterialCreated }) => {
     attachmentData: "", // URL
   });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Reset errors
+    setErrors({});
+    
+    // Validate form
+    const newErrors = {};
+    
     if (!formData.title.trim()) {
-      toast.error("Title is required");
-      return;
+      newErrors.title = "Title is required";
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
     }
 
     // Link is optional, but if selected, URL is required
     if (formData.attachmentType === "link" && !formData.attachmentData.trim()) {
-      toast.error("Please provide a link URL");
+      newErrors.attachmentData = "Please provide a link URL";
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -68,6 +82,7 @@ const CreateMaterial = ({ roomId, onMaterialCreated }) => {
       attachmentType: "",
       attachmentData: ""
     });
+    setErrors({});
     setIsOpen(false);
   };
 
@@ -137,27 +152,41 @@ const CreateMaterial = ({ roomId, onMaterialCreated }) => {
             <input
               type="text"
               placeholder="Enter material title..."
-              className="input input-bordered border-red-300 focus:border-red-500"
+              className={`input input-bordered ${errors.title ? 'border-red-300 focus:border-red-500' : ''}`}
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, title: e.target.value });
+                if (errors.title) setErrors({ ...errors, title: null });
+              }}
               required
             />
-            <label className="label">
-              <span className="label-text-alt text-red-500">*Required</span>
-            </label>
+            {errors.title && (
+              <label className="label">
+                <span className="label-text-alt text-red-500">{errors.title}</span>
+              </label>
+            )}
           </div>
 
           {/* Description Field */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text font-medium">Description (optional)</span>
+              <span className="label-text font-medium">Description *</span>
             </label>
             <textarea
               placeholder="Describe this material..."
-              className="textarea textarea-bordered h-24"
+              className={`textarea textarea-bordered h-24 ${errors.description ? 'border-red-300 focus:border-red-500' : ''}`}
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, description: e.target.value });
+                if (errors.description) setErrors({ ...errors, description: null });
+              }}
+              required
             />
+            {errors.description && (
+              <label className="label">
+                <span className="label-text-alt text-red-500">{errors.description}</span>
+              </label>
+            )}
           </div>
 
           {/* Section Selection */}
@@ -197,22 +226,30 @@ const CreateMaterial = ({ roomId, onMaterialCreated }) => {
              </button>
            </div>
 
-                     {/* Attachment Details - Only for Links */}
-           {formData.attachmentType === "link" && (
-             <div className="form-control">
-               <label className="label">
-                 <span className="label-text font-medium">Link URL</span>
-               </label>
-               <input
-                 type="url"
-                 placeholder="Enter link URL..."
-                 className="input input-bordered"
-                 value={formData.attachmentData}
-                 onChange={(e) => setFormData({ ...formData, attachmentData: e.target.value })}
-                 required
-               />
-             </div>
-           )}
+                                 {/* Attachment Details - Only for Links */}
+            {formData.attachmentType === "link" && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">Link URL</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="Enter link URL..."
+                  className={`input input-bordered ${errors.attachmentData ? 'border-red-300 focus:border-red-500' : ''}`}
+                  value={formData.attachmentData}
+                  onChange={(e) => {
+                    setFormData({ ...formData, attachmentData: e.target.value });
+                    if (errors.attachmentData) setErrors({ ...errors, attachmentData: null });
+                  }}
+                  required
+                />
+                {errors.attachmentData && (
+                  <label className="label">
+                    <span className="label-text-alt text-red-500">{errors.attachmentData}</span>
+                  </label>
+                )}
+              </div>
+            )}
 
           
 

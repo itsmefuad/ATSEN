@@ -92,7 +92,7 @@ const T_Room = () => {
           <div className="flex items-center justify-between mb-6">
             <Link to="/teacher/dashboard" className="btn btn-ghost">
               <ArrowLeft className="h-5 w-5" />
-              Back to rooms
+              Back to Dashboard
             </Link>
           </div>
 
