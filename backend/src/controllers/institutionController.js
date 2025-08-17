@@ -1,5 +1,3 @@
-// backend/controllers/institutionController.js
-
 import mongoose from "mongoose";
 import Institution from "../models/institution.js";
 import Room from "../models/Room.js";
@@ -15,7 +13,7 @@ const findInstitutionByIdOrName = async (idOrName) => {
     if (byId) return byId;
   }
   return Institution.findOne({
-    name: new RegExp(`^${idOrName}$`, "i")
+    name: new RegExp(`^${idOrName}$`, "i"),
   }).lean();
 };
 
@@ -40,19 +38,13 @@ export const getInstitutionInstructors = async (req, res) => {
     }
 
     const instId = institution._id;
-
-    // Build filter
     const filter = { institutions: instId };
     const term = search.trim();
     if (term) {
       filter.name = { $regex: term, $options: "i" };
     }
 
-    // Query and return
-    const list = await Instructor.find(filter)
-      .lean()
-      .limit(50);
-
+    const list = await Instructor.find(filter).lean().limit(50);
     return res.json(list);
   } catch (err) {
     console.error("Error in getInstitutionInstructors:", err);
@@ -78,19 +70,18 @@ export const getInstitutionDashboard = async (req, res) => {
     }
 
     const instId = institution._id;
-
     const [
       totalRooms,
       activeRooms,
       totalStudents,
       totalInstructors,
-      activeInstructors
+      activeInstructors,
     ] = await Promise.all([
       Room.countDocuments({ institution: instId }),
       Room.countDocuments({ institution: instId, active: true }),
       Student.countDocuments({ institution: instId }),
       Instructor.countDocuments({ institution: instId }),
-      Instructor.countDocuments({ institution: instId, active: true })
+      Instructor.countDocuments({ institution: instId, active: true }),
     ]);
 
     const activeStudents = totalStudents; // adjust if you add student.active later
@@ -102,10 +93,52 @@ export const getInstitutionDashboard = async (req, res) => {
       totalStudents,
       activeStudents,
       totalInstructors,
-      activeInstructors
+      activeInstructors,
     });
   } catch (err) {
     console.error("Error in getInstitutionDashboard:", err);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * PUT /api/institutions/:idOrName/settings
+ * Body may include: name, email, phone, address, description
+ */
+export const updateInstitutionSettings = async (req, res) => {
+  try {
+    const { idOrName } = req.params;
+    if (!idOrName) {
+      return res
+        .status(400)
+        .json({ message: "idOrName parameter is required" });
+    }
+
+    const institution = await findInstitutionByIdOrName(idOrName);
+    if (!institution) {
+      return res.status(404).json({ message: "Institution not found" });
+    }
+
+    // Restrict to allowed fields
+    const { name, email, phone, address, description } = req.body;
+    const updates = {};
+    if (name !== undefined)       updates.name = name;
+    if (email !== undefined)      updates.email = email;
+    if (phone !== undefined)      updates.phone = phone;
+    if (address !== undefined)    updates.address = address;
+    if (description !== undefined) updates.description = description;
+
+    const updated = await Institution.findByIdAndUpdate(
+      institution._id,
+      updates,
+      { new: true, runValidators: true }
+    ).lean();
+
+    return res.json(updated);
+  } catch (err) {
+    console.error("Error in updateInstitutionSettings:", err);
+    return res
+      .status(500)
+      .json({ message: "Failed to update institution settings" });
   }
 };

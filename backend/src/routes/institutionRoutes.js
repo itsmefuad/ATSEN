@@ -1,23 +1,19 @@
-// backend/routes/institutionRoutes.js
-
 import { Router } from "express";
 import {
   getInstitutionDashboard,
-  getInstitutionInstructors
+  getInstitutionInstructors,
+  updateInstitutionSettings   // ← import this
 } from "../controllers/institutionController.js";
 
 const router = Router();
 
-// List instructors for this institution (optionally filtered by ?search=…)
-router.get(
-  "/:idOrName/instructors",
-  getInstitutionInstructors
-);
+// List instructors
+router.get("/:idOrName/instructors", getInstitutionInstructors);
 
-// Dynamic: idOrName can be ObjectId or name (case-insensitive exact match)
-router.get(
-  "/:idOrName/dashboard",
-  getInstitutionDashboard
-);
+// Fetch dashboard data
+router.get("/:idOrName/dashboard", getInstitutionDashboard);
+
+// Update settings
+router.put("/:idOrName/settings", updateInstitutionSettings);
 
 export default router;
