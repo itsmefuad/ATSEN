@@ -2,10 +2,11 @@ import { use, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams, useLocation } from "react-router";
 import api from "../../lib/axios";
-import { ArrowLeft, Loader, Trash2, Settings, MessageSquare, BookOpen } from "lucide-react";
+import { ArrowLeft, Loader, Trash2, Settings, MessageSquare, BookOpen, Calendar } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import DiscussionForum from "../../components/room/DiscussionForum";
 import Materials from "../../components/room/Materials";
+import Assessment from "../../components/room/Assessment";
 
 const T_Room = () => {
   const [room, setRoom] = useState(null);
@@ -24,6 +25,8 @@ const T_Room = () => {
       setActiveTab("settings");
     } else if (location.pathname.includes('/materials')) {
       setActiveTab("materials");
+    } else if (location.pathname.includes('/assessment')) {
+      setActiveTab("assessment");
     } else {
       setActiveTab("forum");
     }
@@ -87,32 +90,40 @@ const T_Room = () => {
   return (
     <div className="min-h-screen bg-base-200">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <Link to="/teacher/dashboard" className="btn btn-ghost">
-              <ArrowLeft className="h-5 w-5" />
-              Back to Dashboard
-            </Link>
-          </div>
+             <div className="container mx-auto px-4 py-8">
+         {/* Back to Dashboard Button - Floating left */}
+         <div className="mb-6 flex justify-start">
+           <Link to="/teacher/dashboard" className="btn btn-ghost">
+             <ArrowLeft className="h-5 w-5" />
+             Back to Dashboard
+           </Link>
+         </div>
+         
+         <div className="max-w-2xl mx-auto">
 
-          {/* Room Info Header */}
+          {/* Room Info Header with integrated settings */}
           <div className="card bg-base-100 shadow-lg mb-6">
             <div className="card-body">
-              <h1 className="text-2xl font-bold">{room.room_name}</h1>
-              <p className="text-base-content/70">{room.description}</p>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h1 className="text-2xl font-bold">{room.room_name}</h1>
+                  <p className="text-base-content/70">{room.description}</p>
+                </div>
+                <div className="ml-4">
+                  <Link
+                    to={`/teacher/room/${id}/edit`}
+                    className={`btn btn-sm ${activeTab === "settings" ? "btn-primary" : "btn-ghost"}`}
+                  >
+                    <Settings className="h-4 w-4 mr-1" />
+                    Settings
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Tabs */}
           <div className="tabs tabs-boxed mb-6">
-            <Link
-              to={`/teacher/room/${id}/edit`}
-              className={`tab ${activeTab === "settings" ? "tab-active" : ""}`}
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Room Settings
-            </Link>
             <Link
               to={`/teacher/room/${id}/forum`}
               className={`tab ${activeTab === "forum" ? "tab-active" : ""}`}
@@ -126,6 +137,13 @@ const T_Room = () => {
             >
               <BookOpen className="h-4 w-4 mr-2" />
               Materials
+            </Link>
+            <Link
+              to={`/teacher/room/${id}/assessment`}
+              className={`tab ${activeTab === "assessment" ? "tab-active" : ""}`}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Assessment
             </Link>
           </div>
 
@@ -188,6 +206,10 @@ const T_Room = () => {
 
           {activeTab === "materials" && (
             <Materials roomId={id} />
+          )}
+
+          {activeTab === "assessment" && (
+            <Assessment roomId={id} />
           )}
         </div>
       </div>
