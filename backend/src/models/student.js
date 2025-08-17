@@ -14,6 +14,17 @@ const studentSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+      trim: true
+    },
+    password: {
+      type: String,
+      required: true
+    },
     institution: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institution",

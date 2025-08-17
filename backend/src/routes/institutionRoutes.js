@@ -2,11 +2,16 @@
 
 import { Router } from "express";
 import {
+  registerInstitution,
+  loginInstitution,
   getInstitutionDashboard,
   getInstitutionInstructors
 } from "../controllers/institutionController.js";
 
 const router = Router();
+
+router.post("/register", registerInstitution);
+router.post("/login", loginInstitution);
 
 // List instructors for this institution (optionally filtered by ?search=…)
 router.get(

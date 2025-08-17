@@ -2,7 +2,19 @@ import mongoose from "mongoose";
 
 const instructorSchema = new mongoose.Schema(
   {
+    instructorId: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+      trim: true
+    },
+    password: {
+      type: String,
+      required: true
+    },
 
     // Array of institution references
     institutions: [
