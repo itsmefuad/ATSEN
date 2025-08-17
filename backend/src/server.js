@@ -2,6 +2,10 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+import adminRoutes from "./routes/adminRoutes.js";
+
+
+
 import roomsRoutes from "./routes/roomsRoutes.js";
 import institutionRoute from "./routes/institutionRoutes.js";      // ← import it
 import announcementRoutes from "./routes/announcementRoutes.js";
@@ -23,6 +27,10 @@ app.use(express.json());
 // app.use(rateLimiter); // Temporarily disabled for testing
 
 // mount your routes
+app.use("/api/admin", adminRoutes);
+
+
+
 app.use("/api/rooms", roomsRoutes);
 app.use("/api/institutions", institutionRoute);               // ← mount it
 app.use("/api/announcements", announcementRoutes);

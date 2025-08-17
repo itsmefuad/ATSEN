@@ -1,6 +1,13 @@
 import React from "react";
 import { Routes, Route } from "react-router";
 
+//admin
+import Login from "./pages/admin/Login";
+import Dashboard from "./pages/admin/Dashboard";
+import ProtectedRoute from "./pages/admin/ProtectedRoute";
+
+
+
 import InstitutionLayout from "./pages/institution/InstitutionLayout.jsx";
 import I_Dashboard from "./pages/institution/I_Dashboard.jsx";
 import InstitutionRooms from "./pages/institution/InstitutionRooms.jsx";
@@ -20,6 +27,10 @@ export default function App() {
   return (
     <div data-theme="nord">
       <Routes>
+        {/* Admin routes */}
+        <Route path="/admin/login" element={<Login />} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
         {/* Institution routes */}
         <Route path="/:idOrName" element={<InstitutionLayout />}>
           <Route index element={<I_Dashboard />} />
