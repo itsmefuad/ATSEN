@@ -56,20 +56,28 @@ export async function listRooms(req, res) {
   try {
     const { idOrName } = req.params;
 
-    // find institution by id or name
-    const inst = mongoose.Types.ObjectId.isValid(idOrName)
-      ? await Institution.findById(idOrName)
-      : await Institution.findOne({ name: idOrName });
+    // find by ObjectId OR by slug OR by (case-insensitive) name
+    let inst;
+    if (mongoose.Types.ObjectId.isValid(idOrName)) {
+      inst = await Institution.findById(idOrName);
+    } else {
+      inst = await Institution.findOne({
+        $or: [
+          { slug: idOrName },
+          { name: new RegExp(`^${idOrName}$`, "i") }
+        ]
+      });
+    }
 
     if (!inst) {
       return res.status(404).json({ message: "Institution not found" });
     }
 
-    // fetch all rooms for that institution
-    const rooms = await Room.find({ institution: inst._id });
+    const rooms = await Room.find({ institution: inst._id }).lean();
     return res.json(rooms);
   } catch (err) {
     console.error("Error in listRooms:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+

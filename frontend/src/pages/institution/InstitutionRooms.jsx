@@ -25,11 +25,18 @@ export default function InstitutionRooms() {
         setRooms(json);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("Error loading rooms:", err);
-        setErrMsg("Failed to load rooms.");
+      .catch(async (err) => {
+        // try to pull the real error text
+        let msg = err.message;
+        if (err.response) {
+          msg = await err.response.text();
+        }
+        console.error("Error loading rooms:", msg);
+        setErrMsg(msg);
         setLoading(false);
       });
+
+
   }, [idOrName]);
 
   if (loading) return <p>Loading rooms…</p>;

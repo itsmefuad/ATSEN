@@ -1,26 +1,36 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import slugify from "slugify";
 
 import Institution from "../models/institution.js";
 import Room from "../models/Room.js";
 import Student from "../models/student.js";
 import Instructor from "../models/instructor.js";
 
-// Register institution
 // Utility to generate an 8-digit unique loginId
 async function generateLoginId() {
   let unique = false;
   let loginId;
+
   while (!unique) {
     loginId = Math.floor(10000000 + Math.random() * 90000000).toString();
     const exists = await Institution.findOne({ loginId });
     if (!exists) unique = true;
   }
+
   return loginId;
 }
 
-// Register institution
+// Ensure slug exists
+async function ensureSlug(inst) {
+  if (!inst.slug) {
+    inst.slug = slugify(inst.name, { lower: true, strict: true });
+    await inst.save();
+  }
+  return inst.slug;
+}
+
 export async function registerInstitution(req, res) {
   const { name, eiin, email, password, phone, address, description } = req.body;
   if (!name || !eiin || !email || !password) {
@@ -28,29 +38,25 @@ export async function registerInstitution(req, res) {
   }
 
   try {
-    // Check for duplicates
     const existing = await Institution.findOne({ $or: [{ eiin }, { email }] });
     if (existing) {
-      return res.status(409).json({ message: "Institution with same EIIN or Email already exists." });
+      return res.status(409).json({
+        message: "Institution with same EIIN or Email already exists."
+      });
     }
 
-    // Hash password
     const hashed = await bcrypt.hash(password, 10);
-
-    // Generate unique loginId
-    const loginId = await generateLoginId();
-
-    // Create institution
     const inst = await Institution.create({
       name,
       eiin: eiin.toUpperCase().trim(),
       email: email.toLowerCase().trim(),
       password: hashed,
-      loginId,
       phone,
       address,
       description
     });
+
+    const slug = await ensureSlug(inst);
 
     const token = jwt.sign(
       { id: inst._id, role: "institution" },
@@ -58,66 +64,70 @@ export async function registerInstitution(req, res) {
       { expiresIn: "1h" }
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       token,
-      institution: { id: inst._id, name: inst.name, eiin: inst.eiin, loginId: inst.loginId }
+      institution: { id: inst._id, slug, name: inst.name }
     });
   } catch (err) {
-    console.error("Institution register error:", err);
     return res.status(500).json({ message: err.message });
   }
 }
 
-
-// Login institution
 export async function loginInstitution(req, res) {
   const { email, password } = req.body;
+
   try {
     const inst = await Institution.findOne({ email });
     if (!inst) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
-    const ok = await bcrypt.compare(password, inst.password);
-    if (!ok) {
+
+    const matches = await bcrypt.compare(password, inst.password);
+    if (!matches) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
-    const token = jwt.sign({ id: inst._id, role: "institution" }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.json({ token, institution: { id: inst._id, name: inst.name } });
+    const slug = await ensureSlug(inst);
+
+    const token = jwt.sign(
+      { id: inst._id, role: "institution" },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    return res.json({
+      token,
+      institution: { id: inst._id, slug, name: inst.name }
+    });
   } catch (err) {
-    console.error("Institution login error:", err);
-    res.status(500).json({ message: "Server error." });
+    return res.status(500).json({ message: "Server error." });
   }
 }
 
-
-
-/**
- * Resolve idOrName (ObjectId or case-insensitive name) to an Institution doc
- */
 const findInstitutionByIdOrName = async (idOrName) => {
   if (mongoose.isValidObjectId(idOrName)) {
-    const byId = await Institution.findById(idOrName).lean();
-    if (byId) return byId;
+    const instById = await Institution.findById(idOrName).lean();
+    if (instById) return instById;
   }
-  return Institution.findOne({
-    name: new RegExp(`^${idOrName}$`, "i"),
-  }).lean();
+
+  const instBySlug = await Institution
+    .findOne({ slug: new RegExp(`^${idOrName}$`, "i") })
+    .lean();
+  if (instBySlug) return instBySlug;
+
+  const instByName = await Institution
+    .findOne({ name: new RegExp(`^${idOrName}$`, "i") })
+    .lean();
+  return instByName || null;
 };
 
-/**
- * GET /api/institutions/:idOrName/instructors
- * Optional query: ?search=foobar
- */
 export const getInstitutionInstructors = async (req, res) => {
   try {
     const { idOrName } = req.params;
     const { search = "" } = req.query;
 
     if (!idOrName) {
-      return res
-        .status(400)
-        .json({ message: "idOrName parameter is required" });
+      return res.status(400).json({ message: "idOrName parameter is required" });
     }
 
     const institution = await findInstitutionByIdOrName(idOrName);
@@ -134,22 +144,16 @@ export const getInstitutionInstructors = async (req, res) => {
 
     const list = await Instructor.find(filter).lean().limit(50);
     return res.json(list);
-  } catch (err) {
-    console.error("Error in getInstitutionInstructors:", err);
+  } catch {
     return res.status(500).json({ message: "Server error" });
   }
 };
 
-/**
- * GET /api/institutions/:idOrName/dashboard
- */
 export const getInstitutionDashboard = async (req, res) => {
   try {
     const { idOrName } = req.params;
     if (!idOrName) {
-      return res
-        .status(400)
-        .json({ message: "idOrName parameter is required" });
+      return res.status(400).json({ message: "idOrName parameter is required" });
     }
 
     const institution = await findInstitutionByIdOrName(idOrName);
@@ -163,43 +167,43 @@ export const getInstitutionDashboard = async (req, res) => {
       activeRooms,
       totalStudents,
       totalInstructors,
-      activeInstructors,
+      activeInstructors
     ] = await Promise.all([
       Room.countDocuments({ institution: instId }),
       Room.countDocuments({ institution: instId, active: true }),
       Student.countDocuments({ institution: instId }),
       Instructor.countDocuments({ institution: instId }),
-      Instructor.countDocuments({ institution: instId, active: true }),
+      Instructor.countDocuments({ institution: instId, active: true })
     ]);
 
-    const activeStudents = totalStudents; // adjust if you add student.active later
+    const activeStudents = totalStudents;
 
     return res.json({
-      ...institution,
+      _id: institution._id,
+      name: institution.name,
+      eiin: institution.eiin,
+      email: institution.email,
+      phone: institution.phone,
+      address: institution.address,
+      description: institution.description,
+      slug: institution.slug,
       totalRooms,
       activeRooms,
       totalStudents,
       activeStudents,
       totalInstructors,
-      activeInstructors,
+      activeInstructors
     });
-  } catch (err) {
-    console.error("Error in getInstitutionDashboard:", err);
-    return res.status(500).json({ message: "Server error" });
+  } catch {
+    return res.status(500).json({ message: "Server error." });
   }
 };
 
-/**
- * PUT /api/institutions/:idOrName/settings
- * Body may include: name, email, phone, address, description
- */
 export const updateInstitutionSettings = async (req, res) => {
   try {
     const { idOrName } = req.params;
     if (!idOrName) {
-      return res
-        .status(400)
-        .json({ message: "idOrName parameter is required" });
+      return res.status(400).json({ message: "idOrName parameter is required" });
     }
 
     const institution = await findInstitutionByIdOrName(idOrName);
@@ -207,13 +211,12 @@ export const updateInstitutionSettings = async (req, res) => {
       return res.status(404).json({ message: "Institution not found" });
     }
 
-    // Restrict to allowed fields
     const { name, email, phone, address, description } = req.body;
     const updates = {};
-    if (name !== undefined)       updates.name = name;
-    if (email !== undefined)      updates.email = email;
-    if (phone !== undefined)      updates.phone = phone;
-    if (address !== undefined)    updates.address = address;
+    if (name !== undefined) updates.name = name;
+    if (email !== undefined) updates.email = email;
+    if (phone !== undefined) updates.phone = phone;
+    if (address !== undefined) updates.address = address;
     if (description !== undefined) updates.description = description;
 
     const updated = await Institution.findByIdAndUpdate(
@@ -223,10 +226,7 @@ export const updateInstitutionSettings = async (req, res) => {
     ).lean();
 
     return res.json(updated);
-  } catch (err) {
-    console.error("Error in updateInstitutionSettings:", err);
-    return res
-      .status(500)
-      .json({ message: "Failed to update institution settings" });
+  } catch {
+    return res.status(500).json({ message: "Failed to update institution settings" });
   }
 };

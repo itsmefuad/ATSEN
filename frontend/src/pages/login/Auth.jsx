@@ -1,5 +1,6 @@
+// src/pages/login/Auth.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../../lib/axios";
 
 export default function Auth() {
@@ -7,14 +8,19 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({});
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // If ProtectedRoute redirected us here, it will stash the original path in `location.state.from`
+  const fromPath = location.state?.from;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const toggleMode = () => {
-    setIsLogin(!isLogin);
+    setIsLogin((prev) => !prev);
     setForm({});
     setError("");
   };
@@ -23,7 +29,8 @@ export default function Auth() {
     e.preventDefault();
     setError("");
 
-    const path =
+    // Build the base path for API calls
+    const base =
       role === "instructor"
         ? "/instructors"
         : role === "student"
@@ -31,23 +38,35 @@ export default function Auth() {
         : "/institutions";
 
     try {
-      const endpoint = `${path}/${isLogin ? "login" : "register"}`;
+      const endpoint = `${base}/${isLogin ? "login" : "register"}`;
       const { data } = await api.post(endpoint, form);
 
+      // If registering, flip back to login with a success message
       if (!isLogin) {
-        // after register, go back to login
         setIsLogin(true);
         setForm({});
-        setError("Registration successful — please log in");
+        setError("🎉 Registration successful—please log in.");
         return;
       }
 
-      // login flow
+      // Persist auth token & role
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", role);
-      if (role === "institution") navigate("/institution/dashboard");
-      if (role === "instructor") navigate("/teacher/dashboard");
-      if (role === "student") navigate("/student/dashboard");
+
+      // Determine default path after login
+      let defaultPath;
+      if (role === "institution") {
+        // your backend must return the slug or ID here
+        defaultPath = `/${data.institution.slug}/dashboard`;
+      } else if (role === "instructor") {
+        defaultPath = "/teacher/dashboard";
+      } else {
+        defaultPath = "/student/dashboard";
+      }
+
+      // If someone was trying to hit a protected URL, use that; otherwise use our default
+      const redirectTo = fromPath || defaultPath;
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Operation failed.");
     }
@@ -81,81 +100,20 @@ export default function Auth() {
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Institution Registration */}
+          {/* Registration fields */}
           {!isLogin && role === "institution" && (
             <>
-              <div>
-                <label className="block text-sm">Name</label>
-                <input
-                  name="name"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">EIIN</label>
-                <input
-                  name="eiin"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">Email</label>
-                <input
-                  name="email"
-                  type="email"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">Password</label>
-                <input
-                  name="password"
-                  type="password"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
+              <Input name="name" label="Name" onChange={handleChange} />
+              <Input name="eiin" label="EIIN" onChange={handleChange} />
+              <Input name="email" label="Email" type="email" onChange={handleChange} />
+              <Input name="password" label="Password" type="password" onChange={handleChange} />
             </>
           )}
-
-          {/* Instructor Registration */}
           {!isLogin && role === "instructor" && (
             <>
-              <div>
-                <label className="block text-sm">Instructor ID</label>
-                <input
-                  name="instructorId"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">Name</label>
-                <input
-                  name="name"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">Email</label>
-                <input
-                  name="email"
-                  type="email"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
+              <Input name="instructorId" label="Instructor ID" onChange={handleChange} />
+              <Input name="name" label="Name" onChange={handleChange} />
+              <Input name="email" label="Email" type="email" onChange={handleChange} />
               <div>
                 <label className="block text-sm">
                   Institutions (IDs comma-separated)
@@ -172,95 +130,28 @@ export default function Auth() {
                   className="mt-1 w-full px-3 py-2 border rounded"
                 />
               </div>
-              <div>
-                <label className="block text-sm">Password</label>
-                <input
-                  name="password"
-                  type="password"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
+              <Input name="password" label="Password" type="password" onChange={handleChange} />
             </>
           )}
-
-          {/* Student Registration */}
           {!isLogin && role === "student" && (
             <>
-              <div>
-                <label className="block text-sm">Student ID</label>
-                <input
-                  name="studentId"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">Name</label>
-                <input
-                  name="name"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">Email</label>
-                <input
-                  name="email"
-                  type="email"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">Institution ID</label>
-                <input
-                  name="institution"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">Password</label>
-                <input
-                  name="password"
-                  type="password"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
+              <Input name="studentId" label="Student ID" onChange={handleChange} />
+              <Input name="name" label="Name" onChange={handleChange} />
+              <Input name="email" label="Email" type="email" onChange={handleChange} />
+              <Input
+                name="institution"
+                label="Institution ID"
+                onChange={handleChange}
+              />
+              <Input name="password" label="Password" type="password" onChange={handleChange} />
             </>
           )}
 
-          {/* Login Form */}
+          {/* Login fields */}
           {isLogin && (
             <>
-              <div>
-                <label className="block text-sm">Email</label>
-                <input
-                  name="email"
-                  type="email"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-sm">Password</label>
-                <input
-                  name="password"
-                  type="password"
-                  onChange={handleChange}
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
+              <Input name="email" label="Email" type="email" onChange={handleChange} />
+              <Input name="password" label="Password" type="password" onChange={handleChange} />
             </>
           )}
 
@@ -282,6 +173,22 @@ export default function Auth() {
           </button>
         </p>
       </div>
+    </div>
+  );
+}
+
+// Extracted Input component to DRY up JSX
+function Input({ name, label, type = "text", onChange }) {
+  return (
+    <div>
+      <label className="block text-sm">{label}</label>
+      <input
+        name={name}
+        type={type}
+        onChange={onChange}
+        required
+        className="mt-1 w-full px-3 py-2 border rounded"
+      />
     </div>
   );
 }
