@@ -25,6 +25,7 @@ import Yuvraj_AnnouncementEditor from "./pages/yuvraj_AnnouncementEditor.jsx";
 import TimelineDemo from "./components/room/TimelineDemo.jsx";
 import Yuvraj_PollingAndSurvey from "./pages/yuvraj_PollingAndSurvey.jsx";
 import Yuvraj_PollingAndSurveyEditor from "./pages/yuvraj_PollingAndSurveyEditor.jsx";
+import RouteGuard from "./components/RouteGuard.jsx";
 
 export default function App() {
   return (
@@ -76,11 +77,20 @@ export default function App() {
               <Route path="/:institution/:role/announcements/:id/edit" element={<Yuvraj_AnnouncementEditor />} />
               <Route path="/PollingAndSurvey" element={<Yuvraj_PollingAndSurvey />} />
               <Route path="/PollingAndSurvey/:id" element={<Yuvraj_PollingAndSurveyEditor />} />
-              <Route path="/PollingAndSurvey/new" element={<Yuvraj_PollingAndSurveyEditor />} />
               {/* New URL pattern: /:institution/:role/PollingAndSurvey */}
               <Route path="/:institution/:role/PollingAndSurvey" element={<Yuvraj_PollingAndSurvey />} />
               <Route path="/:institution/:role/PollingAndSurvey/:id" element={<Yuvraj_PollingAndSurveyEditor />} />
-              <Route path="/:institution/:role/PollingAndSurvey/new" element={<Yuvraj_PollingAndSurveyEditor />} />
+              {/* Only allow new form creation for admin routes */}
+              <Route path="/:institution/admin/PollingAndSurvey/new" element={
+                <RouteGuard requirePrivileged={true}>
+                  <Yuvraj_PollingAndSurveyEditor />
+                </RouteGuard>
+              } />
+              <Route path="/:institution/instructor/PollingAndSurvey/new" element={
+                <RouteGuard requirePrivileged={true}>
+                  <Yuvraj_PollingAndSurveyEditor />
+                </RouteGuard>
+              } />
         {/* Catch-all 404 */}
         <Route
           path="*"

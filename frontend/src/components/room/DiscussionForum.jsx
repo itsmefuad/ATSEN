@@ -4,8 +4,6 @@ import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import CreateForumContent from "./CreateForumContent";
 import ForumContentCard from "./ForumContentCard";
-import CreateForumContent from "./CreateForumContent";
-import ForumContentCard from "./ForumContentCard";
 
 const DiscussionForum = ({ roomId }) => {
   const [forumContent, setForumContent] = useState([]);
