@@ -21,6 +21,7 @@ const OptionBox = ({ title, description, icon, onClick, isActive = false }) => (
 const Yuvraj_PollingAndSurvey = () => {
   const [forms, setForms] = useState([]);
   const [role, setRole] = useState("student");
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [isPrivileged, setIsPrivileged] = useState(false);
   const [tab, setTab] = useState("recent");
   const [loading, setLoading] = useState(true);
@@ -62,22 +63,29 @@ const Yuvraj_PollingAndSurvey = () => {
 
   const handleCreateForm = (type) => {
     if (!isPrivileged) return;
-    navigate(`/${institution || 'Brac University'}/${role}/PollingAndSurvey/new?type=${type}`);
+  navigate(`/${encodeURIComponent(institution || 'Brac University')}/${role}/PollingAndSurvey/new?type=${type}`);
+  };
+
+  const changeRole = (r) => {
+    try { localStorage.setItem('yuvraj_role', r); } catch (e) {}
+    setRole(r);
+    setIsPrivileged(r === 'admin' || r === 'instructor');
+    setShowRoleMenu(false);
   };
 
   const handleEditForm = (form) => {
     if (!isPrivileged) return;
-    navigate(`/${institution || 'Brac University'}/${role}/PollingAndSurvey/${form.id}/edit`);
+  navigate(`/${encodeURIComponent(institution || 'Brac University')}/${role}/PollingAndSurvey/${form.id}/edit`);
   };
 
   const handleViewResults = (form) => {
     if (!isPrivileged) return;
-    navigate(`/${institution || 'Brac University'}/${role}/PollingAndSurvey/${form.id}/results`);
+  navigate(`/PollingAndSurvey/${form.id}/results`);
   };
 
   const handleRespondToForm = (form) => {
     if (isPrivileged) return;
-    navigate(`/${institution || 'Brac University'}/${role}/PollingAndSurvey/${form.id}/respond`);
+  navigate(`/PollingAndSurvey/${form.id}`);
   };
 
   if (loading) {
@@ -106,6 +114,24 @@ const Yuvraj_PollingAndSurvey = () => {
             <div className="rounded-full bg-white/20 px-4 py-2 text-white shadow backdrop-blur">Dashboard</div>
             <div className="rounded-full bg-white/20 px-4 py-2 text-white shadow backdrop-blur">Notifications</div>
             <div className="rounded-full bg-white/20 px-4 py-2 text-white shadow backdrop-blur">Profile</div>
+
+            {/* Role switcher (Student / Instructor / Admin) - local override for this section */}
+            <div className="relative">
+              <button
+                onClick={() => setShowRoleMenu((s) => !s)}
+                className="h-9 w-9 rounded-full bg-white/30 flex items-center justify-center text-sm text-white shadow"
+                title="Switch role for Polls & Survey"
+              >
+                {role && role[0].toUpperCase()}
+              </button>
+              {showRoleMenu && (
+                <div className="absolute right-0 mt-2 w-40 rounded-lg bg-white/90 text-black shadow-lg p-2">
+                  <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => changeRole('student')}>Student</button>
+                  <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => changeRole('instructor')}>Instructor</button>
+                  <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => changeRole('admin')}>Admin</button>
+                </div>
+              )}
+            </div>
           </nav>
         </div>
 
@@ -157,9 +183,9 @@ const Yuvraj_PollingAndSurvey = () => {
           </div>
         )}
 
-        <div className="rounded-3xl bg-white/15 p-5 shadow-2xl backdrop-blur border border-white/20">
+  <div className="rounded-3xl bg-white/15 p-5 shadow-2xl backdrop-blur border border-white/20">
           <div className="flex items-center justify-between mb-6">
-            <div className="text-white/90 text-lg font-semibold">
+            <div className="text-white/90 text-lg font-google-sans font-bold">
               {tab === "recent" ? "Recent Forms" : "All Forms"}
             </div>
             <div className="text-sm text-white/70">{forms.length} form{forms.length !== 1 ? "s" : ""} available</div>

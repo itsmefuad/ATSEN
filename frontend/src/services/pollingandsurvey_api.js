@@ -24,13 +24,19 @@ export async function getPollingAndSurveyById(id) {
 }
 
 export async function createPollingAndSurvey(body) {
+  // ensure body contains institution so backend can scope the item
+  const inst = (() => { try { return localStorage.getItem('yuvraj_institution'); } catch(e) { return null; } })();
+  if (!body.institution) body.institution = inst || 'Brac University';
+
+  const headers = {
+    "Content-Type": "application/json",
+    "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
+    ...getInstitutionHeader(),
+  };
+  console.debug("createPollingAndSurvey ->", { url: `${API}/api/PollingAndSurvey`, headers, body });
   const r = await fetch(`${API}/api/PollingAndSurvey`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-  "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
-  ...getInstitutionHeader(),
-    },
+    headers,
     body: JSON.stringify(body),
   });
   if (!r.ok) {
@@ -51,13 +57,19 @@ export async function createPollingAndSurvey(body) {
 }
 
 export async function updatePollingAndSurvey(id, body) {
+  // ensure body contains institution so backend can enforce scoping when header absent
+  const inst = (() => { try { return localStorage.getItem('yuvraj_institution'); } catch(e) { return null; } })();
+  if (!body.institution) body.institution = inst || 'Brac University';
+
+  const headers = {
+    "Content-Type": "application/json",
+    "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
+    ...getInstitutionHeader(),
+  };
+  console.debug("updatePollingAndSurvey ->", { url: `${API}/api/PollingAndSurvey/${id}`, headers, body });
   const r = await fetch(`${API}/api/PollingAndSurvey/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-  "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
-  ...getInstitutionHeader(),
-    },
+    headers,
     body: JSON.stringify(body),
   });
   if (!r.ok) {
@@ -78,9 +90,11 @@ export async function updatePollingAndSurvey(id, body) {
 }
 
 export async function submitResponse(id, body) {
+  const headers = { "Content-Type": "application/json", ...getInstitutionHeader() };
+  console.debug("submitResponse ->", { url: `${API}/api/PollingAndSurvey/${id}/responses`, headers, body });
   const r = await fetch(`${API}/api/PollingAndSurvey/${id}/responses`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...getInstitutionHeader() },
+    headers,
     body: JSON.stringify(body),
   });
   if (!r.ok) {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { createPollingAndSurvey, updatePollingAndSurvey, getPollingAndSurveyById } from "../services/pollingandsurvey_api.js";
+import { createPollingAndSurvey, updatePollingAndSurvey, getPollingAndSurveyById, submitResponse } from "../services/pollingandsurvey_api.js";
 
 const Field = ({ label, children }) => (
   <label className="form-control w-full">
@@ -30,12 +30,14 @@ const Yuvraj_PollingAndSurveyEditor = () => {
   const { institution, role: roleParam } = useParams();
 
   useEffect(() => {
-    setRole(roleParam || "student"); // Default to student if no roleParam
-    setIsPrivileged(roleParam === 'admin' || roleParam === 'instructor');
+    // Determine role: URL param > localStorage override > default
+    const currentRole = roleParam || localStorage.getItem('yuvraj_role') || "student";
+    setRole(currentRole);
+    setIsPrivileged(currentRole === 'admin' || currentRole === 'instructor');
     
     // ensure localStorage has an institution so other services send correct header
-    const effectiveInstitution = institution || "defaultInstitution"; // Placeholder, replace with actual institution logic
-    try { localStorage.setItem("institution", effectiveInstitution); } catch (e) {}
+  const effectiveInstitution = institution || "defaultInstitution"; // Persist under expected key for services
+  try { localStorage.setItem('yuvraj_institution', effectiveInstitution); } catch (e) {}
     
     // prevent students from accessing the create/new editor
     if (isCreate && !isPrivileged) {
@@ -178,11 +180,11 @@ const Yuvraj_PollingAndSurveyEditor = () => {
         setShowConfirmation(true);
         setTimeout(() => {
           setShowConfirmation(false);
-          navigate(`${safePrefix}/PollingAndSurvey`, { replace: true });
+          navigate(`/PollingAndSurvey`, { replace: true });
         }, 1400);
       } else {
         await updatePollingAndSurvey(id, body);
-        navigate(`${safePrefix}/PollingAndSurvey`, { replace: true });
+        navigate(`/PollingAndSurvey`, { replace: true });
       }
     } catch (err) {
       console.error(err);
@@ -201,11 +203,18 @@ const Yuvraj_PollingAndSurveyEditor = () => {
         }
         return a;
       }) : questions.map((q) => q._selected || "");
-      // await submitResponse(id, { user: "Student", answers }); // This line was removed as per the edit hint
-      // show same confirmation animation used for instructor create
+      // submit student response to backend
+      if (id) {
+        await submitResponse(id, { user: 'Student', answers });
+      }
+      // show confirmation animation used for instructor create
       setShowConfirmation(true);
       setTimeout(() => {
         setShowConfirmation(false);
+        // After confirmation, go to the results view for this form (if id available)
+        if (id) {
+          navigate(`/PollingAndSurvey/${id}/results`, { replace: true });
+        }
       }, 1400);
     } catch (e) {
       console.error(e);
@@ -214,6 +223,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
   };
 
   const prefix = institution ? `/${institution}/${role || 'student'}` : `/${role || 'student'}`;
+  const encodedPrefix = institution ? `/${encodeURIComponent(institution)}/${role || 'student'}` : `/${role || 'student'}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-600 p-6">

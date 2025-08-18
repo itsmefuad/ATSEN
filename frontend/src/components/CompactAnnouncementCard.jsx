@@ -2,7 +2,7 @@ const CompactAnnouncementCard = ({ announcement, onClick }) => {
   return (
     <div 
       onClick={onClick}
-      className="cursor-pointer rounded-xl border border-white/20 bg-white/10 shadow-lg backdrop-blur hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white/15"
+      className="cursor-pointer rounded-xl border border-white/20 bg-white/10 shadow-lg backdrop-blur hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:bg-white/15 max-w-80pct"
     >
       <div className="p-4">
         {/* Header with type and date */}
@@ -19,7 +19,7 @@ const CompactAnnouncementCard = ({ announcement, onClick }) => {
         </div>
 
         {/* Title with shadow */}
-        <h3 className="text-lg font-bold text-white mb-2 drop-shadow-lg line-clamp-2">
+        <h3 className="text-lg font-google-sans text-white mb-2 drop-shadow-lg line-clamp-2 font-bold">
           {announcement.title || 'Untitled Announcement'}
         </h3>
 

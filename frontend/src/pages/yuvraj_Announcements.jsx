@@ -17,6 +17,7 @@ const NavPill = ({ children, active = false }) => (
 const Yuvraj_Announcements = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [role, setRole] = useState("student");
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [isPrivileged, setIsPrivileged] = useState(false);
   const [tab, setTab] = useState("recent");
   const [loading, setLoading] = useState(true);
@@ -25,9 +26,10 @@ const Yuvraj_Announcements = () => {
   const { institution, role: roleParam } = useParams();
 
   useEffect(() => {
-    // Set role and privileges
-    setRole(roleParam || 'student');
-    setIsPrivileged(roleParam === 'admin' || roleParam === 'instructor');
+    // Set role and privileges (URL param > localStorage > default)
+    const currentRole = roleParam || localStorage.getItem('yuvraj_role') || 'student';
+    setRole(currentRole);
+    setIsPrivileged(currentRole === 'admin' || currentRole === 'instructor');
     
     // Persist institution for API header
     if (institution) { 
@@ -55,6 +57,33 @@ const Yuvraj_Announcements = () => {
     loadAnnouncements();
   }, [institution, roleParam]);
 
+  const handleEdit = (id) => {
+    const editPath = institution ? `/${institution}/${role}/announcements/${id}/edit` : `/yuvraj/admin/announcements/${id}/edit`;
+    navigate(editPath);
+  };
+
+  const changeRole = (r) => {
+    try { localStorage.setItem('yuvraj_role', r); } catch (e) {}
+    setRole(r);
+    setIsPrivileged(r === 'admin' || r === 'instructor');
+    setShowRoleMenu(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this announcement?')) return;
+    try {
+      const API = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      const headers = {};
+      try { const inst = localStorage.getItem('yuvraj_institution'); if (inst) headers['x-institution-id'] = inst; } catch(e){}
+      const r = await fetch(`${API}/api/yuvraj/announcements/${id}`, { method: 'DELETE', headers: { 'x-admin-key': import.meta.env.VITE_ADMIN_KEY || '', ...headers } });
+      if (!r.ok) throw new Error('Delete failed');
+      setAnnouncements((prev) => prev.filter(a => (a.id || a._id) !== id));
+    } catch (err) {
+      console.error('Failed to delete announcement', err);
+      alert('Failed to delete announcement');
+    }
+  };
+
   const visible = useMemo(() => announcements.slice(0, 7), [announcements]);
 
   if (loading) {
@@ -74,15 +103,33 @@ const Yuvraj_Announcements = () => {
     <div className="min-h-screen bg-gradient-to-br from-sky-400/80 via-blue-600/80 to-indigo-700/80 p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <nav className="flex items-center gap-4">
             <img src="/atsen-circular-logo.svg" alt="ATSEN" className="h-10 w-10 drop-shadow" />
             <span className="hidden text-white/90 sm:inline">ATSEN</span>
-          </div>
+          </nav>
           <nav className="flex items-center gap-4">
             <NavPill active>Home</NavPill>
             <NavPill>Dashboard</NavPill>
             <NavPill>Notifications</NavPill>
             <NavPill>Profile</NavPill>
+
+            {/* Role switcher (Student / Instructor / Admin) - local override for this section */}
+            <div className="relative">
+              <button
+                onClick={() => setShowRoleMenu((s) => !s)}
+                className="h-9 w-9 rounded-full bg-white/30 flex items-center justify-center text-sm text-white shadow"
+                title="Switch role for Announcements"
+              >
+                {role && role[0].toUpperCase()}
+              </button>
+              {showRoleMenu && (
+                <div className="absolute right-0 mt-2 w-40 rounded-lg bg-white/90 text-black shadow-lg p-2">
+                  <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => changeRole('student')}>Student</button>
+                  <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => changeRole('instructor')}>Instructor</button>
+                  <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => changeRole('admin')}>Admin</button>
+                </div>
+              )}
+            </div>
           </nav>
         </div>
 
@@ -145,16 +192,37 @@ const Yuvraj_Announcements = () => {
                   className="scroll-snap-start transform transition-all duration-500 ease-out hover:-translate-y-0.5 hover:shadow-2xl hover:scale-[1.005]"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <Link to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${a.id}`}>
-                    <div className="transform transition-all duration-300 hover:scale-[1.002]">
-                      <YuvrajAnnouncementCard title={a.title}>
-                        <p className="line-clamp-3 text-black/80">{a.content}</p>
-                        <div className="mt-3 text-sm text-black/70">
-                          {new Date(a.createdAt).toLocaleString()} • {a.author}
+                  <div className="flex items-start gap-4">
+                    {isPrivileged && (
+                      <div className="flex flex-col gap-[20px] mt-2">
+                        <button
+                          onClick={() => handleEdit(a.id || a._id)}
+                          className="btn btn-md h-7 px-3 bg-blue-600 text-white hover:bg-blue-700 border-none"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(a.id || a._id)}
+                          className="btn btn-md h-7 px-3 bg-red-300 text-red-800 hover:bg-red-400 border-none"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="flex-1 ml-10">
+                      <Link to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${a.id}`}>
+                        <div className="transform transition-all duration-300 hover:scale-[1.002]">
+                          <YuvrajAnnouncementCard title={a.title}>
+                            <p className="line-clamp-3 text-black/80">{a.content}</p>
+                            <div className="mt-3 text-sm text-black/70">
+                              {new Date(a.createdAt).toLocaleString()}  {a.author}
+                            </div>
+                          </YuvrajAnnouncementCard>
                         </div>
-                      </YuvrajAnnouncementCard>
+                      </Link>
                     </div>
-                  </Link>
+                  </div>
                 </div>
               ))}
             </div>
