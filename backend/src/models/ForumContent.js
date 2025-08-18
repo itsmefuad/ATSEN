@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const announcementSchema = new Schema(
+const forumContentSchema = new Schema(
   {
     title: {
       type: String,
@@ -11,12 +11,6 @@ const announcementSchema = new Schema(
     content: {
       type: String,
       required: true
-    },
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: "instructors",
-      required: false,
-      default: undefined
     },
     room: {
       type: Schema.Types.ObjectId,
@@ -37,5 +31,5 @@ const announcementSchema = new Schema(
   }
 );
 
-const Announcement = mongoose.models.Announcement || mongoose.model("Announcement", announcementSchema);
-export default Announcement;
+const ForumContent = mongoose.models.ForumContent || mongoose.model("ForumContent", forumContentSchema);
+export default ForumContent;

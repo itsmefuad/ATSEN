@@ -3,7 +3,7 @@ import { Plus, X, Tag, Pin } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
-const CreateAnnouncement = ({ roomId, onAnnouncementCreated }) => {
+const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -28,7 +28,7 @@ const CreateAnnouncement = ({ roomId, onAnnouncementCreated }) => {
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
-      const response = await api.post(`/announcements/room/${roomId}`, {
+      const response = await api.post(`/forum-content/room/${roomId}`, {
         title: formData.title,
         content: formData.content,
         tags,
@@ -175,4 +175,4 @@ const CreateAnnouncement = ({ roomId, onAnnouncementCreated }) => {
   );
 };
 
-export default CreateAnnouncement;
+export default CreateForumContent;

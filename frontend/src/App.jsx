@@ -33,6 +33,7 @@ import S_Room from "./pages/student/S_Room.jsx";
 import Yuvraj_Announcements from "./pages/yuvraj_Announcements.jsx";
 import Yuvraj_AnnouncementDetail from "./pages/yuvraj_AnnouncementDetail.jsx";
 import Yuvraj_AnnouncementEditor from "./pages/yuvraj_AnnouncementEditor.jsx";
+import TimelineDemo from "./components/room/TimelineDemo.jsx";
 
 export default function App() {
   return (
@@ -79,6 +80,7 @@ export default function App() {
         <Route path="/teacher/create/room" element={<T_CreateRoom />} />
         <Route path="/teacher/room/:id/forum" element={<T_Room />} />
         <Route path="/teacher/room/:id/materials" element={<T_Room />} />
+                <Route path="/teacher/room/:id/assessment" element={<T_Room />} />
         <Route path="/teacher/room/:id/edit" element={<T_Room />} />
         <Route path="/teacher/room/:id" element={<T_Room />} />
         <Route path="/teacher/edit/room/:id" element={<T_Room />} />
@@ -100,6 +102,9 @@ export default function App() {
           path="/yuvraj/admin/announcements/:id"
           element={<Yuvraj_AnnouncementEditor />}
         />
+              
+              {/* Demo route for timeline testing */}
+              <Route path="/demo/timeline" element={<TimelineDemo />} />
 
         {/* 8. Catch-all 404 */}
         <Route

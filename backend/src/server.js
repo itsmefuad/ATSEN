@@ -14,8 +14,9 @@ import mongoose from "mongoose";
 import roomsRoutes           from "./routes/roomsRoutes.js";
 import institutionRoutes     from "./routes/institutionRoutes.js";
 import institutionRoomRoutes from "./routes/institution/InstitutionRoomRoutes.js";
-import announcementRoutes from "./routes/announcementRoutes.js";
+import forumContentRoutes from "./routes/forumContentRoutes.js";
 import materialRoutes from "./routes/materialRoutes.js";
+import assessmentRoutes from "./routes/assessmentRoutes.js";
 import { connectDB }         from "./config/db.js";
 import rateLimter           from "./middlewares/rateLimiter.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
@@ -73,8 +74,9 @@ app.use("/api/institutions", institutionRoutes);
 app.use("/api/institutions", institutionRoomRoutes);
 app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
 //app.use("/api/institutions", institutionRoute);
-app.use("/api/announcements", announcementRoutes);
+app.use("/api/forum-content", forumContentRoutes);
 app.use("/api/materials", materialRoutes);
+app.use("/api/assessments", assessmentRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {

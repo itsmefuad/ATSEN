@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { MessageSquare, Loader } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
-import CreateAnnouncement from "./CreateAnnouncement";
-import AnnouncementCard from "./AnnouncementCard";
+import CreateForumContent from "./CreateForumContent";
+import ForumContentCard from "./ForumContentCard";
 
 const DiscussionForum = ({ roomId }) => {
   const [announcements, setAnnouncements] = useState([]);
@@ -13,7 +13,7 @@ const DiscussionForum = ({ roomId }) => {
   const fetchAnnouncements = async () => {
     try {
       console.log("Fetching announcements for room:", roomId);
-      const response = await api.get(`/announcements/room/${roomId}`);
+      const response = await api.get(`/forum-content/room/${roomId}`);
       console.log("Fetched announcements:", response.data);
       setAnnouncements(response.data);
     } catch (error) {
@@ -99,7 +99,7 @@ const DiscussionForum = ({ roomId }) => {
         <h2 className="text-2xl font-bold">Discussion Forum</h2>
       </div>
 
-      <CreateAnnouncement 
+      <CreateForumContent 
         roomId={roomId} 
         onAnnouncementCreated={handleAnnouncementCreated}
       />
@@ -131,7 +131,7 @@ const DiscussionForum = ({ roomId }) => {
                 zIndex: animatingAnnouncements.has(announcement._id) ? 10 : 1
               }}
             >
-              <AnnouncementCard
+              <ForumContentCard
                 announcement={announcement}
                 onUpdate={handleAnnouncementUpdated}
                 onDelete={handleAnnouncementDeleted}
