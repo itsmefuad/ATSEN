@@ -3,10 +3,20 @@ import { Calendar, BookOpen, FileText, CheckCircle, Clock, GraduationCap } from 
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
-const CourseTimeline = ({ roomId, room, demoAssessments = null }) => {
+const CourseTimeline = ({ roomId, room, demoAssessments = null, isStudent = false }) => {
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentProgress, setCurrentProgress] = useState(0); // Track current progress position
+
+  // Load saved progress from localStorage on component mount
+  useEffect(() => {
+    if (roomId) {
+      const savedProgress = localStorage.getItem(`timeline-progress-${roomId}`);
+      if (savedProgress !== null) {
+        setCurrentProgress(parseInt(savedProgress));
+      }
+    }
+  }, [roomId]);
 
   useEffect(() => {
     if (demoAssessments) {
@@ -155,12 +165,23 @@ const CourseTimeline = ({ roomId, room, demoAssessments = null }) => {
 
   // Handle icon click to move progress
   const handleIconClick = (index) => {
+    // Students cannot interact with the timeline
+    if (isStudent) return;
+    
+    let newProgress;
     if (currentProgress === index) {
       // If clicking the same icon, move back to previous
-      setCurrentProgress(Math.max(0, index - 1));
+      newProgress = Math.max(0, index - 1);
     } else {
       // Move to clicked position
-      setCurrentProgress(index);
+      newProgress = index;
+    }
+    
+    setCurrentProgress(newProgress);
+    
+    // Save progress to localStorage
+    if (roomId) {
+      localStorage.setItem(`timeline-progress-${roomId}`, newProgress.toString());
     }
   };
 
@@ -227,9 +248,9 @@ const CourseTimeline = ({ roomId, room, demoAssessments = null }) => {
                       {/* Center icon */}
                       <div className="absolute left-1/2 transform -translate-x-1/2 z-10">
                         <div 
-                          className={`p-2 rounded-full shadow-lg cursor-pointer transition-all duration-300 hover:scale-110 ${
+                          className={`p-2 rounded-full shadow-lg transition-all duration-300 ${
                             index <= currentProgress ? 'bg-primary text-primary-content' : 'bg-base-100'
-                          }`}
+                          } ${!isStudent ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
                           onClick={() => handleIconClick(index)}
                         >
                           {event.type === 'course_start' ? (
@@ -249,9 +270,9 @@ const CourseTimeline = ({ roomId, room, demoAssessments = null }) => {
                       {/* Center icon */}
                       <div className="absolute left-1/2 transform -translate-x-1/2 z-10">
                         <div 
-                          className={`p-2 rounded-full shadow-lg cursor-pointer transition-all duration-300 hover:scale-110 ${
+                          className={`p-2 rounded-full shadow-lg transition-all duration-300 ${
                             index <= currentProgress ? 'bg-primary text-primary-content' : 'bg-base-100'
-                          }`}
+                          } ${!isStudent ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
                           onClick={() => handleIconClick(index)}
                         >
                           {event.type === 'course_start' ? (

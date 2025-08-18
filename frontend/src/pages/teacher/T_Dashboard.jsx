@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 import RoomCard from "../../components/RoomCard";
 import { Link } from "react-router";
 import { Plus } from "lucide-react";
-
 const T_Dashboard = () => {
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [rooms, setRooms] = useState([]);
