@@ -27,6 +27,7 @@ const MaterialCard = ({ material, onUpdate, onDelete }) => {
     attachmentData: material.fileUrl || ''
   });
   const [editLoading, setEditLoading] = useState(false);
+  const [editErrors, setEditErrors] = useState({});
 
   const handleToggleExpansion = async () => {
     try {
@@ -71,13 +72,26 @@ const MaterialCard = ({ material, onUpdate, onDelete }) => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     
+    // Reset errors
+    setEditErrors({});
+    
+    // Validate form
+    const newErrors = {};
+    
     if (!editFormData.title.trim()) {
-      toast.error("Title is required");
-      return;
+      newErrors.title = "Title is required";
+    }
+
+    if (!editFormData.description.trim()) {
+      newErrors.description = "Description is required";
     }
 
     if (editFormData.attachmentType === "link" && !editFormData.attachmentData.trim()) {
-      toast.error("Please provide a link URL");
+      newErrors.attachmentData = "Please provide a link URL";
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setEditErrors(newErrors);
       return;
     }
 
@@ -106,6 +120,7 @@ const MaterialCard = ({ material, onUpdate, onDelete }) => {
 
   const handleEditCancel = () => {
     setIsEditModalOpen(false);
+    setEditErrors({});
     setEditFormData({
       title: material.title,
       description: material.description,
@@ -151,56 +166,89 @@ const MaterialCard = ({ material, onUpdate, onDelete }) => {
 
   return (
     <>
-      <div className="card bg-base-100 shadow-md hover:shadow-lg transition-all duration-300">
-        <div className="card-body p-4">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 flex-1">
-              <button
-                onClick={handleToggleExpansion}
-                className="btn btn-ghost btn-sm p-1"
-              >
-                {isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </button>
-              
-              <div className="flex items-center gap-2">
-                {getFileIcon(material.fileType)}
-                <div>
-                  <h3 className="font-semibold text-base-content">{material.title}</h3>
-                </div>
-              </div>
-            </div>
+             <div className="card bg-base-100 shadow-md hover:shadow-lg transition-all duration-300">
+         <div className="card-body p-4">
+           {/* Header */}
+           <div className="flex items-center justify-between">
+             <div 
+               className="flex items-center gap-3 flex-1 cursor-pointer"
+               onClick={handleToggleExpansion}
+             >
+               <div className="flex items-center justify-center w-6 h-6">
+                 {isExpanded ? (
+                   <ChevronDown className="h-4 w-4" />
+                 ) : (
+                   <ChevronRight className="h-4 w-4" />
+                 )}
+               </div>
+               
+               <div className="flex items-center gap-2">
+                 {getFileIcon(material.fileType)}
+                 <div>
+                   <h3 className="font-semibold text-base-content">{material.title}</h3>
+                 </div>
+               </div>
+             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1">
-                <button
-                  onClick={handleEdit}
-                  className="btn btn-ghost btn-sm"
-                  title="Edit"
-                >
-                  <Edit className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="btn btn-ghost btn-sm text-error"
-                  title="Delete"
-                  disabled={loading}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
+             <div className="flex items-center gap-2">
+               <div className="flex gap-1">
+                 <button
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     handleEdit();
+                   }}
+                   className="btn btn-ghost btn-sm"
+                   title="Edit"
+                 >
+                   <Edit className="h-4 w-4" />
+                 </button>
+                 <button
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     handleDelete();
+                   }}
+                   className="btn btn-ghost btn-sm text-error"
+                   title="Delete"
+                   disabled={loading}
+                 >
+                   <Trash2 className="h-4 w-4" />
+                 </button>
+               </div>
+             </div>
+           </div>
 
           {/* Expanded Content */}
           {isExpanded && (
             <div className="mt-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
-              <div className="border-t pt-4">
-                <p className="text-base-content/80 mb-3">{material.description}</p>
+                             <div className="border-t pt-4">
+                 <div className="text-base-content/80 mb-3 whitespace-pre-wrap">
+                   {material.description.split('\n').map((line, index) => {
+                     // Check if line contains a URL
+                     const urlRegex = /(https?:\/\/[^\s]+)/g;
+                     const parts = line.split(urlRegex);
+                     
+                     return (
+                       <div key={index} className={line === '' ? 'h-4' : ''}>
+                         {parts.map((part, partIndex) => {
+                           if (urlRegex.test(part)) {
+                             return (
+                               <a
+                                 key={partIndex}
+                                 href={part}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="text-primary hover:text-primary-focus underline"
+                               >
+                                 {part}
+                               </a>
+                             );
+                           }
+                           return part;
+                         })}
+                       </div>
+                     );
+                   })}
+                 </div>
                 
                 {/* Link Preview - Only for link materials */}
                 {material.fileType === 'link' && material.fileUrl && (
@@ -262,36 +310,50 @@ const MaterialCard = ({ material, onUpdate, onDelete }) => {
               </div>
 
               <form onSubmit={handleEditSubmit} className="space-y-6">
-                {/* Title Field */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Title *</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter material title..."
-                    className="input input-bordered border-red-300 focus:border-red-500"
-                    value={editFormData.title}
-                    onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                    required
-                  />
-                  <label className="label">
-                    <span className="label-text-alt text-red-500">*Required</span>
-                  </label>
-                </div>
+                                 {/* Title Field */}
+                 <div className="form-control">
+                   <label className="label">
+                     <span className="label-text font-medium">Title *</span>
+                   </label>
+                   <input
+                     type="text"
+                     placeholder="Enter material title..."
+                     className={`input input-bordered ${editErrors.title ? 'border-red-300 focus:border-red-500' : ''}`}
+                     value={editFormData.title}
+                     onChange={(e) => {
+                       setEditFormData({ ...editFormData, title: e.target.value });
+                       if (editErrors.title) setEditErrors({ ...editErrors, title: null });
+                     }}
+                     required
+                   />
+                   {editErrors.title && (
+                     <label className="label">
+                       <span className="label-text-alt text-red-500">{editErrors.title}</span>
+                     </label>
+                   )}
+                 </div>
 
-                {/* Description Field */}
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Description (optional)</span>
-                  </label>
-                  <textarea
-                    placeholder="Describe this material..."
-                    className="textarea textarea-bordered h-24"
-                    value={editFormData.description}
-                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                  />
-                </div>
+                                                   {/* Description Field */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">Description *</span>
+                    </label>
+                    <textarea
+                      placeholder="Describe this material..."
+                      className={`textarea textarea-bordered h-24 ${editErrors.description ? 'border-red-300 focus:border-red-500' : ''}`}
+                      value={editFormData.description}
+                      onChange={(e) => {
+                        setEditFormData({ ...editFormData, description: e.target.value });
+                        if (editErrors.description) setEditErrors({ ...editErrors, description: null });
+                      }}
+                      required
+                    />
+                    {editErrors.description && (
+                      <label className="label">
+                        <span className="label-text-alt text-red-500">{editErrors.description}</span>
+                      </label>
+                    )}
+                  </div>
 
                 {/* Section Selection */}
                 <div className="form-control">
@@ -330,22 +392,30 @@ const MaterialCard = ({ material, onUpdate, onDelete }) => {
                   </button>
                 </div>
 
-                {/* Attachment Details - Only for Links */}
-                {editFormData.attachmentType === "link" && (
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium">Link URL</span>
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="Enter link URL..."
-                      className="input input-bordered"
-                      value={editFormData.attachmentData}
-                      onChange={(e) => setEditFormData({ ...editFormData, attachmentData: e.target.value })}
-                      required
-                    />
-                  </div>
-                )}
+                                 {/* Attachment Details - Only for Links */}
+                 {editFormData.attachmentType === "link" && (
+                   <div className="form-control">
+                     <label className="label">
+                       <span className="label-text font-medium">Link URL</span>
+                     </label>
+                     <input
+                       type="url"
+                       placeholder="Enter link URL..."
+                       className={`input input-bordered ${editErrors.attachmentData ? 'border-red-300 focus:border-red-500' : ''}`}
+                       value={editFormData.attachmentData}
+                       onChange={(e) => {
+                         setEditFormData({ ...editFormData, attachmentData: e.target.value });
+                         if (editErrors.attachmentData) setEditErrors({ ...editErrors, attachmentData: null });
+                       }}
+                       required
+                     />
+                     {editErrors.attachmentData && (
+                       <label className="label">
+                         <span className="label-text-alt text-red-500">{editErrors.attachmentData}</span>
+                       </label>
+                     )}
+                   </div>
+                 )}
 
                 <div className="flex gap-2 justify-end">
                   <button

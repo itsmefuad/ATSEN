@@ -12,7 +12,7 @@ import {
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
-const AnnouncementCard = ({ announcement, onUpdate, onDelete }) => {
+const ForumContentCard = ({ announcement, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     title: announcement.title,
@@ -37,7 +37,7 @@ const AnnouncementCard = ({ announcement, onUpdate, onDelete }) => {
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
-      const response = await api.put(`/announcements/${announcement._id}`, {
+      const response = await api.put(`/forum-content/${announcement._id}`, {
         title: editData.title,
         content: editData.content,
         tags,
@@ -62,7 +62,7 @@ const AnnouncementCard = ({ announcement, onUpdate, onDelete }) => {
 
     setLoading(true);
     try {
-      await api.delete(`/announcements/${announcement._id}`);
+      await api.delete(`/forum-content/${announcement._id}`);
       toast.success("Announcement deleted successfully!");
       onDelete(announcement._id);
     } catch (error) {
@@ -75,7 +75,7 @@ const AnnouncementCard = ({ announcement, onUpdate, onDelete }) => {
 
   const handleTogglePin = async () => {
     try {
-      const response = await api.patch(`/announcements/${announcement._id}/pin`);
+      const response = await api.patch(`/forum-content/${announcement._id}/pin`);
       onUpdate(response.data);
       toast.success(response.data.isPinned ? "Announcement pinned!" : "Announcement unpinned!");
     } catch (error) {
@@ -252,4 +252,4 @@ const AnnouncementCard = ({ announcement, onUpdate, onDelete }) => {
   );
 };
 
-export default AnnouncementCard;
+export default ForumContentCard;
