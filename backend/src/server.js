@@ -3,6 +3,12 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+
+import adminRoutes from "./routes/adminRoutes.js";
+
+import institutionRoutes from "./routes/institutionRoutes.js";
+import instructorRoutes from "./routes/instructorRoutes.js";
+import studentRoutes from "./routes/studentRoutes.js";
 import mongoose from "mongoose";
 
 import roomsRoutes           from "./routes/roomsRoutes.js";
@@ -49,6 +55,15 @@ app.get("/api/db-status", (req, res) => {
 });
 
 // prefixing
+app.use("/api/admin", adminRoutes);
+app.use("/api/institutions", institutionRoutes);
+app.use("/api/instructors", instructorRoutes);
+app.use("/api/students", studentRoutes);
+
+app.use("/api/institutions", institutionRoutes);
+app.use("/api/instructors", instructorRoutes);
+app.use("/api/students", studentRoutes);
+
 app.use("/api/rooms", roomsRoutes);
 
 // institution CRUD

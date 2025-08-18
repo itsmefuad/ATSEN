@@ -4,8 +4,15 @@ import mongoose from "mongoose";
 const institutionSchema = new mongoose.Schema(
   {
     name:        { type: String, required: true },
-    eiin:        { type: String, required: true, unique: true },
+    eiin:        { type: String, required: true, unique: true, sparse: true, trim: true, uppercase: true },
     email:       { type: String, required: true },
+    password:    { type: String, required: true },
+    loginId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true
+    },
     phone:       { type: String },
     address:     { type: String },
     description: { type: String },

@@ -1,5 +1,12 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router";
+import { Routes, Route, Navigate } from "react-router-dom";
+
+//admin
+import Login from "./pages/admin/Login";
+import Dashboard from "./pages/admin/Dashboard";
+import ProtectedRoute from "./pages/admin/ProtectedRoute";
+
+import Auth from "./pages/login/Auth.jsx";
 
 import InstitutionLayout from "./pages/institution/InstitutionLayout.jsx";
 import I_Dashboard from "./pages/institution/I_Dashboard.jsx";
@@ -15,6 +22,8 @@ import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
 import T_CreateRoom from "./pages/teacher/T_CreateRoom.jsx";
 import T_Room from "./pages/teacher/T_Room.jsx";
 
+import S_Dashboard from "./pages/student/S_Dashboard.jsx";
+
 import S_Room from "./pages/student/S_Room.jsx";
 import Yuvraj_Announcements from "./pages/yuvraj_Announcements.jsx";
 import Yuvraj_AnnouncementDetail from "./pages/yuvraj_AnnouncementDetail.jsx";
@@ -23,7 +32,19 @@ import Yuvraj_AnnouncementEditor from "./pages/yuvraj_AnnouncementEditor.jsx";
 export default function App() {
   return (
     <div data-theme="nord">
+      
       <Routes>
+        {/* Admin routes */}
+        <Route path="/admin/login" element={<Login />} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
+        {/* Auth Routes*/}
+        <Route path="/" element={<Auth />} />
+        <Route path="/institution/dashboard" element={<I_Dashboard />} />
+        <Route path="/teacher/dashboard" element={<T_Dashboard />} />
+        <Route path="/student/dashboard" element={<S_Dashboard />} />
+
+
         {/* Institution routes */}
         <Route path="/:idOrName" element={<InstitutionLayout />}>
           <Route index element={<I_Dashboard />} />

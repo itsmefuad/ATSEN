@@ -21,6 +21,10 @@ const studentSchema = new mongoose.Schema(
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Please fill a valid email address"]
     },
+    password: {
+      type: String,
+      required: true
+    },
     // changed: institution is now an array so a student can belong to multiple institutions
     institution: [
       {
