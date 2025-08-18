@@ -1,18 +1,25 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+/*
+  Card to render a single announcement. Shows title, date, and content.
+*/
+const AnnouncementCard = ({ announcement, highlighted = false }) => {
+  const { title, content, createdAt, author, pinned } = announcement;
 
-const AnnouncementCard = ({ announcement }) => {
   return (
-    <Link to={`/announcement/${announcement._id}`}>
-      <div className="bg-white rounded-lg p-6 mb-4 shadow-md hover:shadow-lg transition-shadow">
-        <h2 className="text-xl font-semibold mb-2">{announcement.title}</h2>
-        <p className="text-gray-600 mb-2 line-clamp-2">{announcement.content}</p>
-        <p className="text-sm text-gray-500">
-          {new Date(announcement.date).toLocaleDateString()}
+    <div className={`card border ${highlighted || pinned ? "border-primary" : "border-base-200"} bg-base-100 shadow-sm`}>
+      <div className="card-body">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="card-title text-lg leading-snug">{title}</h3>
+          {(highlighted || pinned) && <div className="badge badge-primary">Highlighted</div>}
+        </div>
+        <p className="text-sm text-base-content/70">
+          {new Date(createdAt).toLocaleString()} {author ? `• ${author}` : ""}
         </p>
+        <p className="mt-2 text-base-content/80">{content}</p>
       </div>
-    </Link>
+    </div>
   );
-}
+};
 
 export default AnnouncementCard;
+
+
