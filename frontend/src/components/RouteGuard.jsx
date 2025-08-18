@@ -12,7 +12,7 @@ const RouteGuard = ({ children, requirePrivileged = false, fallbackPath = '/' })
       const isPrivileged = role === 'admin' || role === 'instructor';
       if (!isPrivileged) {
         const inst = institution || 'Brac University';
-        const safePath = `/${inst}/${role || 'student'}/PollingAndSurvey`;
+  // ...existing code...
         navigate(safePath, { replace: true });
       }
     }

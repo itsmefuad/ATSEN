@@ -14,7 +14,7 @@ import assessmentRoutes from "./routes/assessmentRoutes.js";
 import { connectDB }         from "./config/db.js";
 import rateLimter           from "./middlewares/rateLimiter.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
-import PollingAndSurveyRoutes from "./routes/PollingAndSurveyRoutes.js";
+// ...existing code...
 
 dotenv.config();
 
@@ -59,7 +59,7 @@ app.use("/api/institutions", institutionRoutes);
 // room‐creation under institutions
 app.use("/api/institutions", institutionRoomRoutes);
 app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
-app.use("/api/PollingAndSurvey", PollingAndSurveyRoutes);
+// ...existing code...
 //app.use("/api/institutions", institutionRoute);
 app.use("/api/forum-content", forumContentRoutes);
 app.use("/api/materials", materialRoutes);
