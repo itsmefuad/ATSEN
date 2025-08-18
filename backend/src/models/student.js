@@ -1,0 +1,42 @@
+import mongoose from "mongoose";
+
+const studentSchema = new mongoose.Schema(
+  {
+    studentId: {
+      type: String,
+      required: false, // changed from true -> false
+      unique: true,
+      index: true,
+      trim: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please fill a valid email address"]
+    },
+    // changed: institution is now an array so a student can belong to multiple institutions
+    institution: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Institution"
+      }
+    ],
+    // changed: room is now an array so a student can belong to multiple rooms
+    room: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Room"
+      }
+    ]
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model("Student", studentSchema);
