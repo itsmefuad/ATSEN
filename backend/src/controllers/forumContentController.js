@@ -34,7 +34,7 @@ export const getForumContentByRoom = async (req, res) => {
 export const createForumContent = async (req, res) => {
   try {
     const { roomId } = req.params;
-    const { title, content, tags, isPinned } = req.body;
+    const { title, content, tags, isPinned, contentType } = req.body;
     
     // Check if room exists
     const room = await Room.findById(roomId);
@@ -42,11 +42,16 @@ export const createForumContent = async (req, res) => {
       return res.status(404).json({ message: "Room not found" });
     }
 
+    // For now, we'll use a mock user ID. In a real app, this would come from authentication
+    const mockUserId = "507f1f77bcf86cd799439011"; // Mock user ID
+
     // Create forum content
     const forumContent = new ForumContent({
       title,
       content,
       room: roomId,
+      contentType: contentType || 'announcement',
+      author: mockUserId,
       tags: tags || [],
       isPinned: isPinned || false
     });
@@ -73,18 +78,37 @@ export const createForumContent = async (req, res) => {
 export const updateForumContent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, tags, isPinned } = req.body;
+    const { title, content, tags, isPinned, userRole } = req.body;
 
     const forumContent = await ForumContent.findById(id);
     if (!forumContent) {
       return res.status(404).json({ message: "Forum content not found" });
     }
 
+    // Authorization logic
+    const mockUserId = "507f1f77bcf86cd799439011"; // Mock user ID
+    const isAuthor = forumContent.author.toString() === mockUserId;
+    const isTeacher = userRole === 'teacher';
+
+    // Students can only edit their own discussions
+    if (!isTeacher && forumContent.contentType === 'announcement') {
+      return res.status(403).json({ message: "Students cannot edit teacher announcements" });
+    }
+
+    if (!isTeacher && !isAuthor) {
+      return res.status(403).json({ message: "You can only edit your own content" });
+    }
+
+    // Students cannot pin content
+    if (!isTeacher && typeof isPinned === 'boolean') {
+      return res.status(403).json({ message: "Students cannot pin content" });
+    }
+
     // Update fields
     if (title) forumContent.title = title;
     if (content) forumContent.content = content;
     if (tags) forumContent.tags = tags;
-    if (typeof isPinned === 'boolean') forumContent.isPinned = isPinned;
+    if (typeof isPinned === 'boolean' && isTeacher) forumContent.isPinned = isPinned;
 
     const updatedForumContent = await forumContent.save();
 
@@ -99,10 +123,25 @@ export const updateForumContent = async (req, res) => {
 export const deleteForumContent = async (req, res) => {
   try {
     const { id } = req.params;
+    const { userRole } = req.body;
 
     const forumContent = await ForumContent.findById(id);
     if (!forumContent) {
       return res.status(404).json({ message: "Forum content not found" });
+    }
+
+    // Authorization logic
+    const mockUserId = "507f1f77bcf86cd799439011"; // Mock user ID
+    const isAuthor = forumContent.author.toString() === mockUserId;
+    const isTeacher = userRole === 'teacher';
+
+    // Students can only delete their own discussions
+    if (!isTeacher && forumContent.contentType === 'announcement') {
+      return res.status(403).json({ message: "Students cannot delete teacher announcements" });
+    }
+
+    if (!isTeacher && !isAuthor) {
+      return res.status(403).json({ message: "You can only delete your own content" });
     }
 
     await ForumContent.findByIdAndDelete(id);
@@ -117,10 +156,16 @@ export const deleteForumContent = async (req, res) => {
 export const togglePinForumContent = async (req, res) => {
   try {
     const { id } = req.params;
+    const { userRole } = req.body;
 
     const forumContent = await ForumContent.findById(id);
     if (!forumContent) {
       return res.status(404).json({ message: "Forum content not found" });
+    }
+
+    // Only teachers can pin/unpin content
+    if (userRole !== 'teacher') {
+      return res.status(403).json({ message: "Only teachers can pin content" });
     }
 
     forumContent.isPinned = !forumContent.isPinned;
