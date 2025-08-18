@@ -59,3 +59,15 @@ export async function loginStudent(req, res) {
     return res.status(500).json({ message: "Server error." });
   }
 }
+
+export async function getAllStudents(req, res) {
+  try {
+    // exclude passwords
+    const students = await Student.find({}, "-password");
+    return res.status(200).json(students);
+  } catch (err) {
+    console.error("getAllStudents error:", err);
+    return res.status(500).json({ message: err.message });
+  }
+}
+

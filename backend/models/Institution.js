@@ -130,7 +130,7 @@ export default function I_Dashboard() {
         </Link>
       </div>
 
-      {/* Details (EIIN, Email, Phone, Address removed) */}
+     
     </div>
   );
 }

@@ -40,7 +40,7 @@ const institutionSchema = new mongoose.Schema(
     // legacy or internal ID, if you still need it
     loginId: {
       type: String,
-      required: true,
+      required: false,
       unique: true,
       trim: true
     },

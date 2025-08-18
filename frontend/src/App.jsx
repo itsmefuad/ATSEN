@@ -19,6 +19,8 @@ import AddInstructor from "./pages/institution/AddInstructor.jsx";
 import StudentList from "./pages/institution/StudentList.jsx";
 import InstructorList from "./pages/institution/InstructorList.jsx";
 import InstitutionSettings from "./pages/institution/InstitutionSettings.jsx";
+import AddStudent from "./pages/institution/AddStudent";
+
 
 // Teacher
 import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
@@ -70,6 +72,7 @@ export default function App() {
           {/* People */}
           <Route path="students" element={<StudentList />} />
           <Route path="instructors" element={<InstructorList />} />
+          <Route path="add-student" element={<AddStudent />} />
 
           {/* Settings */}
           <Route path="settings" element={<InstitutionSettings />} />

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const instructorSchema = new mongoose.Schema(
   {
-    instructorId: { type: String, required: false, unique: true, index: true },
+    
     name: { type: String, required: true },
     email: {
       type: String,
