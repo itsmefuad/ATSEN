@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useRole } from "../components/RoleContext.jsx";
+import RoleSwitcher from "../components/RoleSwitcher.jsx";
+import { getInstitutionHeader } from "../components/RoleContext";
 import YuvrajAnnouncementCard from "../components/yuvraj_AnnouncementCard.jsx";
 import CompactAnnouncementCard from "../components/CompactAnnouncementCard.jsx";
 import { yuvrajListAnnouncements } from "../services/yuvraj_announcements_api.js";
@@ -16,8 +19,7 @@ const NavPill = ({ children, active = false }) => (
 
 const Yuvraj_Announcements = () => {
   const [announcements, setAnnouncements] = useState([]);
-  const [role, setRole] = useState("student");
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
+  const { role, setRole, institution: ctxInstitution, setInstitution } = useRole();
   const [isPrivileged, setIsPrivileged] = useState(false);
   const [tab, setTab] = useState("recent");
   const [loading, setLoading] = useState(true);
@@ -26,19 +28,13 @@ const Yuvraj_Announcements = () => {
   const { institution, role: roleParam } = useParams();
 
   useEffect(() => {
-    // Set role and privileges (URL param > localStorage > default)
-    const currentRole = roleParam || localStorage.getItem('yuvraj_role') || 'student';
-    setRole(currentRole);
+    const currentRole = roleParam || role || 'student';
     setIsPrivileged(currentRole === 'admin' || currentRole === 'instructor');
-    
-    // Persist institution for API header
-    if (institution) { 
-      try { 
-        localStorage.setItem('yuvraj_institution', institution); 
-      } catch(e){} 
+
+    if (institution && !ctxInstitution) {
+      try { setInstitution(institution); } catch (e) {}
     }
-    
-    // Load announcements from API only
+
     const loadAnnouncements = async () => {
       try {
         setLoading(true);
@@ -53,9 +49,9 @@ const Yuvraj_Announcements = () => {
         setLoading(false);
       }
     };
-    
+
     loadAnnouncements();
-  }, [institution, roleParam]);
+  }, [institution, roleParam, role, ctxInstitution, setInstitution]);
 
   const handleEdit = (id) => {
     const editPath = institution ? `/${institution}/${role}/announcements/${id}/edit` : `/yuvraj/admin/announcements/${id}/edit`;
@@ -63,19 +59,15 @@ const Yuvraj_Announcements = () => {
   };
 
   const changeRole = (r) => {
-    try { localStorage.setItem('yuvraj_role', r); } catch (e) {}
     setRole(r);
     setIsPrivileged(r === 'admin' || r === 'instructor');
-    setShowRoleMenu(false);
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this announcement?')) return;
     try {
       const API = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-      const headers = {};
-      try { const inst = localStorage.getItem('yuvraj_institution'); if (inst) headers['x-institution-id'] = inst; } catch(e){}
-      const r = await fetch(`${API}/api/yuvraj/announcements/${id}`, { method: 'DELETE', headers: { 'x-admin-key': import.meta.env.VITE_ADMIN_KEY || '', ...headers } });
+      const r = await fetch(`${API}/api/yuvraj/announcements/${id}`, { method: 'DELETE', headers: { 'x-admin-key': import.meta.env.VITE_ADMIN_KEY || '', ...getInstitutionHeader() } });
       if (!r.ok) throw new Error('Delete failed');
       setAnnouncements((prev) => prev.filter(a => (a.id || a._id) !== id));
     } catch (err) {
@@ -113,23 +105,7 @@ const Yuvraj_Announcements = () => {
             <NavPill>Notifications</NavPill>
             <NavPill>Profile</NavPill>
 
-            {/* Role switcher (Student / Instructor / Admin) - local override for this section */}
-            <div className="relative">
-              <button
-                onClick={() => setShowRoleMenu((s) => !s)}
-                className="h-9 w-9 rounded-full bg-white/30 flex items-center justify-center text-sm text-white shadow"
-                title="Switch role for Announcements"
-              >
-                {role && role[0].toUpperCase()}
-              </button>
-              {showRoleMenu && (
-                <div className="absolute right-0 mt-2 w-40 rounded-lg bg-white/90 text-black shadow-lg p-2">
-                  <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => changeRole('student')}>Student</button>
-                  <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => changeRole('instructor')}>Instructor</button>
-                  <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => changeRole('admin')}>Admin</button>
-                </div>
-              )}
-            </div>
+            <RoleSwitcher position="inline" />
           </nav>
         </div>
 

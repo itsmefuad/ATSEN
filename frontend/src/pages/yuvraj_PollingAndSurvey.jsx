@@ -1,32 +1,13 @@
 import { useEffect, useState } from "react";
+import { useRole } from "../components/RoleContext.jsx";
+import RoleSwitcher from "../components/RoleSwitcher.jsx";
 import { useNavigate } from "react-router-dom";
 import { listPollingAndSurveys } from "../services/pollingandsurvey_api.js";
 import FormCard from "../components/FormCard.jsx";
 
-function RoleSwitcher({ role, setRole }) {
-  const [open, setOpen] = useState(false);
-  const change = (r) => {
-    try { localStorage.setItem('yuvraj_role', r); } catch(e){}
-    setRole(r);
-    setOpen(false);
-  };
-  return (
-    <div className="relative">
-      <button onClick={() => setOpen((s) => !s)} className="h-9 w-9 rounded-full bg-white/30 flex items-center justify-center text-sm text-white shadow">{role?.[0]?.toUpperCase()}</button>
-      {open && (
-        <div className="absolute right-0 mt-2 w-40 rounded-lg bg-white/90 text-black shadow-lg p-2">
-          <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => change('student')}>Student</button>
-          <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => change('instructor')}>Instructor</button>
-          <button className="w-full text-left px-3 py-2 rounded hover:bg-black/5" onClick={() => change('admin')}>Admin</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 const Yuvraj_PollingAndSurvey = () => {
   const [forms, setForms] = useState([]);
-  const [role, setRole] = useState(localStorage.getItem('yuvraj_role') || 'student');
+  const { role, setRole } = useRole();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tab, setTab] = useState('recent');
@@ -73,7 +54,7 @@ const Yuvraj_PollingAndSurvey = () => {
           <nav className="flex items-center gap-4">
             <div className="rounded-full bg-white/40 px-4 py-2 text-white shadow backdrop-blur">Home</div>
             <div className="rounded-full bg-white/20 px-4 py-2 text-white shadow backdrop-blur">Dashboard</div>
-            <RoleSwitcher role={role} setRole={setRole} />
+            <RoleSwitcher position="inline" />
           </nav>
         </div>
 

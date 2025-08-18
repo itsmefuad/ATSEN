@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router";
+import { RoleProvider } from "./components/RoleContext.jsx";
 
 
 import InstitutionLayout from "./pages/institution/InstitutionLayout.jsx";
@@ -29,8 +30,9 @@ import RouteGuard from "./components/RouteGuard.jsx";
 
 export default function App() {
   return (
-    <div data-theme="nord">
-      <Routes>
+    <RoleProvider>
+      <div data-theme="nord">
+        <Routes>
         {/* Institution routes */}
         <Route path="/:idOrName" element={<InstitutionLayout />}>
           <Route index element={<I_Dashboard />} />
@@ -97,7 +99,8 @@ export default function App() {
           path="*"
           element={<p>Page not found: {window.location.pathname}</p>}
         />
-      </Routes>
-    </div>
+        </Routes>
+      </div>
+    </RoleProvider>
   );
 }

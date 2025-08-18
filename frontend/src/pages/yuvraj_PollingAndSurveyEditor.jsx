@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useRole } from "../components/RoleContext.jsx";
 import { createPollingAndSurvey, updatePollingAndSurvey, getPollingAndSurveyById, submitResponse } from "../services/pollingandsurvey_api.js";
 
 const Field = ({ label, children }) => (
@@ -16,7 +17,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isCreate = !id || id === "new";
-  const [role, setRole] = useState("student");
+  const { role, setRole, institution: ctxInstitution, setInstitution } = useRole();
   const [isPrivileged, setIsPrivileged] = useState(false);
   const [title, setTitle] = useState("");
   const [type, setType] = useState(searchParams.get("type") || "poll");
@@ -31,13 +32,12 @@ const Yuvraj_PollingAndSurveyEditor = () => {
 
   useEffect(() => {
     // Determine role: URL param > localStorage override > default
-    const currentRole = roleParam || localStorage.getItem('yuvraj_role') || "student";
-    setRole(currentRole);
-    setIsPrivileged(currentRole === 'admin' || currentRole === 'instructor');
+  const currentRole = roleParam || role || "student";
+  setIsPrivileged(currentRole === 'admin' || currentRole === 'instructor');
     
     // ensure localStorage has an institution so other services send correct header
-  const effectiveInstitution = institution || "defaultInstitution"; // Persist under expected key for services
-  try { localStorage.setItem('yuvraj_institution', effectiveInstitution); } catch (e) {}
+  const effectiveInstitution = institution || ctxInstitution || "defaultInstitution"; // Persist under expected key for services
+  try { if (!ctxInstitution && institution) setInstitution(institution); } catch (e) {}
     
     // prevent students from accessing the create/new editor
     if (isCreate && !isPrivileged) {

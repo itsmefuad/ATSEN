@@ -1,11 +1,5 @@
+import { getInstitutionHeader } from '../components/RoleContext';
 const API = import.meta.env.VITE_API_URL || "http://localhost:5001";
-function getInstitutionHeader() {
-  try {
-    const inst = localStorage.getItem('yuvraj_institution');
-    if (inst) return { 'x-institution-id': inst };
-  } catch (e) {}
-  return {};
-}
 
 export async function listPollingAndSurveys(limit = 20) {
   const headers = getInstitutionHeader();
@@ -25,13 +19,14 @@ export async function getPollingAndSurveyById(id) {
 
 export async function createPollingAndSurvey(body) {
   // ensure body contains institution so backend can scope the item
-  const inst = (() => { try { return localStorage.getItem('yuvraj_institution'); } catch(e) { return null; } })();
-  if (!body.institution) body.institution = inst || 'Brac University';
+  const headersForInst = getInstitutionHeader();
+  const inst = headersForInst['x-institution-id'] || 'Brac University';
+  if (!body.institution) body.institution = inst;
 
   const headers = {
     "Content-Type": "application/json",
     "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
-    ...getInstitutionHeader(),
+    ...headersForInst,
   };
   console.debug("createPollingAndSurvey ->", { url: `${API}/api/PollingAndSurvey`, headers, body });
   const r = await fetch(`${API}/api/PollingAndSurvey`, {
@@ -58,13 +53,14 @@ export async function createPollingAndSurvey(body) {
 
 export async function updatePollingAndSurvey(id, body) {
   // ensure body contains institution so backend can enforce scoping when header absent
-  const inst = (() => { try { return localStorage.getItem('yuvraj_institution'); } catch(e) { return null; } })();
-  if (!body.institution) body.institution = inst || 'Brac University';
+  const headersForInst = getInstitutionHeader();
+  const inst = headersForInst['x-institution-id'] || 'Brac University';
+  if (!body.institution) body.institution = inst;
 
   const headers = {
     "Content-Type": "application/json",
     "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
-    ...getInstitutionHeader(),
+    ...headersForInst,
   };
   console.debug("updatePollingAndSurvey ->", { url: `${API}/api/PollingAndSurvey/${id}`, headers, body });
   const r = await fetch(`${API}/api/PollingAndSurvey/${id}`, {

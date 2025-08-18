@@ -1,9 +1,5 @@
+import { getInstitutionHeader } from '../components/RoleContext';
 const API = import.meta.env.VITE_API_URL || "http://localhost:5001";
-
-function getInstitutionHeader() {
-  try { const inst = localStorage.getItem('yuvraj_institution'); if (inst) return { 'x-institution-id': inst }; } catch(e) {}
-  return {};
-}
 
 export async function yuvrajListAnnouncements(limit = 7) {
   const r = await fetch(`${API}/api/yuvraj/announcements?limit=${limit}`, { headers: getInstitutionHeader() });

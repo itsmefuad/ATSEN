@@ -1,23 +1,22 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { useRole } from './RoleContext.jsx';
 
 const RouteGuard = ({ children, requirePrivileged = false, fallbackPath = '/' }) => {
   const navigate = useNavigate();
 
+  const { role, institution } = useRole();
+
   useEffect(() => {
     if (requirePrivileged) {
-      // Check if user is privileged based on role in localStorage
-      const role = localStorage.getItem('yuvraj_role') || 'student';
       const isPrivileged = role === 'admin' || role === 'instructor';
-      
       if (!isPrivileged) {
-        // Redirect non-privileged users
-        const institution = localStorage.getItem('yuvraj_institution') || 'Brac University';
-        const safePath = `/${institution}/${role}/PollingAndSurvey`;
+        const inst = institution || 'Brac University';
+        const safePath = `/${inst}/${role || 'student'}/PollingAndSurvey`;
         navigate(safePath, { replace: true });
       }
     }
-  }, [requirePrivileged, navigate, fallbackPath]);
+  }, [requirePrivileged, navigate, role, institution]);
 
   return children;
 };
