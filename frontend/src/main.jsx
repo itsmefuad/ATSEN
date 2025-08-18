@@ -4,14 +4,16 @@ import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router";
 import { Toaster } from "react-hot-toast";
-import { yuvrajGetInstitution, yuvrajSetInstitution } from "./services/yuvraj_announcements.js";
 
-// Ensure a default institution exists in localStorage so pages and API clients
-// that read `yuvraj_institution` get a predictable value immediately.
+// Set default institution in localStorage
 try {
-  const inst = yuvrajGetInstitution();
-  yuvrajSetInstitution(inst);
-} catch (e) {}
+  const existingInstitution = localStorage.getItem('yuvraj_institution');
+  if (!existingInstitution) {
+    localStorage.setItem('yuvraj_institution', 'Brac University');
+  }
+} catch (e) {
+  console.warn('Failed to set default institution:', e);
+}
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

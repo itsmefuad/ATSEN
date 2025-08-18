@@ -66,7 +66,8 @@ export default function App() {
               <Route path="/teacher/edit/room/:id" element={<T_Room />} />
               <Route path="/yuvraj/announcements" element={<Yuvraj_Announcements />} />
               <Route path="/yuvraj/announcements/:id" element={<Yuvraj_AnnouncementDetail />} />
-              <Route path="/yuvraj/admin/announcements/:id" element={<Yuvraj_AnnouncementEditor />} />
+              <Route path="/yuvraj/admin/announcements/new" element={<Yuvraj_AnnouncementEditor />} />
+              <Route path="/yuvraj/admin/announcements/:id/edit" element={<Yuvraj_AnnouncementEditor />} />
               
               {/* Demo route for timeline testing */}
               <Route path="/demo/timeline" element={<TimelineDemo />} />

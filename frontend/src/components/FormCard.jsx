@@ -31,7 +31,7 @@ const FormCard = ({ form, isPrivileged, onEdit, onViewResults, onRespond, compac
           </div>
 
           {/* Title with shadow */}
-          <h3 className="text-lg font-bold text-white mb-2 drop-shadow-lg">
+          <h3 className="text-lg font-bold text-black mb-2 drop-shadow-lg">
             {form.title || 'Untitled Form'}
           </h3>
 
@@ -65,7 +65,7 @@ const FormCard = ({ form, isPrivileged, onEdit, onViewResults, onRespond, compac
         </div>
 
         {/* Title with stronger shadow and bigger size */}
-        <h3 className="text-3xl font-extrabold text-white mb-3 drop-shadow-2xl">
+        <h3 className="text-3xl font-extrabold text-black mb-3 drop-shadow-2xl">
           {form.title || 'Untitled Form'}
         </h3>
 
@@ -101,7 +101,7 @@ const FormCard = ({ form, isPrivileged, onEdit, onViewResults, onRespond, compac
           ) : (
             <button 
               onClick={onRespond}
-              className="btn btn-primary btn-md px-6 py-2 text-base font-medium"
+              className="btn btn-primary btn-md px-6 py-2 text-lg font-medium text-white"
             >
               Respond to Form
             </button>

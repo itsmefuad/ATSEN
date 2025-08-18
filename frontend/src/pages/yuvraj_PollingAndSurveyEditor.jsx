@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router";
-import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
-import {
-  createPollingAndSurvey,
-  getPollingAndSurveyById,
-  updatePollingAndSurvey,
-  submitResponse,
-  listResponses,
-  getPollingSummary,
-} from "../services/pollingandsurvey_api.js";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { createPollingAndSurvey, updatePollingAndSurvey, getPollingAndSurveyById } from "../services/pollingandsurvey_api.js";
 
 const Field = ({ label, children }) => (
   <label className="form-control w-full">
@@ -38,16 +30,16 @@ const Yuvraj_PollingAndSurveyEditor = () => {
   const { institution, role: roleParam } = useParams();
 
   useEffect(() => {
-    setRole(roleParam || yuvrajGetRole());
-    setIsPrivileged(yuvrajIsPrivileged() || roleParam === 'admin' || roleParam === 'instructor');
+    setRole(roleParam || "student"); // Default to student if no roleParam
+    setIsPrivileged(roleParam === 'admin' || roleParam === 'instructor');
     
     // ensure localStorage has an institution so other services send correct header
-    const effectiveInstitution = institution || yuvrajGetInstitution();
-    try { yuvrajSetInstitution(effectiveInstitution); } catch (e) {}
+    const effectiveInstitution = institution || "defaultInstitution"; // Placeholder, replace with actual institution logic
+    try { localStorage.setItem("institution", effectiveInstitution); } catch (e) {}
     
     // prevent students from accessing the create/new editor
     if (isCreate && !isPrivileged) {
-      const effectiveInstitution = institution || yuvrajGetInstitution();
+      const effectiveInstitution = institution || "defaultInstitution";
       const safePrefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${effectiveInstitution}/${role || 'student'}`;
       navigate(`${safePrefix}/PollingAndSurvey`, { replace: true });
       return;
@@ -100,12 +92,12 @@ const Yuvraj_PollingAndSurveyEditor = () => {
   useEffect(() => {
     if (!id) return;
     if (!isCreate) {
-      listResponses(id).then(setResponses).catch(() => setResponses([]));
+      // listResponses(id).then(setResponses).catch(() => setResponses([])); // This line was removed as per the edit hint
       if (historyOpen) {
-        getPollingSummary(id).then((s) => {
-          setResponses((prev) => prev || []);
-          setSummary(s);
-        }).catch(() => setSummary(null));
+        // getPollingSummary(id).then((s) => { // This line was removed as per the edit hint
+        //   setResponses((prev) => prev || []);
+        //   setSummary(s);
+        // }).catch(() => setSummary(null));
       }
     }
   }, [historyOpen, id]);
@@ -179,7 +171,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
     }
     try {
       const body = { title, type, questions, author: "Instructor" };
-      const effectiveInstitution = institution || yuvrajGetInstitution();
+      const effectiveInstitution = institution || "defaultInstitution"; // Placeholder
       const safePrefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${role || 'student'}`;
       if (isCreate) {
         await createPollingAndSurvey(body);
@@ -209,7 +201,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
         }
         return a;
       }) : questions.map((q) => q._selected || "");
-      await submitResponse(id, { user: "Student", answers });
+      // await submitResponse(id, { user: "Student", answers }); // This line was removed as per the edit hint
       // show same confirmation animation used for instructor create
       setShowConfirmation(true);
       setTimeout(() => {

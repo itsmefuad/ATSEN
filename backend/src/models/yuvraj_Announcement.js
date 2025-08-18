@@ -5,7 +5,7 @@ const yuvrajAnnouncementSchema = new mongoose.Schema(
     title: { type: String, required: true },
     content: { type: String, default: "" },
     author: { type: String, default: "Admin" },
-  institution: { type: String, default: null },
+    institution: { type: String, default: null },
     pinned: { type: Boolean, default: false },
   },
   { timestamps: true }
