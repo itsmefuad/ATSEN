@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { listPollingAndSurveys } from "../services/pollingandsurvey_api.js";
 import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
 import { useParams } from "react-router";
+import FormCard from "../components/FormCard.jsx";
 
 const NavPill = ({ children, active = false }) => (
   <div
@@ -14,12 +15,16 @@ const NavPill = ({ children, active = false }) => (
   </div>
 );
 
-const OptionBox = ({ title, onClick }) => (
+const OptionBox = ({ title, onClick, icon }) => (
   <div
     onClick={onClick}
-    className="cursor-pointer rounded-xl bg-white/20 p-6 shadow-md hover:scale-[1.01] transition-transform"
+    className="cursor-pointer rounded-2xl bg-white/20 p-8 shadow-xl backdrop-blur hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 border border-white/20"
   >
-    <div className="text-lg font-semibold text-white">{title}</div>
+    <div className="text-center">
+      <div className="text-4xl mb-3">{icon}</div>
+      <div className="text-xl font-bold text-white">{title}</div>
+      <div className="text-sm text-white/70 mt-2">Click to create</div>
+    </div>
   </div>
 );
 
@@ -48,7 +53,7 @@ const Yuvraj_PollingAndSurvey = () => {
   const prefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${role || 'student'}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-600 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-sky-400/80 via-blue-600/80 to-indigo-700/80 p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -63,51 +68,72 @@ const Yuvraj_PollingAndSurvey = () => {
           </nav>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-2 gap-6 mb-8">
           {isPrivileged ? (
             <>
-              <OptionBox title="Create a Poll Form" onClick={() => navigate(`${prefix}/PollingAndSurvey/new?type=poll`)} />
-              <OptionBox title="Create a QnA Form" onClick={() => navigate(`${prefix}/PollingAndSurvey/new?type=qna`)} />
+              <OptionBox 
+                title="Create a Poll Form" 
+                icon="📊"
+                onClick={() => navigate(`${prefix}/PollingAndSurvey/new?type=poll`)} 
+              />
+              <OptionBox 
+                title="Create a QnA Form" 
+                icon="❓"
+                onClick={() => navigate(`${prefix}/PollingAndSurvey/new?type=qna`)} 
+              />
             </>
           ) : (
-            <div className="col-span-2 flex gap-2">
-              <button onClick={() => setTab('recent')} className={`px-4 py-2 rounded-full ${tab==='recent' ? 'bg-white/30 text-white' : 'bg-white/10 text-white/80'}`}>Recent</button>
-              <button onClick={() => setTab('existing')} className={`px-4 py-2 rounded-full ${tab==='existing' ? 'bg-white/30 text-white' : 'bg-white/10 text-white/80'}`}>Existing</button>
+            <div className="col-span-2 flex gap-4 justify-center">
+              <button 
+                onClick={() => setTab('recent')} 
+                className={`px-6 py-3 rounded-full text-lg font-medium transition-all duration-300 ${
+                  tab==='recent' 
+                    ? 'bg-white/30 text-white shadow-lg' 
+                    : 'bg-white/10 text-white/80 hover:bg-white/20'
+                }`}
+              >
+                📋 Recent Forms
+              </button>
+              <button 
+                onClick={() => setTab('existing')} 
+                className={`px-6 py-3 rounded-full text-lg font-medium transition-all duration-300 ${
+                  tab==='existing' 
+                    ? 'bg-white/30 text-white shadow-lg' 
+                    : 'bg-white/10 text-white/80 hover:bg-white/20'
+                }`}
+              >
+                📚 All Forms
+              </button>
             </div>
           )}
         </div>
 
-        <div className="rounded-3xl bg-white/20 p-5 shadow-2xl backdrop-blur">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-white/90">Recent forms</div>
+        <div className="rounded-3xl bg-white/15 p-5 shadow-2xl backdrop-blur">
+          <div className="flex items-center justify-between mb-6">
+            <div className="text-white/90 text-lg font-semibold">
+              {tab === 'recent' ? 'Recent Forms' : 'All Forms'}
+            </div>
+            <div className="text-sm text-white/70">{list.length} form{list.length !== 1 ? 's' : ''} available</div>
           </div>
 
-          <div className="space-y-3">
+          <div className={tab === 'recent' ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'}>
             {list.length === 0 && (
-              <div className="text-white/80">No forms yet.</div>
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📝</div>
+                <div className="text-white/80 text-lg">No forms available yet</div>
+                <div className="text-white/60 text-sm mt-2">Forms will appear here when created by instructors</div>
+              </div>
             )}
             {list.map((it) => (
-              <div key={it.id} className="p-3 rounded-lg bg-white/10 text-white flex justify-between items-center">
-                <div className="flex justify-between items-center w-full">
-                  <div className="flex items-center gap-3">
-                    <span className={`px-2 py-1 rounded text-white text-xs font-semibold`} style={{background: it.type === 'poll' ? '#059669' : '#2563EB'}}>{(it.type || 'poll').toUpperCase()}</span>
-                    <div>
-                      <div className="font-semibold">{it.title}</div>
-                      <div className="text-sm opacity-80">{it.type} • {new Date(it.createdAt).toLocaleString()}</div>
-                    </div>
-                  </div>
-                  <div>
-                    {isPrivileged ? (
-                      <div className="flex gap-2">
-                        <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)} className="btn btn-ghost btn-sm">Edit</button>
-                        <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}#reports`)} className="btn btn-outline btn-sm">Results</button>
-                      </div>
-                    ) : (
-                      <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)} className="btn btn-primary btn-sm">Respond</button>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <FormCard
+                key={it.id}
+                form={it}
+                isPrivileged={isPrivileged}
+                compact={tab === 'existing'}
+                onEdit={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)}
+                onViewResults={() => navigate(`${prefix}/PollingAndSurvey/${it.id}#reports`)}
+                onRespond={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)}
+              />
             ))}
           </div>
         </div>
