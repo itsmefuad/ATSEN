@@ -15,6 +15,7 @@ import InstitutionLayout from "./pages/institution/InstitutionLayout.jsx";
 import I_Dashboard from "./pages/institution/I_Dashboard.jsx";
 import InstitutionRooms from "./pages/institution/InstitutionRooms.jsx";
 import AddRoom from "./pages/institution/AddRoom.jsx";
+import AddInstructor from "./pages/institution/AddInstructor.jsx";
 import StudentList from "./pages/institution/StudentList.jsx";
 import InstructorList from "./pages/institution/InstructorList.jsx";
 import InstitutionSettings from "./pages/institution/InstitutionSettings.jsx";
@@ -63,6 +64,7 @@ export default function App() {
           {/* Rooms */}
           <Route path="rooms" element={<InstitutionRooms />} />
           <Route path="add-room" element={<AddRoom />} />
+          <Route path="add-instructor" element={<AddInstructor />} />
 
           {/* People */}
           <Route path="students" element={<StudentList />} />

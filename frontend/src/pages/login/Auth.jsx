@@ -111,38 +111,15 @@ export default function Auth() {
           )}
           {!isLogin && role === "instructor" && (
             <>
-              <Input name="instructorId" label="Instructor ID" onChange={handleChange} />
               <Input name="name" label="Name" onChange={handleChange} />
               <Input name="email" label="Email" type="email" onChange={handleChange} />
-              <div>
-                <label className="block text-sm">
-                  Institutions (IDs comma-separated)
-                </label>
-                <input
-                  name="institutions"
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      institutions: e.target.value.split(","),
-                    })
-                  }
-                  required
-                  className="mt-1 w-full px-3 py-2 border rounded"
-                />
-              </div>
               <Input name="password" label="Password" type="password" onChange={handleChange} />
             </>
           )}
           {!isLogin && role === "student" && (
             <>
-              <Input name="studentId" label="Student ID" onChange={handleChange} />
               <Input name="name" label="Name" onChange={handleChange} />
               <Input name="email" label="Email" type="email" onChange={handleChange} />
-              <Input
-                name="institution"
-                label="Institution ID"
-                onChange={handleChange}
-              />
               <Input name="password" label="Password" type="password" onChange={handleChange} />
             </>
           )}
