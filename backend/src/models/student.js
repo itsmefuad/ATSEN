@@ -1,11 +1,10 @@
-
 import mongoose from "mongoose";
 
 const studentSchema = new mongoose.Schema(
   {
     studentId: {
       type: String,
-      required: true,
+      required: false, // changed from true -> false
       unique: true,
       index: true,
       trim: true
@@ -14,15 +13,28 @@ const studentSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    institution: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Institution",
-      required: true
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please fill a valid email address"]
     },
-    room: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Room"
-    }
+    // changed: institution is now an array so a student can belong to multiple institutions
+    institution: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Institution"
+      }
+    ],
+    // changed: room is now an array so a student can belong to multiple rooms
+    room: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Room"
+      }
+    ]
   },
   { timestamps: true }
 );

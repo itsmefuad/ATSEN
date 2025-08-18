@@ -2,9 +2,10 @@ import { use, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams, useLocation } from "react-router";
 import api from "../../lib/axios";
-import { ArrowLeft, Loader, Trash2, Settings, MessageSquare } from "lucide-react";
+import { ArrowLeft, Loader, Trash2, Settings, MessageSquare, BookOpen } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import DiscussionForum from "../../components/room/DiscussionForum";
+import Materials from "../../components/room/Materials";
 
 const T_Room = () => {
   const [room, setRoom] = useState(null);
@@ -21,6 +22,8 @@ const T_Room = () => {
   useEffect(() => {
     if (location.pathname.includes('/edit')) {
       setActiveTab("settings");
+    } else if (location.pathname.includes('/materials')) {
+      setActiveTab("materials");
     } else {
       setActiveTab("forum");
     }
@@ -104,7 +107,7 @@ const T_Room = () => {
           {/* Tabs */}
           <div className="tabs tabs-boxed mb-6">
             <Link
-              to={`/teacher/edit/room/${id}/edit`}
+              to={`/teacher/room/${id}/edit`}
               className={`tab ${activeTab === "settings" ? "tab-active" : ""}`}
             >
               <Settings className="h-4 w-4 mr-2" />
@@ -116,6 +119,13 @@ const T_Room = () => {
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Discussion Forum
+            </Link>
+            <Link
+              to={`/teacher/room/${id}/materials`}
+              className={`tab ${activeTab === "materials" ? "tab-active" : ""}`}
+            >
+              <BookOpen className="h-4 w-4 mr-2" />
+              Materials
             </Link>
           </div>
 
@@ -174,6 +184,10 @@ const T_Room = () => {
 
           {activeTab === "forum" && (
             <DiscussionForum roomId={id} />
+          )}
+
+          {activeTab === "materials" && (
+            <Materials roomId={id} />
           )}
         </div>
       </div>

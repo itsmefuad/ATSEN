@@ -34,7 +34,7 @@ export default function InstitutionLayout() {
       >
         <h1 style={{ fontSize: "1.75rem", margin: 0 }}>{instName}</h1>
         <span style={{ fontSize: "0.9rem", color: "#666" }}>
-          Admin Control
+          Institution Control Panel
         </span>
       </header>
 

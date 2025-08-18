@@ -9,6 +9,7 @@ import StudentList from "./pages/institution/StudentList.jsx";
 //import AddStudent         from "./pages/institution/AddStudent.jsx";
 import InstructorList from "./pages/institution/InstructorList.jsx";
 //import AddInstructor      from "./pages/institution/AddInstructor.jsx";
+import InstitutionSettings from "./pages/institution/InstitutionSettings";
 
 import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
 import T_CreateRoom from "./pages/teacher/T_CreateRoom.jsx";
@@ -37,13 +38,17 @@ export default function App() {
           <Route path="students" element={<StudentList />} />
 
           <Route path="instructors" element={<InstructorList />} />
+          <Route path="/:idOrName/settings" element={<InstitutionSettings />} />
         </Route>
 
-        {/* Teacher routes */}
-        <Route path="/teacher/dashboard" element={<T_Dashboard />} />
-        <Route path="/teacher/create/room" element={<T_CreateRoom />} />
-        <Route path="/teacher/room/:id/forum" element={<T_Room />} />
-        <Route path="/teacher/edit/room/:id/edit" element={<T_Room />} />
+                        {/* Teacher routes */}
+                <Route path="/teacher/dashboard" element={<T_Dashboard />} />
+                <Route path="/teacher/create/room" element={<T_CreateRoom />} />
+                <Route path="/teacher/room/:id/forum" element={<T_Room />} />
+                <Route path="/teacher/room/:id/materials" element={<T_Room />} />
+                <Route path="/teacher/room/:id/edit" element={<T_Room />} />
+                {/* Redirect old URL to new forum URL for backward compatibility */}
+                <Route path="/teacher/room/:id" element={<T_Room />} />
 
                 {/* Student routes */}
                 <Route path="/student/room/:id" element={<S_Room />} />
