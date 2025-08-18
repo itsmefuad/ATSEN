@@ -1,48 +1,48 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router";
-import { ArrowLeft, Loader, MessageSquare, User, Calendar, Pin } from "lucide-react";
+import { useParams, Link, useLocation } from "react-router";
+import { ArrowLeft, Loader, MessageSquare, BookOpen, Calendar } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
+import StudentDiscussionForum from "../../components/room/StudentDiscussionForum";
+import StudentMaterials from "../../components/room/StudentMaterials";
+import StudentAssessment from "../../components/room/StudentAssessment";
 import CourseTimeline from "../../components/room/CourseTimeline";
 
 const S_Room = () => {
   const [room, setRoom] = useState(null);
-  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("forum"); // Default to forum
 
+  const location = useLocation();
   const { id } = useParams();
 
+  // Determine active tab based on URL
   useEffect(() => {
-    const fetchRoomData = async () => {
+    if (location.pathname.includes('/materials')) {
+      setActiveTab("materials");
+    } else if (location.pathname.includes('/assessment')) {
+      setActiveTab("assessment");
+    } else {
+      setActiveTab("forum");
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const fetchRoom = async () => {
       try {
-        const [roomRes, announcementsRes] = await Promise.all([
-          api.get(`/rooms/${id}`),
-          api.get(`/forum-content/room/${id}`)
-        ]);
-        
-        setRoom(roomRes.data);
-        setAnnouncements(announcementsRes.data);
+        const res = await api.get(`/rooms/${id}`);
+        setRoom(res.data);
       } catch (error) {
-        console.error("Error fetching room data:", error);
-        toast.error("Failed to fetch room data");
+        console.log("Error in fetching room details", error);
+        toast.error("Failed to fetch room details");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRoomData();
+    fetchRoom();
   }, [id]);
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  };
 
   if (loading) {
     return (
@@ -56,102 +56,75 @@ const S_Room = () => {
     <div className="min-h-screen bg-base-200">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
+        {/* Back to Dashboard Button - Floating left */}
+        <div className="mb-6 flex justify-start">
+          <Link to="/student/dashboard" className="btn btn-ghost">
+            <ArrowLeft className="h-5 w-5" />
+            Back to Dashboard
+          </Link>
+        </div>
+        
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content Area */}
             <div className="lg:col-span-2">
-              <div className="flex items-center justify-between mb-6">
-                <Link to="/student/dashboard" className="btn btn-ghost">
-                  <ArrowLeft className="h-5 w-5" />
-                  Back to Dashboard
-                </Link>
-              </div>
-
               {/* Room Info Header */}
               <div className="card bg-base-100 shadow-lg mb-6">
                 <div className="card-body">
-                  <h1 className="text-2xl font-bold">{room.room_name}</h1>
-                  <p className="text-base-content/70">{room.description}</p>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h1 className="text-2xl font-bold">{room.room_name}</h1>
+                      <p className="text-base-content/70">{room.description}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Discussion Forum */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="h-6 w-6 text-primary" />
-                  <h2 className="text-2xl font-bold">Discussion Forum</h2>
-                </div>
-
-                {announcements.length === 0 ? (
-                  <div className="text-center py-12">
-                    <MessageSquare className="h-12 w-12 text-base-content/30 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-base-content/70 mb-2">
-                      No announcements yet
-                    </h3>
-                    <p className="text-base-content/50">
-                      Check back later for announcements from your instructor!
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {announcements.map((announcement) => (
-                      <div 
-                        key={announcement._id} 
-                        className={`card bg-base-100 shadow-lg ${announcement.isPinned ? 'border-l-4 border-l-warning' : ''}`}
-                      >
-                        <div className="card-body">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-lg font-semibold">{announcement.title}</h3>
-                              {announcement.isPinned && (
-                                <Pin className="h-4 w-4 text-warning" />
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="prose max-w-none mb-4">
-                            <p className="whitespace-pre-wrap">{announcement.content}</p>
-                          </div>
-
-                          {announcement.tags && announcement.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {announcement.tags.map((tag, index) => (
-                                <span
-                                  key={index}
-                                  className="badge badge-outline badge-sm"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between text-sm text-base-content/70">
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-1">
-                                <User className="h-3 w-3" />
-                                <span>{announcement.author?.name || 'Teacher'}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                <span>{formatDate(announcement.createdAt)}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {/* Tabs */}
+              <div className="tabs tabs-boxed mb-6">
+                <Link
+                  to={`/student/room/${id}/forum`}
+                  className={`tab ${activeTab === "forum" ? "tab-active" : ""}`}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Discussion Forum
+                </Link>
+                <Link
+                  to={`/student/room/${id}/materials`}
+                  className={`tab ${activeTab === "materials" ? "tab-active" : ""}`}
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Materials
+                </Link>
+                <Link
+                  to={`/student/room/${id}/assessment`}
+                  className={`tab ${activeTab === "assessment" ? "tab-active" : ""}`}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Assessment
+                </Link>
               </div>
+
+              {/* Tab Content */}
+              {activeTab === "forum" && (
+                <StudentDiscussionForum roomId={id} />
+              )}
+
+              {activeTab === "materials" && (
+                <StudentMaterials roomId={id} />
+              )}
+
+              {activeTab === "assessment" && (
+                <StudentAssessment roomId={id} room={room} />
+              )}
             </div>
             
             {/* Timeline Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-6">
-                <CourseTimeline roomId={id} room={room} />
-              </div>
-            </div>
+                                <div className="lg:col-span-1">
+                      <div className="sticky top-6">
+                        <CourseTimeline roomId={id} room={room} isStudent={true} />
+                      </div>
+                    </div>
           </div>
         </div>
       </div>

@@ -17,6 +17,16 @@ const forumContentSchema = new Schema(
       ref: "Room",
       required: true
     },
+    contentType: {
+      type: String,
+      enum: ['announcement', 'discussion'],
+      default: 'announcement'
+    },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
     isPinned: {
       type: Boolean,
       default: false
