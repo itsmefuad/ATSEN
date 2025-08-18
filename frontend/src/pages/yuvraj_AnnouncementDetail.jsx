@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import YuvrajAnnouncementCard from "../components/yuvraj_AnnouncementCard.jsx";
-import { yuvrajGetRole } from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole, yuvrajIsPrivileged } from "../services/yuvraj_announcements.js";
 import { yuvrajGetAnnouncementById } from "../services/yuvraj_announcements_api.js";
 import { yuvrajSeedData } from "../services/yuvraj_seed.js";
 
@@ -13,7 +13,9 @@ const Yuvraj_AnnouncementDetail = () => {
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [role, setRole] = useState("student");
+  const [isPrivileged, setIsPrivileged] = useState(false);
   const navigate = useNavigate();
+  const { institution, role: roleParam } = useParams();
 
   useEffect(() => {
     yuvrajGetAnnouncementById(id)
@@ -22,11 +24,13 @@ const Yuvraj_AnnouncementDetail = () => {
         const seed = await yuvrajSeedData();
         setData(seed.find((x) => x.id === id) || seed[0]);
       });
-    setRole(yuvrajGetRole());
+  setRole(roleParam || yuvrajGetRole());
+  setIsPrivileged(roleParam === 'admin' || roleParam === 'instructor' || yuvrajIsPrivileged());
+  if (institution) { try { localStorage.setItem('yuvraj_institution', institution); } catch(e){} }
   }, [id]);
 
-  const title = data?.title || (role === "admin" ? "Edit title here" : "Announcement");
-  const content = data?.content || (role === "admin" ? "Edit content here" : "");
+  const title = data?.title || (isPrivileged ? "Edit title here" : "Announcement");
+  const content = data?.content || (isPrivileged ? "Edit content here" : "");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-600 p-6">
@@ -37,7 +41,7 @@ const Yuvraj_AnnouncementDetail = () => {
             <span className="hidden text-white/90 sm:inline">BRAC University</span>
           </div>
           <nav className="flex items-center gap-4">
-            <Link to="/yuvraj/announcements" className="rounded-full bg-white/40 px-4 py-2 text-white shadow backdrop-blur">Home</Link>
+            <Link to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements`} className="rounded-full bg-white/40 px-4 py-2 text-white shadow backdrop-blur">Home</Link>
             <NavPill>Dashboard</NavPill>
             <NavPill>Notifications</NavPill>
             <NavPill>Profile</NavPill>
@@ -54,11 +58,11 @@ const Yuvraj_AnnouncementDetail = () => {
             )}
           </YuvrajAnnouncementCard>
 
-          {role === "admin" && data && (
+          {isPrivileged && data && (
             <div className="mt-6 flex justify-end">
               <button
                 className="btn btn-primary"
-                onClick={() => navigate(`/yuvraj/admin/announcements/${data.id}`)}
+                onClick={() => navigate(`/${institution || 'yuvraj'}/${role || 'admin'}/announcements/${data.id}/edit`)}
               >
                 Edit
               </button>

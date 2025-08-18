@@ -21,11 +21,36 @@ function writeStore(list) {
 }
 
 export function yuvrajGetRole() {
-  return localStorage.getItem(ROLE_KEY) || "student"; // student | instructor | admin
+  // Normalize role names: allow 'teacher' to be treated the same as 'admin' for now
+  const raw = localStorage.getItem(ROLE_KEY) || "student";
+  if (raw === 'teacher') return 'admin';
+  return raw;
 }
 
 export function yuvrajSetRole(role) {
   localStorage.setItem(ROLE_KEY, role);
+}
+
+export function yuvrajIsPrivileged() {
+  const r = yuvrajGetRole();
+  return r === 'admin'; // currently teacher maps to admin via yuvrajGetRole
+}
+
+// Default institution used when no institution route param is present
+export const DEFAULT_INSTITUTION = 'Brac University';
+
+export function yuvrajGetInstitution() {
+  try {
+    return localStorage.getItem('yuvraj_institution') || DEFAULT_INSTITUTION;
+  } catch (e) {
+    return DEFAULT_INSTITUTION;
+  }
+}
+
+export function yuvrajSetInstitution(inst) {
+  try {
+    if (inst) localStorage.setItem('yuvraj_institution', inst);
+  } catch (e) {}
 }
 
 export async function yuvrajSeedIfEmpty() {

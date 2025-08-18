@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import YuvrajAnnouncementCard from "../components/yuvraj_AnnouncementCard.jsx";
-import { yuvrajGetRole } from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole, yuvrajIsPrivileged } from "../services/yuvraj_announcements.js";
 import { yuvrajListAnnouncements } from "../services/yuvraj_announcements_api.js";
 import { yuvrajSeedData } from "../services/yuvraj_seed.js";
 
@@ -18,10 +18,15 @@ const NavPill = ({ children, active = false }) => (
 const Yuvraj_Announcements = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [role, setRole] = useState("student");
+  const [isPrivileged, setIsPrivileged] = useState(false);
   const navigate = useNavigate();
+  const { institution, role: roleParam } = useParams();
 
   useEffect(() => {
-    setRole(yuvrajGetRole());
+  setRole(roleParam || yuvrajGetRole());
+  setIsPrivileged(roleParam === 'admin' || roleParam === 'instructor' || yuvrajIsPrivileged());
+  // persist institution for API header
+  if (institution) { try { localStorage.setItem('yuvraj_institution', institution); } catch(e){} }
     yuvrajListAnnouncements(7)
       .then(setAnnouncements)
       .catch(async () => {
@@ -64,7 +69,7 @@ const Yuvraj_Announcements = () => {
                 key={a.id}
                 className="scroll-snap-start transform transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-2xl"
               >
-                <Link to={`/yuvraj/announcements/${a.id}`}>
+                <Link to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${a.id}`}>
                   <YuvrajAnnouncementCard title={a.title}>
                     <p className="line-clamp-3 opacity-80">{a.content}</p>
                     <div className="mt-3 text-sm opacity-70">
@@ -76,11 +81,11 @@ const Yuvraj_Announcements = () => {
             ))}
           </div>
 
-          {role === "admin" && (
+      {isPrivileged && (
             <div className="mt-6 flex justify-end">
               <button
                 className="btn btn-primary"
-                onClick={() => navigate("/yuvraj/admin/announcements/new")}
+        onClick={() => navigate(`/${institution || 'yuvraj'}/${role || 'admin'}/announcements/new`)}
               >
                 Create Announcement
               </button>

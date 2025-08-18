@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { yuvrajGetRole } from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
 import {
   yuvrajCreateAnnouncement,
   yuvrajGetAnnouncementById,
@@ -24,9 +24,11 @@ const Yuvraj_AnnouncementEditor = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [pinned, setPinned] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const { institution, role: roleParam } = useParams();
 
   useEffect(() => {
-    setRole(yuvrajGetRole());
+  setRole(roleParam || yuvrajGetRole());
     if (!isCreate) {
       yuvrajGetAnnouncementById(id).then((d) => {
         if (!d) return;
@@ -35,6 +37,9 @@ const Yuvraj_AnnouncementEditor = () => {
         setPinned(Boolean(d.pinned));
       });
     }
+  // ensure institution is set in localStorage (default to configured value)
+  const effectiveInstitution = institution || yuvrajGetInstitution();
+  try { yuvrajSetInstitution(effectiveInstitution); } catch (e) {}
   }, [id, isCreate]);
 
   if (role !== "admin") {
@@ -51,15 +56,21 @@ const Yuvraj_AnnouncementEditor = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (isCreate) {
-        await yuvrajCreateAnnouncement({ title, content, pinned, author: "Admin" });
-      } else {
-        await yuvrajUpdateAnnouncement(id, { title, content, pinned });
-      }
-      navigate("/yuvraj/announcements", { replace: true });
+        if (isCreate) {
+          await yuvrajCreateAnnouncement({ title, content, pinned, author: "Admin" });
+        } else {
+          await yuvrajUpdateAnnouncement(id, { title, content, pinned });
+        }
+        const effectiveInstitution = institution || yuvrajGetInstitution();
+        // show confirmation animation similar to polling editor
+        setShowConfirmation(true);
+        setTimeout(() => {
+          setShowConfirmation(false);
+          navigate(`/${effectiveInstitution || 'yuvraj'}/${role || 'student'}/announcements`, { replace: true });
+        }, 900);
     } catch (e) {
-      console.error(e);
-      alert("Failed to submit. Check backend is running and ADMIN key if required.");
+  console.error(e);
+  alert("Failed to submit: " + (e?.message || String(e)) + " — Check backend and ADMIN key if required.");
     }
   };
 
@@ -99,6 +110,19 @@ const Yuvraj_AnnouncementEditor = () => {
           </div>
         </form>
       </div>
+      {showConfirmation && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative p-8 bg-white rounded-xl shadow-2xl flex flex-col items-center gap-4">
+            <svg width="72" height="72" viewBox="0 0 72 72" className="overflow-visible">
+              <circle cx="36" cy="36" r="34" fill="none" stroke="#10B981" strokeWidth="4" className="opacity-20" />
+              <path d="M22 37 L31 46 L50 27" fill="none" stroke="#10B981" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" style={{ strokeDasharray: 100, strokeDashoffset: 100, animation: 'dash 0.9s ease forwards 0.2s' }} />
+            </svg>
+            <div className="text-lg font-semibold">Your announcement has been posted.</div>
+          </div>
+          <style>{`@keyframes dash { to { stroke-dashoffset: 0; } }`}</style>
+        </div>
+      )}
     </div>
   );
 };
