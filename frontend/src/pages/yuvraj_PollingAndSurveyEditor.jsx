@@ -180,6 +180,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
         setShowConfirmation(true);
         setTimeout(() => {
           setShowConfirmation(false);
+          // go back to the base list route
           navigate(`/PollingAndSurvey`, { replace: true });
         }, 1400);
       } else {
@@ -205,6 +206,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
       }) : questions.map((q) => q._selected || "");
       // submit student response to backend
       if (id) {
+        // Ensure backend receives the response and then redirect to results
         await submitResponse(id, { user: 'Student', answers });
       }
       // show confirmation animation used for instructor create
@@ -213,6 +215,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
         setShowConfirmation(false);
         // After confirmation, go to the results view for this form (if id available)
         if (id) {
+          // After submit, show results for the same form
           navigate(`/PollingAndSurvey/${id}/results`, { replace: true });
         }
       }, 1400);

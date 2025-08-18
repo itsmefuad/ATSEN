@@ -188,35 +188,36 @@ const Yuvraj_Announcements = () => {
 
               {visible.slice(0, 7).map((a, index) => (
                 <div
-                  key={a.id}
+                  key={a.id || a._id}
                   className="scroll-snap-start transform transition-all duration-500 ease-out hover:-translate-y-0.5 hover:shadow-2xl hover:scale-[1.005]"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-start gap-4">
                     {isPrivileged && (
-                      <div className="flex flex-col gap-[20px] mt-2">
+                      // left-side stacked buttons aligned to card left margin
+                      <div className="flex flex-col gap-3 mt-2 w-[92px]">
                         <button
                           onClick={() => handleEdit(a.id || a._id)}
-                          className="btn btn-md h-7 px-3 bg-blue-600 text-white hover:bg-blue-700 border-none"
+                          className="h-8 px-3 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(a.id || a._id)}
-                          className="btn btn-md h-7 px-3 bg-red-300 text-red-800 hover:bg-red-400 border-none"
+                          className="h-8 px-3 bg-red-300 text-red-800 hover:bg-red-400 rounded-lg"
                         >
                           Delete
                         </button>
                       </div>
                     )}
 
-                    <div className="flex-1 ml-10">
-                      <Link to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${a.id}`}>
+                    <div className="flex-1 ml-2">
+                      <Link to={`/announcements/${a.id || a._id}`}>
                         <div className="transform transition-all duration-300 hover:scale-[1.002]">
                           <YuvrajAnnouncementCard title={a.title}>
                             <p className="line-clamp-3 text-black/80">{a.content}</p>
                             <div className="mt-3 text-sm text-black/70">
-                              {new Date(a.createdAt).toLocaleString()}  {a.author}
+                              {new Date(a.createdAt).toLocaleString()}  {a.author}
                             </div>
                           </YuvrajAnnouncementCard>
                         </div>
