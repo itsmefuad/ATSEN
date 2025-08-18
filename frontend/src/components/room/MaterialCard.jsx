@@ -15,7 +15,7 @@ import {
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
-const MaterialCard = ({ material, onUpdate, onDelete }) => {
+const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
   const [isExpanded, setIsExpanded] = useState(material.isExpanded || false);
   const [loading, setLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -191,29 +191,31 @@ const MaterialCard = ({ material, onUpdate, onDelete }) => {
              </div>
 
              <div className="flex items-center gap-2">
-               <div className="flex gap-1">
-                 <button
-                   onClick={(e) => {
-                     e.stopPropagation();
-                     handleEdit();
-                   }}
-                   className="btn btn-ghost btn-sm"
-                   title="Edit"
-                 >
-                   <Edit className="h-4 w-4" />
-                 </button>
-                 <button
-                   onClick={(e) => {
-                     e.stopPropagation();
-                     handleDelete();
-                   }}
-                   className="btn btn-ghost btn-sm text-error"
-                   title="Delete"
-                   disabled={loading}
-                 >
-                   <Trash2 className="h-4 w-4" />
-                 </button>
-               </div>
+               {!isStudent && (
+                 <div className="flex gap-1">
+                   <button
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       handleEdit();
+                     }}
+                     className="btn btn-ghost btn-sm"
+                     title="Edit"
+                   >
+                     <Edit className="h-4 w-4" />
+                   </button>
+                   <button
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       handleDelete();
+                     }}
+                     className="btn btn-ghost btn-sm text-error"
+                     title="Delete"
+                     disabled={loading}
+                   >
+                     <Trash2 className="h-4 w-4" />
+                   </button>
+                 </div>
+               )}
              </div>
            </div>
 

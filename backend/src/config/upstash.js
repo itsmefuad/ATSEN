@@ -11,7 +11,7 @@ let ratelimit = null;
 if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
   ratelimit = new Ratelimit({
     redis: Redis.fromEnv(),
-    limiter: Ratelimit.slidingWindow(100, "10 s"), // 10 requests every 10 seconds
+    limiter: Ratelimit.slidingWindow(10, "10 s"), // 10 requests every 10 seconds
   });
 }
 
