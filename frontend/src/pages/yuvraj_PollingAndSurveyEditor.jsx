@@ -369,6 +369,17 @@ const Yuvraj_PollingAndSurveyEditor = () => {
                     {sq.otherCount > 0 && (
                       <div className="mt-2 text-sm text-white/80">Other responses: {sq.otherCount}</div>
                     )}
+                    {role === 'admin' && (
+                      <div className="mt-3">
+                        <div className="text-sm font-medium text-white mb-2">All responses</div>
+                        {(responses || []).filter((r) => (r.answers && r.answers[qi])).map((r, ri) => (
+                          <div key={ri} className="p-2 mb-1 bg-white/10 rounded text-sm text-white break-words">{r.answers[qi]}</div>
+                        ))}
+                        {((responses || []).filter((r) => (r.answers && r.answers[qi])).length === 0) && (
+                          <div className="text-sm text-white/80">No textual responses</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (
@@ -410,6 +421,17 @@ const Yuvraj_PollingAndSurveyEditor = () => {
                     <div key={qi} className="mt-3 p-3 bg-white/5 rounded">
                       <div className="font-semibold text-white mb-1">{q.text || `Question ${qi + 1}`}</div>
                       <div className="text-sm text-white/90">{totalForQ} responses</div>
+                      {role === 'admin' && (
+                        <div className="mt-3">
+                          <div className="text-sm font-medium text-white mb-2">All responses</div>
+                          {(responses || []).filter((r) => (r.answers && r.answers[qi])).map((r, ri) => (
+                            <div key={ri} className="p-2 mb-1 bg-white/10 rounded text-sm text-white break-words">{r.answers[qi]}</div>
+                          ))}
+                          {((responses || []).filter((r) => (r.answers && r.answers[qi])).length === 0) && (
+                            <div className="text-sm text-white/80">No textual responses</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })
