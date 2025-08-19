@@ -3,7 +3,7 @@ import { Edit, Trash2, Calendar, FileText, X, Check } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
-const AssessmentCard = ({ assessment, onUpdate, onDelete }) => {
+const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editErrors, setEditErrors] = useState({});
@@ -176,21 +176,25 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete }) => {
             </div>
 
             <div className="flex items-center gap-1 ml-4">
-              <button
-                onClick={handleEdit}
-                className="btn btn-ghost btn-sm"
-                title="Edit"
-              >
-                <Edit className="h-4 w-4" />
-              </button>
-                             <button
-                 onClick={handleDelete}
-                 className="btn btn-ghost btn-sm text-error"
-                 title="Delete"
-                 disabled={loading}
-               >
-                 <Trash2 className="h-4 w-4" />
-               </button>
+              {!isStudent && (
+                <>
+                  <button
+                    onClick={handleEdit}
+                    className="btn btn-ghost btn-sm"
+                    title="Edit"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="btn btn-ghost btn-sm text-error"
+                    title="Delete"
+                    disabled={loading}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
