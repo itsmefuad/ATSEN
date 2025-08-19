@@ -30,14 +30,12 @@ import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
 import T_CreateRoom from "./pages/teacher/T_CreateRoom.jsx";
 import T_Room from "./pages/teacher/T_Room.jsx";
 
-// Student
 import S_Dashboard from "./pages/student/S_Dashboard.jsx";
-
 import S_Room from "./pages/student/S_Room.jsx";
 import S_Profile from "./pages/student/S_Profile.jsx";
 
-// Yuvraj Announcements
 
+// Yuvraj Announcements
 import Yuvraj_Announcements from "./pages/yuvraj_Announcements.jsx";
 import Yuvraj_AnnouncementDetail from "./pages/yuvraj_AnnouncementDetail.jsx";
 import Yuvraj_AnnouncementEditor from "./pages/yuvraj_AnnouncementEditor.jsx";
