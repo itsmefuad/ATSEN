@@ -71,3 +71,24 @@ export async function getAllStudents(req, res) {
   }
 }
 
+// Get student's enrolled rooms
+export async function getStudentRooms(req, res) {
+  try {
+    const { studentId } = req.params;
+    
+    const student = await Student.findById(studentId).populate({
+      path: 'room',
+      select: 'room_name description createdAt'
+    });
+    
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    
+    return res.json(student.room || []);
+  } catch (err) {
+    console.error("getStudentRooms error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+

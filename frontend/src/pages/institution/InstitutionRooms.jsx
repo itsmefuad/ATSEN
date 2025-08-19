@@ -22,6 +22,15 @@ export default function InstitutionRooms() {
         return res.json();
       })
       .then((json) => {
+        console.log("=== ROOMS DATA ===");
+        console.log("Rooms received:", json);
+        json.forEach((room, index) => {
+          console.log(`Room ${index}:`, {
+            id: room._id,
+            name: room.room_name,
+            idLength: room._id?.length
+          });
+        });
         setRooms(json);
         setLoading(false);
       })
@@ -100,15 +109,19 @@ export default function InstitutionRooms() {
                     </div>
                   </div>
                   <Link
-                    to={`/${encodeURIComponent(idOrName)}/rooms/${room._id}`}
+                    to={`/${encodeURIComponent(idOrName)}/rooms/${room._id}/edit`}
                     style={{
                       fontSize:       "0.9rem",
                       textDecoration: "none",
-                      color:          "#0b1220",
+                      color:          "#fff",
                       fontWeight:     600,
+                      padding:        "0.4rem 0.8rem",
+                      background:     "#10b981",
+                      border:         "1px solid #10b981",
+                      borderRadius:   "4px",
                     }}
                   >
-                    View
+                    Edit
                   </Link>
                 </div>
 

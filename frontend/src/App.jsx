@@ -5,7 +5,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 // Admin
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
-import ProtectedRoute from "./pages/admin/ProtectedRoute";
+import AdminProtectedRoute from "./pages/admin/ProtectedRoute";
 
 // Auth
 import Auth from "./pages/login/Auth.jsx";
@@ -21,6 +21,8 @@ import StudentList from "./pages/institution/StudentList.jsx";
 import InstructorList from "./pages/institution/InstructorList.jsx";
 import InstitutionSettings from "./pages/institution/InstitutionSettings.jsx";
 import AddStudent from "./pages/institution/AddStudent";
+import EditRoom from "./pages/institution/EditRoom.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 
 // Teacher
@@ -30,7 +32,7 @@ import T_Room from "./pages/teacher/T_Room.jsx";
 
 // Student
 import S_Dashboard from "./pages/student/S_Dashboard.jsx";
-import S_Dashboard from "./pages/student/S_Dashboard.jsx";
+
 import S_Room from "./pages/student/S_Room.jsx";
 import S_Profile from "./pages/student/S_Profile.jsx";
 
@@ -56,20 +58,25 @@ export default function App() {
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute>
+            <AdminProtectedRoute>
               <Dashboard />
-            </ProtectedRoute>
+            </AdminProtectedRoute>
           }
         />
 
         {/* 4. Dynamic Institution Routes */}
-        <Route path="/:idOrName" element={<InstitutionLayout />}>
+        <Route path="/:idOrName" element={
+          <ProtectedRoute requiredRole="institution">
+            <InstitutionLayout />
+          </ProtectedRoute>
+        }>
           {/* Dashboard */}
           <Route index element={<I_Dashboard />} />
           <Route path="dashboard" element={<I_Dashboard />} />
 
           {/* Rooms */}
           <Route path="rooms" element={<InstitutionRooms />} />
+          <Route path="rooms/:roomId/edit" element={<EditRoom />} />
           <Route path="add-room" element={<AddRoom />} />
           <Route path="add-instructor" element={<AddInstructor />} />
 
@@ -83,7 +90,11 @@ export default function App() {
         </Route>
 
         {/* 5. Teacher */}
-        <Route path="/teacher/dashboard" element={<T_Dashboard />} />
+        <Route path="/teacher/dashboard" element={
+          <ProtectedRoute requiredRole="instructor">
+            <T_Dashboard />
+          </ProtectedRoute>
+        } />
         <Route path="/teacher/create/room" element={<T_CreateRoom />} />
         <Route path="/teacher/room/:id/forum" element={<T_Room />} />
         <Route path="/teacher/room/:id/materials" element={<T_Room />} />
@@ -93,7 +104,11 @@ export default function App() {
         <Route path="/teacher/edit/room/:id" element={<T_Room />} />
 
                 {/* Student routes */}
-                <Route path="/student/dashboard" element={<S_Dashboard />} />
+                <Route path="/student/dashboard" element={
+                  <ProtectedRoute requiredRole="student">
+                    <S_Dashboard />
+                  </ProtectedRoute>
+                } />
                 <Route path="/student/profile" element={<S_Profile />} />
                 <Route path="/student/room/:id/forum" element={<S_Room />} />
                 <Route path="/student/room/:id/materials" element={<S_Room />} />

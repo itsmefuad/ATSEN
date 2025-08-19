@@ -2,7 +2,8 @@
 import { Router } from "express";
 import {
   registerInstructor,
-  loginInstructor
+  loginInstructor,
+  getInstructorRooms
 } from "../controllers/instructorController.js";
 
 import Instructor from "../models/instructor.js";  // ← import model
@@ -22,5 +23,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Could not fetch instructors." });
   }
 });
+
+router.get("/:instructorId/rooms", getInstructorRooms);
 
 export default router;

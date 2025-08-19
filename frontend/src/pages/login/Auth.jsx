@@ -1,6 +1,7 @@
 // src/pages/login/Auth.jsx
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext.jsx";
 import api from "../../lib/axios";
 
 export default function Auth() {
@@ -11,6 +12,7 @@ export default function Auth() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
 
   // If ProtectedRoute redirected us here, it will stash the original path in `location.state.from`
   const fromPath = location.state?.from;
@@ -49,14 +51,19 @@ export default function Auth() {
         return;
       }
 
-      // Persist auth token & role
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", role);
+      // Create user object with role and data
+      const userData = {
+        role,
+        ...(role === "institution" ? data.institution : 
+           role === "instructor" ? data.instructor : data.student)
+      };
+
+      // Use AuthContext login
+      login(data.token, userData);
 
       // Determine default path after login
       let defaultPath;
       if (role === "institution") {
-        // your backend must return the slug or ID here
         defaultPath = `/${data.institution.slug}/dashboard`;
       } else if (role === "instructor") {
         defaultPath = "/teacher/dashboard";

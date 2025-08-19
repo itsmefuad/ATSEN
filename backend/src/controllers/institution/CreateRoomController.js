@@ -81,6 +81,17 @@ export async function listRooms(req, res) {
     }
 
     const rooms = await Room.find({ institution: inst._id }).lean();
+    console.log("=== LIST ROOMS DEBUG ===");
+    console.log("Institution ID:", inst._id);
+    console.log("Found rooms count:", rooms.length);
+    rooms.forEach((room, index) => {
+      console.log(`Room ${index}:`, {
+        id: room._id,
+        name: room.room_name,
+        idType: typeof room._id,
+        idLength: room._id?.toString().length
+      });
+    });
     return res.json(rooms);
   } catch (err) {
     console.error("Error in listRooms:", err);

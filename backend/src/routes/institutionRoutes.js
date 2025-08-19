@@ -1,17 +1,33 @@
 // backend/src/routes/institutionRoutes.js
 
 import { Router } from "express";
+// Auth
 import {
   registerInstitution,
-  loginInstitution,
-  getInstitutionDashboard,
+  loginInstitution
+} from "../controllers/institution/authController.js";
+
+// Dashboard
+import {
+  getInstitutionDashboard
+} from "../controllers/institution/dashboardController.js";
+
+// People management
+import {
   getInstitutionInstructors,
   getInstitutionStudents,
-  updateInstitutionSettings,
   addInstructorToInstitution,
   addStudent,
-  removeStudent
-} from "../controllers/institutionController.js";
+  removeStudent,
+  removeInstructor
+} from "../controllers/institution/peopleController.js";
+
+
+
+// Settings
+import {
+  updateInstitutionSettings
+} from "../controllers/institution/settingsController.js";
 
 const router = Router();
 
@@ -36,5 +52,8 @@ router.put("/:idOrName/settings", updateInstitutionSettings);
 
 router.post("/:idOrName/add-student", addStudent);
 router.post("/:idOrName/remove-student", removeStudent);
+router.post("/:idOrName/remove-instructor", removeInstructor);
+
+
 
 export default router;

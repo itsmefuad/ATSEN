@@ -25,13 +25,13 @@ const roomSchema = new Schema(
     students: [
       {
         type: Schema.Types.ObjectId,
-        ref: "students"
+        ref: "Student"
       }
     ],
     instructors: [
       {
         type: Schema.Types.ObjectId,
-        ref: "instructors"
+        ref: "Instructor"
       }
     ],
 

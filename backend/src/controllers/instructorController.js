@@ -3,6 +3,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import Instructor from "../models/instructor.js";
+import Room from "../models/Room.js";
 
 // Register instructor
 export async function registerInstructor(req, res) {
@@ -68,6 +69,23 @@ export async function loginInstructor(req, res) {
     res.json({ token, instructor: { id: instr._id, name: instr.name } });
   } catch (err) {
     console.error("Instructor login error:", err);
+    res.status(500).json({ message: "Server error." });
+  }
+}
+
+// Get rooms assigned to an instructor
+export async function getInstructorRooms(req, res) {
+  try {
+    const { instructorId } = req.params;
+    
+    const rooms = await Room.find({ instructors: instructorId })
+      .populate('students', 'name email')
+      .populate('instructors', 'name email')
+      .sort({ createdAt: -1 });
+    
+    res.json(rooms);
+  } catch (err) {
+    console.error("Get instructor rooms error:", err);
     res.status(500).json({ message: "Server error." });
   }
 }

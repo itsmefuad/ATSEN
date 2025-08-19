@@ -8,6 +8,31 @@ export default function InstructorList() {
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg]   = useState("");
 
+  const handleRemoveInstructor = async (instructorId) => {
+    if (!confirm("Are you sure you want to remove this instructor?")) return;
+    
+    try {
+      const res = await fetch(
+        `http://localhost:5001/api/institutions/${encodeURIComponent(idOrName)}/remove-instructor`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ instructorId }),
+        }
+      );
+      
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || `Status ${res.status}`);
+      }
+      
+      setInsts(prev => prev.filter(i => i._id !== instructorId));
+    } catch (err) {
+      console.error("Remove instructor failed:", err);
+      setErrMsg("Could not remove instructor.");
+    }
+  };
+
   useEffect(() => {
     fetch(
       `http://localhost:5001/api/institutions/${encodeURIComponent(
@@ -58,28 +83,46 @@ export default function InstructorList() {
                 backgroundColor: "#ffffff",
               }}
             >
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  margin: 0,
-                  marginBottom: "0.5rem",
-                  color: "#111827",
-                }}
-              >
-                {i.name}
-              </h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <h2
+                    style={{
+                      fontSize: "1.25rem",
+                      margin: 0,
+                      marginBottom: "0.5rem",
+                      color: "#111827",
+                    }}
+                  >
+                    {i.name}
+                  </h2>
 
-              {/* optional details */}
-              {i.email && (
-                <p style={{ margin: "0.25rem 0", fontSize: "0.9rem" }}>
-                  <strong>Email:</strong> {i.email}
-                </p>
-              )}
-              {i.phone && (
-                <p style={{ margin: "0.25rem 0", fontSize: "0.9rem" }}>
-                  <strong>Phone:</strong> {i.phone}
-                </p>
-              )}
+                  {/* optional details */}
+                  {i.email && (
+                    <p style={{ margin: "0.25rem 0", fontSize: "0.9rem" }}>
+                      <strong>Email:</strong> {i.email}
+                    </p>
+                  )}
+                  {i.phone && (
+                    <p style={{ margin: "0.25rem 0", fontSize: "0.9rem" }}>
+                      <strong>Phone:</strong> {i.phone}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleRemoveInstructor(i._id)}
+                  style={{
+                    padding: "0.4rem 0.8rem",
+                    borderRadius: "6px",
+                    fontWeight: 500,
+                    color: "#fff",
+                    background: "#dc2626",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
             </li>
           ))}
         </ul>
