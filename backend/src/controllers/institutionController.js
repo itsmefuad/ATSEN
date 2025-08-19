@@ -176,6 +176,40 @@ export async function getInstitutionInstructors(req, res) {
   }
 }
 
+// List all students attached to an institution
+export async function getInstitutionStudents(req, res) {
+  try {
+    const { idOrName } = req.params;
+    const { search = "" } = req.query;
+
+    if (!idOrName) {
+      return res.status(400).json({ message: "idOrName parameter is required" });
+    }
+
+    const institution = await findInstitutionByIdOrName(idOrName);
+    if (!institution) {
+      return res.status(404).json({ message: "Institution not found" });
+    }
+
+    const instId = institution._id;
+    const term = search.trim();
+
+    const filter = {
+      institutions: instId
+    };
+
+    if (term) {
+      filter.name = { $regex: term, $options: "i" };
+    }
+
+    const list = await Student.find(filter, "-password").lean();
+    return res.json(list);
+  } catch (err) {
+    console.error("Get students error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+
 
 
 
@@ -257,8 +291,8 @@ export async function getInstitutionDashboard(req, res) {
     ] = await Promise.all([
       Room.countDocuments({ institution: instId }),
       Room.countDocuments({ institution: instId, active: true }),
-      Student.countDocuments({ institution: instId }),
-      Student.countDocuments({ institution: instId}),
+      Student.countDocuments({ institutions: instId }),
+      Student.countDocuments({ institutions: instId}),
       Instructor.countDocuments({ institutions: instId })
     ]);
 
@@ -324,33 +358,70 @@ export const updateInstitutionSettings = async (req, res) => {
 };
 export async function addStudent(req, res) {
   const { idOrName } = req.params;
-  const { studentId } = req.body;                // ← get it here
+  const { studentId } = req.body;
 
   if (!studentId) {
     return res.status(400).json({ message: "Missing studentId." });
   }
 
-  // find institution
-  const inst = await Institution.findOne(/* your filter */);
-  if (!inst) return res.status(404).json({ message: "Institution not found." });
+  try {
+    const inst = await findInstitutionByIdOrName(idOrName);
+    if (!inst) {
+      return res.status(404).json({ message: "Institution not found." });
+    }
 
-  // find the student
-  const student = await Student.findById(studentId);
-  if (!student) return res.status(404).json({ message: "Student not found." });
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
 
-  // prevent duplicates
-  if ((student.institutions || [])
-        .map(id => id.toString())
-        .includes(inst._id.toString())) {
-    return res.status(400).json({ message: "Already linked." });
+    const alreadyLinked = (student.institutions || [])
+      .map(id => id.toString())
+      .includes(inst._id.toString());
+
+    if (alreadyLinked) {
+      return res.status(400).json({ message: "Student already linked to this institution." });
+    }
+
+    student.institutions = student.institutions || [];
+    student.institutions.push(inst._id);
+    await student.save();
+
+    res.json({ message: "Student added to institution successfully." });
+  } catch (err) {
+    console.error("Add student error:", err);
+    return res.status(500).json({ message: "Server error." });
+  }
+}
+
+export async function removeStudent(req, res) {
+  const { idOrName } = req.params;
+  const { studentId } = req.body;
+
+  if (!studentId) {
+    return res.status(400).json({ message: "Missing studentId." });
   }
 
-  // push & save
-  student.institutions = student.institutions || [];
-  student.institutions.push(inst._id);
-  await student.save();
+  try {
+    const inst = await findInstitutionByIdOrName(idOrName);
+    if (!inst) {
+      return res.status(404).json({ message: "Institution not found." });
+    }
 
-  res.json({ message: "Added to institution." });
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    student.institutions = (student.institutions || [])
+      .filter(id => id.toString() !== inst._id.toString());
+    await student.save();
+
+    res.json({ message: "Student removed from institution successfully." });
+  } catch (err) {
+    console.error("Remove student error:", err);
+    return res.status(500).json({ message: "Server error." });
+  }
 }
 
 

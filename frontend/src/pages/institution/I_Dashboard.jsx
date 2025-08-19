@@ -141,24 +141,28 @@ export default function I_Dashboard() {
             </Link>
 
             {/* Active Students */}
-            <div
-              style={{
-                borderRadius: "0.75rem",
-                padding: "1rem 0.5rem",
-                textAlign: "center",
-                background: "#bbf7d0",
-                color: "#166534",
-                fontWeight: 600,
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                minWidth: 100,
-                flex: 1,
-              }}
+            <Link
+              to={`/${encodeURIComponent(idOrName)}/students`}
+              style={{ flex: 1, textDecoration: "none" }}
             >
-              <div style={{ fontSize: "1.2rem" }}>
-                {data.activeStudents ?? 0}
+              <div
+                style={{
+                  borderRadius: "0.75rem",
+                  padding: "1rem 0.5rem",
+                  textAlign: "center",
+                  background: "#bbf7d0",
+                  color: "#166534",
+                  fontWeight: 600,
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                  minWidth: 100,
+                }}
+              >
+                <div style={{ fontSize: "1.2rem" }}>
+                  {data.activeStudents ?? 0}
+                </div>
+                <div style={{ fontSize: "0.9rem" }}>Students</div>
               </div>
-              <div style={{ fontSize: "0.9rem" }}>Students</div>
-            </div>
+            </Link>
 
             {/* Total Instructors */}
             <Link

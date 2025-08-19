@@ -6,9 +6,11 @@ import {
   loginInstitution,
   getInstitutionDashboard,
   getInstitutionInstructors,
+  getInstitutionStudents,
   updateInstitutionSettings,
   addInstructorToInstitution,
-  addStudent
+  addStudent,
+  removeStudent
 } from "../controllers/institutionController.js";
 
 const router = Router();
@@ -20,6 +22,9 @@ router.post("/login",    loginInstitution);
 // List instructors for an institution
 router.get("/:idOrName/instructors", getInstitutionInstructors);
 
+// List students for an institution
+router.get("/:idOrName/students", getInstitutionStudents);
+
 // Add an instructor to an institution
 router.post("/:idOrName/add-instructor", addInstructorToInstitution);
 
@@ -30,5 +35,6 @@ router.get("/:idOrName/dashboard", getInstitutionDashboard);
 router.put("/:idOrName/settings", updateInstitutionSettings);
 
 router.post("/:idOrName/add-student", addStudent);
+router.post("/:idOrName/remove-student", removeStudent);
 
 export default router;
