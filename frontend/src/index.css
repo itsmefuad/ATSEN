@@ -62,3 +62,49 @@
 
 .glass-text-muted { color: rgba(255,255,255,0.75); }
 
+/* App background and main panel to emulate iOS-like liquid glass */
+.app-background {
+	background: radial-gradient(1200px 600px at 10% 10%, rgba(255,255,255,0.06), rgba(255,255,255,0) 8%),
+							radial-gradient(1000px 500px at 90% 90%, rgba(255,255,255,0.03), rgba(255,255,255,0) 8%),
+							linear-gradient(180deg, #4f9fff 0%, #6b5ef3 50%, #4b6cf0 100%);
+	background-blend-mode: overlay, overlay, normal;
+}
+
+.main-panel {
+	border-radius: 20px;
+	padding: 28px;
+	background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+	border: 1px solid rgba(255,255,255,0.08);
+	box-shadow: 0 30px 60px rgba(10,20,60,0.45), inset 0 1px 0 rgba(255,255,255,0.02);
+	backdrop-filter: blur(14px) saturate(130%);
+}
+
+.glass-surface {
+	border-radius: 12px;
+	background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+	border: 1px solid rgba(255,255,255,0.06);
+	box-shadow: 0 10px 24px rgba(8,18,45,0.35);
+	padding: 16px;
+}
+
+.glass-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 18px;
+	border-radius: 999px;
+	background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+	border: 1px solid rgba(255,255,255,0.08);
+	box-shadow: 0 8px 18px rgba(8,18,45,0.28);
+}
+
+/* Announcement card style used in listing */
+.announcement-card {
+	border-radius: 12px;
+	padding: 18px;
+	background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015));
+	border: 1px solid rgba(255,255,255,0.06);
+	box-shadow: 0 12px 30px rgba(8,18,45,0.25);
+}
+
+

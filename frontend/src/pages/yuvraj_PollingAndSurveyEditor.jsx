@@ -189,7 +189,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
   const prefix = institution ? `/${institution}/${role || 'student'}` : `/${role || 'student'}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-600 p-6">
+    <div className="min-h-screen app-background p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -206,8 +206,9 @@ const Yuvraj_PollingAndSurveyEditor = () => {
       </div>
 
       <div className="mx-auto max-w-3xl">
-        {/* glass card wrapper for the editor */}
-        <div className="glass-card p-6 shadow-2xl backdrop-blur">
+        {/* main glass panel wrapper */}
+        <div className="main-panel mx-auto">
+          <div className="glass-surface">
           {!historyOpen ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               {errorMessage && (
@@ -440,6 +441,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
             </div>
           )}
         </div>
+      </div>
 
         {showConfirmation && (
           <div className="fixed inset-0 flex items-center justify-center z-50">
