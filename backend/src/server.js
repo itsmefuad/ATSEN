@@ -17,6 +17,7 @@ import forumContentRoutes from "./routes/forumContentRoutes.js";
 import materialRoutes from "./routes/materialRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
+import PollingAndSurveyRoutes from "./routes/PollingAndSurveyRoutes.js";
 // ...existing code...
 
 dotenv.config();
@@ -70,6 +71,7 @@ app.use("/api/forum-content", forumContentRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/assessments", assessmentRoutes);
 app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
+app.use("/api/PollingAndSurvey", PollingAndSurveyRoutes);
 
 // connect to DB, then start the server
 connectDB().then(() => {

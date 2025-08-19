@@ -17,24 +17,29 @@ const Field = ({ label, children }) => (
 );
 
 const Yuvraj_AnnouncementEditor = () => {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params.id;
   const navigate = useNavigate();
-  const isCreate = id === "new";
+  // treat missing id (route /:institution/:role/announcements/new) as create mode
+  const isCreate = !id || id === "new";
   const [role, setRole] = useState("student");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [pinned, setPinned] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const { institution, role: roleParam } = useParams();
+  const { institution, role: roleParam } = params;
 
   useEffect(() => {
   setRole(roleParam || yuvrajGetRole());
-    if (!isCreate) {
+    // Only fetch when we have a concrete id to avoid calling the API with 'undefined'
+    if (!isCreate && id) {
       yuvrajGetAnnouncementById(id).then((d) => {
         if (!d) return;
         setTitle(d.title || "");
         setContent(d.content || "");
         setPinned(Boolean(d.pinned));
+      }).catch((err) => {
+        console.error('Failed to load announcement:', err);
       });
     }
   // ensure institution is set in localStorage (default to configured value)
