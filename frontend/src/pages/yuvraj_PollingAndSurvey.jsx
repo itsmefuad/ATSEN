@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { listPollingAndSurveys } from "../services/pollingandsurvey_api.js";
 import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
 import { useParams } from "react-router";
+import YuvrajNavbar from "../components/yuvraj_Navbar.jsx";
 
 const NavPill = ({ children, active = false }) => (
   <div
@@ -60,6 +61,7 @@ const Yuvraj_PollingAndSurvey = () => {
             <NavPill>Dashboard</NavPill>
             <NavPill>Notifications</NavPill>
             <NavPill>Profile</NavPill>
+            <YuvrajNavbar />
           </nav>
         </div>
 

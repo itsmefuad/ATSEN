@@ -4,6 +4,7 @@ import YuvrajAnnouncementCard from "../components/yuvraj_AnnouncementCard.jsx";
 import { yuvrajGetRole, yuvrajIsPrivileged } from "../services/yuvraj_announcements.js";
 import { yuvrajListAnnouncements } from "../services/yuvraj_announcements_api.js";
 import { yuvrajSeedData } from "../services/yuvraj_seed.js";
+import YuvrajNavbar from "../components/yuvraj_Navbar.jsx";
 
 const NavPill = ({ children, active = false }) => (
   <div
@@ -50,6 +51,7 @@ const Yuvraj_Announcements = () => {
             <NavPill>Dashboard</NavPill>
             <NavPill>Notifications</NavPill>
             <NavPill>Profile</NavPill>
+            <YuvrajNavbar />
           </nav>
         </div>
 
