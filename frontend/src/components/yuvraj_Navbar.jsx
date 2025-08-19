@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from "react-router";
+import GlassCard from './GlassCard';
 
 const YuvrajNavbar = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const YuvrajNavbar = () => {
   };
 
   return (
-    <div>
+    <GlassCard className="inline-block">
       <button
         className="btn btn-xs btn-outline"
         onClick={toggleDemoStudent}
@@ -35,7 +36,7 @@ const YuvrajNavbar = () => {
       >
         {isDemoStudent ? "Exit Demo" : "Demo Student"}
       </button>
-    </div>
+    </GlassCard>
   );
 };
 

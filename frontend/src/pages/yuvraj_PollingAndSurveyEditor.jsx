@@ -206,7 +206,8 @@ const Yuvraj_PollingAndSurveyEditor = () => {
       </div>
 
       <div className="mx-auto max-w-3xl">
-        <div className="rounded-3xl bg-white/10 p-6 shadow-2xl backdrop-blur">
+        {/* glass card wrapper for the editor */}
+        <div className="glass-card p-6 shadow-2xl backdrop-blur">
           {!historyOpen ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               {errorMessage && (
