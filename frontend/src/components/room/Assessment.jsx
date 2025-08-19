@@ -4,9 +4,8 @@ import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import CreateAssessment from "./CreateAssessment";
 import AssessmentCard from "./AssessmentCard";
-import CourseTimeline from "./CourseTimeline";
 
-const Assessment = ({ roomId, room }) => {
+const Assessment = ({ roomId }) => {
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -109,8 +108,6 @@ const Assessment = ({ roomId, room }) => {
         <Calendar className="h-6 w-6" />
         <h2 className="text-2xl font-bold">Assessment</h2>
       </div>
-
-      
 
       {/* Permanent Assessments */}
       <div className="space-y-4">

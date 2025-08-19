@@ -1,6 +1,5 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router";
-import { RoleProvider } from "./components/RoleContext.jsx";
 
 
 import InstitutionLayout from "./pages/institution/InstitutionLayout.jsx";
@@ -26,13 +25,11 @@ import Yuvraj_AnnouncementEditor from "./pages/yuvraj_AnnouncementEditor.jsx";
 import TimelineDemo from "./components/room/TimelineDemo.jsx";
 import Yuvraj_PollingAndSurvey from "./pages/yuvraj_PollingAndSurvey.jsx";
 import Yuvraj_PollingAndSurveyEditor from "./pages/yuvraj_PollingAndSurveyEditor.jsx";
-import RouteGuard from "./components/RouteGuard.jsx";
 
 export default function App() {
   return (
-    <RoleProvider>
-      <div data-theme="nord">
-        <Routes>
+    <div data-theme="nord">
+      <Routes>
         {/* Institution routes */}
         <Route path="/:idOrName" element={<InstitutionLayout />}>
           <Route index element={<I_Dashboard />} />
@@ -68,8 +65,7 @@ export default function App() {
               <Route path="/teacher/edit/room/:id" element={<T_Room />} />
               <Route path="/yuvraj/announcements" element={<Yuvraj_Announcements />} />
               <Route path="/yuvraj/announcements/:id" element={<Yuvraj_AnnouncementDetail />} />
-              <Route path="/yuvraj/admin/announcements/new" element={<Yuvraj_AnnouncementEditor />} />
-              <Route path="/yuvraj/admin/announcements/:id/edit" element={<Yuvraj_AnnouncementEditor />} />
+              <Route path="/yuvraj/admin/announcements/:id" element={<Yuvraj_AnnouncementEditor />} />
               
               {/* Demo route for timeline testing */}
               <Route path="/demo/timeline" element={<TimelineDemo />} />
@@ -80,27 +76,17 @@ export default function App() {
               <Route path="/:institution/:role/announcements/:id/edit" element={<Yuvraj_AnnouncementEditor />} />
               <Route path="/PollingAndSurvey" element={<Yuvraj_PollingAndSurvey />} />
               <Route path="/PollingAndSurvey/:id" element={<Yuvraj_PollingAndSurveyEditor />} />
+              <Route path="/PollingAndSurvey/new" element={<Yuvraj_PollingAndSurveyEditor />} />
               {/* New URL pattern: /:institution/:role/PollingAndSurvey */}
               <Route path="/:institution/:role/PollingAndSurvey" element={<Yuvraj_PollingAndSurvey />} />
               <Route path="/:institution/:role/PollingAndSurvey/:id" element={<Yuvraj_PollingAndSurveyEditor />} />
-              {/* Only allow new form creation for admin routes */}
-              <Route path="/:institution/admin/PollingAndSurvey/new" element={
-                <RouteGuard requirePrivileged={true}>
-                  <Yuvraj_PollingAndSurveyEditor />
-                </RouteGuard>
-              } />
-              <Route path="/:institution/instructor/PollingAndSurvey/new" element={
-                <RouteGuard requirePrivileged={true}>
-                  <Yuvraj_PollingAndSurveyEditor />
-                </RouteGuard>
-              } />
+              <Route path="/:institution/:role/PollingAndSurvey/new" element={<Yuvraj_PollingAndSurveyEditor />} />
         {/* Catch-all 404 */}
         <Route
           path="*"
           element={<p>Page not found: {window.location.pathname}</p>}
         />
-        </Routes>
-      </div>
-    </RoleProvider>
+      </Routes>
+    </div>
   );
 }

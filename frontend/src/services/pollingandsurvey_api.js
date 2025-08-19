@@ -1,5 +1,11 @@
-import { getInstitutionHeader } from '../components/RoleContext';
 const API = import.meta.env.VITE_API_URL || "http://localhost:5001";
+function getInstitutionHeader() {
+  try {
+    const inst = localStorage.getItem('yuvraj_institution');
+    if (inst) return { 'x-institution-id': inst };
+  } catch (e) {}
+  return {};
+}
 
 export async function listPollingAndSurveys(limit = 20) {
   const headers = getInstitutionHeader();
@@ -18,20 +24,13 @@ export async function getPollingAndSurveyById(id) {
 }
 
 export async function createPollingAndSurvey(body) {
-  // ensure body contains institution so backend can scope the item
-  const headersForInst = getInstitutionHeader();
-  const inst = headersForInst['x-institution-id'] || 'Brac University';
-  if (!body.institution) body.institution = inst;
-
-  const headers = {
-    "Content-Type": "application/json",
-    "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
-    ...headersForInst,
-  };
-  console.debug("createPollingAndSurvey ->", { url: `${API}/api/PollingAndSurvey`, headers, body });
   const r = await fetch(`${API}/api/PollingAndSurvey`, {
     method: "POST",
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+  "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
+  ...getInstitutionHeader(),
+    },
     body: JSON.stringify(body),
   });
   if (!r.ok) {
@@ -52,20 +51,13 @@ export async function createPollingAndSurvey(body) {
 }
 
 export async function updatePollingAndSurvey(id, body) {
-  // ensure body contains institution so backend can enforce scoping when header absent
-  const headersForInst = getInstitutionHeader();
-  const inst = headersForInst['x-institution-id'] || 'Brac University';
-  if (!body.institution) body.institution = inst;
-
-  const headers = {
-    "Content-Type": "application/json",
-    "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
-    ...headersForInst,
-  };
-  console.debug("updatePollingAndSurvey ->", { url: `${API}/api/PollingAndSurvey/${id}`, headers, body });
   const r = await fetch(`${API}/api/PollingAndSurvey/${id}`, {
     method: "PUT",
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+  "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "",
+  ...getInstitutionHeader(),
+    },
     body: JSON.stringify(body),
   });
   if (!r.ok) {
@@ -86,11 +78,9 @@ export async function updatePollingAndSurvey(id, body) {
 }
 
 export async function submitResponse(id, body) {
-  const headers = { "Content-Type": "application/json", ...getInstitutionHeader() };
-  console.debug("submitResponse ->", { url: `${API}/api/PollingAndSurvey/${id}/responses`, headers, body });
   const r = await fetch(`${API}/api/PollingAndSurvey/${id}/responses`, {
     method: "POST",
-    headers,
+    headers: { "Content-Type": "application/json", ...getInstitutionHeader() },
     body: JSON.stringify(body),
   });
   if (!r.ok) {

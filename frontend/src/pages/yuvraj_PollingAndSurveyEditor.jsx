@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useRole } from "../components/RoleContext.jsx";
-import { createPollingAndSurvey, updatePollingAndSurvey, getPollingAndSurveyById, submitResponse } from "../services/pollingandsurvey_api.js";
+import { useNavigate, useParams, useSearchParams } from "react-router";
+import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
+import {
+  createPollingAndSurvey,
+  getPollingAndSurveyById,
+  updatePollingAndSurvey,
+  submitResponse,
+  listResponses,
+  getPollingSummary,
+} from "../services/pollingandsurvey_api.js";
 
 const Field = ({ label, children }) => (
   <label className="form-control w-full">
@@ -17,7 +24,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isCreate = !id || id === "new";
-  const { role, setRole, institution: ctxInstitution, setInstitution } = useRole();
+  const [role, setRole] = useState("student");
   const [isPrivileged, setIsPrivileged] = useState(false);
   const [title, setTitle] = useState("");
   const [type, setType] = useState(searchParams.get("type") || "poll");
@@ -31,33 +38,15 @@ const Yuvraj_PollingAndSurveyEditor = () => {
   const { institution, role: roleParam } = useParams();
 
   useEffect(() => {
-    // Determine role: URL param > localStorage override > default
-  const currentRole = roleParam || role || "student";
-  setIsPrivileged(currentRole === 'admin' || currentRole === 'instructor');
-    
-    // ensure localStorage has an institution so other services send correct header
-  const effectiveInstitution = institution || ctxInstitution || "defaultInstitution"; // Persist under expected key for services
-  try { if (!ctxInstitution && institution) setInstitution(institution); } catch (e) {}
-    
-    // prevent students from accessing the create/new editor
-    if (isCreate && !isPrivileged) {
-      const effectiveInstitution = institution || "defaultInstitution";
-      const safePrefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${effectiveInstitution}/${role || 'student'}`;
-      navigate(`${safePrefix}/PollingAndSurvey`, { replace: true });
-      return;
-    }
-    
-    // For students viewing existing forms, ensure they can't change the form type
-    if (!isPrivileged && !isCreate) {
-      // Students should only see the form as it was created, not be able to modify type
-      // The type will be loaded from the existing form data
-    }
-    
+  setRole(roleParam || yuvrajGetRole());
+  setIsPrivileged(yuvrajIsPrivileged() || roleParam === 'admin' || roleParam === 'instructor');
+  // ensure localStorage has an institution so other services send correct header
+  const effectiveInstitution = institution || yuvrajGetInstitution();
+  try { yuvrajSetInstitution(effectiveInstitution); } catch (e) {}
     // open reports if URL contains #reports
     if (window.location && window.location.hash && window.location.hash.includes("reports")) {
       setHistoryOpen(true);
     }
-    
     if (!isCreate) {
       getPollingAndSurveyById(id).then((d) => {
         if (!d) return;
@@ -68,14 +57,15 @@ const Yuvraj_PollingAndSurveyEditor = () => {
         setStudentAnswers((d.questions || []).map(() => ""));
       });
     }
-  }, [id, isCreate, institution, roleParam, isPrivileged]);
+    // prevent students from accessing the create/new editor
+    if (isCreate && roleParam !== 'admin') {
+      const effectiveInstitution = institution || yuvrajGetInstitution();
+      const safePrefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${role || 'student'}`;
+      navigate(`${safePrefix}/PollingAndSurvey`, { replace: true });
+    }
+  }, [id, isCreate, institution, roleParam]);
 
   useEffect(() => {
-    // Only allow type changes for privileged users
-    if (!isPrivileged && !isCreate) {
-      return; // Students cannot change form type
-    }
-    
     if (type === "qna") {
       // ensure exactly one question for qna
       setQuestions((prev) => {
@@ -89,17 +79,17 @@ const Yuvraj_PollingAndSurveyEditor = () => {
         options: q.options && q.options.length ? q.options : ["", ""],
       })) : [{ text: "", options: ["", ""] }]));
     }
-  }, [type, isPrivileged, isCreate]);
+  }, [type]);
 
   useEffect(() => {
     if (!id) return;
     if (!isCreate) {
-      // listResponses(id).then(setResponses).catch(() => setResponses([])); // This line was removed as per the edit hint
+      listResponses(id).then(setResponses).catch(() => setResponses([]));
       if (historyOpen) {
-        // getPollingSummary(id).then((s) => { // This line was removed as per the edit hint
-        //   setResponses((prev) => prev || []);
-        //   setSummary(s);
-        // }).catch(() => setSummary(null));
+        getPollingSummary(id).then((s) => {
+          setResponses((prev) => prev || []);
+          setSummary(s);
+        }).catch(() => setSummary(null));
       }
     }
   }, [historyOpen, id]);
@@ -111,43 +101,24 @@ const Yuvraj_PollingAndSurveyEditor = () => {
     });
   }, [questions]);
 
-  // Prevent students from editing existing forms
-  if (!isPrivileged && !isCreate) {
-    // Students can only view and respond to forms, not edit them
-    // This is handled in the UI by hiding edit controls
-  }
-  
   if (role !== "admin" && !isCreate && type === "admin") {
     return <div className="p-6 text-white">Not allowed</div>;
   }
 
   const addQuestion = () => {
-    // Only privileged users can add questions
-    if (!isPrivileged) return;
     setQuestions((s) => [...s, { text: "", options: ["", ""] }]);
   };
 
   const updateQuestion = (idx, patch) => {
-    // Only privileged users can update questions
-    if (!isPrivileged) return;
     setQuestions((s) => s.map((q, i) => (i === idx ? { ...q, ...patch } : q)));
   };
 
   const removeQuestion = (idx) => {
-    // Only privileged users can remove questions
-    if (!isPrivileged) return;
     setQuestions((s) => s.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
-    
-    // Prevent students from submitting form updates
-    if (!isPrivileged && !isCreate) {
-      setErrorMessage("Students cannot modify forms.");
-      return;
-    }
-    
     setErrorMessage("");
     if (!title || !title.trim()) {
       setErrorMessage("Title is required.");
@@ -173,19 +144,18 @@ const Yuvraj_PollingAndSurveyEditor = () => {
     }
     try {
       const body = { title, type, questions, author: "Instructor" };
-      const effectiveInstitution = institution || "defaultInstitution"; // Placeholder
-      const safePrefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${role || 'student'}`;
+  const effectiveInstitution = institution || yuvrajGetInstitution();
+  const safePrefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${role || 'student'}`;
       if (isCreate) {
         await createPollingAndSurvey(body);
         setShowConfirmation(true);
         setTimeout(() => {
           setShowConfirmation(false);
-          // go back to the base list route
-          navigate(`/PollingAndSurvey`, { replace: true });
+          navigate(`${safePrefix}/PollingAndSurvey`, { replace: true });
         }, 1400);
       } else {
         await updatePollingAndSurvey(id, body);
-        navigate(`/PollingAndSurvey`, { replace: true });
+        navigate(`${safePrefix}/PollingAndSurvey`, { replace: true });
       }
     } catch (err) {
       console.error(err);
@@ -204,20 +174,11 @@ const Yuvraj_PollingAndSurveyEditor = () => {
         }
         return a;
       }) : questions.map((q) => q._selected || "");
-      // submit student response to backend
-      if (id) {
-        // Ensure backend receives the response and then redirect to results
-        await submitResponse(id, { user: 'Student', answers });
-      }
-      // show confirmation animation used for instructor create
+      await submitResponse(id, { user: "Student", answers });
+      // show same confirmation animation used for instructor create
       setShowConfirmation(true);
       setTimeout(() => {
         setShowConfirmation(false);
-        // After confirmation, go to the results view for this form (if id available)
-        if (id) {
-          // After submit, show results for the same form
-          navigate(`/PollingAndSurvey/${id}/results`, { replace: true });
-        }
       }, 1400);
     } catch (e) {
       console.error(e);
@@ -226,7 +187,6 @@ const Yuvraj_PollingAndSurveyEditor = () => {
   };
 
   const prefix = institution ? `/${institution}/${role || 'student'}` : `/${role || 'student'}`;
-  const encodedPrefix = institution ? `/${encodeURIComponent(institution)}/${role || 'student'}` : `/${role || 'student'}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-600 p-6">
@@ -260,20 +220,10 @@ const Yuvraj_PollingAndSurveyEditor = () => {
               )}
             </Field>
 
-            {/* Only show type switching for privileged users creating new forms */}
-            {(isPrivileged && isCreate) ? (
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setType("poll")} className={`rounded-full px-4 py-2 ${type === "poll" ? "bg-green-600 text-white" : "bg-white/20 text-white"}`}>Poll</button>
-                <button type="button" onClick={() => setType("qna")} className={`rounded-full px-4 py-2 ${type === "qna" ? "bg-green-600 text-white" : "bg-white/20 text-white"}`}>QnA</button>
-              </div>
-            ) : (
-              /* Show form type as read-only for students */
-              <div className="flex gap-2">
-                <div className={`rounded-full px-4 py-2 ${type === "poll" ? "bg-green-600 text-white" : "bg-blue-600 text-white"}`}>
-                  {(type || 'poll').toUpperCase()}
-                </div>
-              </div>
-            )}
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setType("poll")} className={`rounded-full px-4 py-2 ${type === "poll" ? "bg-green-600 text-white" : "bg-white/20 text-white"}`}>Poll</button>
+              <button type="button" onClick={() => setType("qna")} className={`rounded-full px-4 py-2 ${type === "qna" ? "bg-green-600 text-white" : "bg-white/20 text-white"}`}>QnA</button>
+            </div>
 
             {/* Scrollable card for questions */}
             <div className="max-h-[52vh] overflow-y-auto p-4 space-y-4">

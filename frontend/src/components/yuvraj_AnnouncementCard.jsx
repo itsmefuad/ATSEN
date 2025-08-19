@@ -1,9 +1,9 @@
 const YuvrajAnnouncementCard = ({ title, children }) => {
   return (
-    <div className="relative rounded-2xl border-2 border-white/20 bg-white/10 shadow-xl backdrop-blur hover:shadow-2xl transition-all duration-300 hover:scale-[1.002] hover:bg-white/15 overflow-hidden max-w-60pct">
+    <div className="rounded-2xl border border-base-200/60 bg-base-100/80 shadow-xl backdrop-blur">
       <div className="p-6">
-        <h3 className="text-2xl font-google-sans text-black drop-shadow-lg font-bold">{title}</h3>
-        <div className="mt-4 rounded-xl bg-white/20 p-5 text-black backdrop-blur">
+        <h3 className="text-2xl font-extrabold text-base-content/90">{title}</h3>
+        <div className="mt-4 rounded-xl bg-base-200/60 p-5 text-base-content/80">
           {children}
         </div>
       </div>
