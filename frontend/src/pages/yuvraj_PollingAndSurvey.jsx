@@ -73,45 +73,59 @@ const Yuvraj_PollingAndSurvey = () => {
             </>
           ) : (
             <div className="col-span-2 flex gap-2">
-              <button onClick={() => setTab('recent')} className={`px-4 py-2 rounded-full ${tab==='recent' ? 'bg-white/30 text-white' : 'bg-white/10 text-white/80'}`}>Recent</button>
-              <button onClick={() => setTab('existing')} className={`px-4 py-2 rounded-full ${tab==='existing' ? 'bg-white/30 text-white' : 'bg-white/10 text-white/80'}`}>Existing</button>
+              <button onClick={() => setTab('recent')} className={`glass-pill ${tab==='recent' ? 'bg-white/40' : 'bg-white/20'}`}>Recent</button>
+              <button onClick={() => setTab('all')} className={`glass-pill ${tab==='all' ? 'bg-white/40' : 'bg-white/20'}`}>All</button>
             </div>
           )}
         </div>
 
         <div className="rounded-3xl bg-white/20 p-5 shadow-2xl backdrop-blur">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-white/90">Recent forms</div>
-          </div>
-
-          <div className="space-y-3">
-            {list.length === 0 && (
-              <div className="text-white/80">No forms yet.</div>
-            )}
-            {list.map((it) => (
-              <div key={it.id} className="p-3 rounded-lg bg-white/10 text-white flex justify-between items-center">
-                <div className="flex justify-between items-center w-full">
-                  <div className="flex items-center gap-3">
-                    <span className={`px-2 py-1 rounded text-white text-xs font-semibold`} style={{background: it.type === 'poll' ? '#059669' : '#2563EB'}}>{(it.type || 'poll').toUpperCase()}</span>
+          {tab === 'recent' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(list.slice(0,4).length === 0) && (<div className="text-white/80">No forms yet.</div>)}
+              {list.slice(0,4).map((it) => (
+                <div key={it.id} className="announcement-card p-4 transform transition-all duration-300 hover:-translate-y-1">
+                  <div className="flex justify-between items-center">
                     <div>
-                      <div className="font-semibold">{it.title}</div>
+                      <div className="text-white font-semibold text-lg">{it.title}</div>
                       <div className="text-sm opacity-80">{it.type} • {new Date(it.createdAt).toLocaleString()}</div>
                     </div>
-                  </div>
-                  <div>
-                    {isPrivileged ? (
-                      <div className="flex gap-2">
-                        <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)} className="btn btn-ghost btn-sm">Edit</button>
-                        <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}#reports`)} className="btn btn-outline btn-sm">Results</button>
-                      </div>
-                    ) : (
-                      <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)} className="btn btn-primary btn-sm">Respond</button>
-                    )}
+                    <div>
+                      {isPrivileged ? (
+                        <div className="flex gap-2">
+                          <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)} className="btn btn-ghost btn-sm">Edit</button>
+                          <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}#reports`)} className="btn btn-outline btn-sm">Results</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)} className="btn btn-primary btn-sm">Respond</button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {(list.slice(0,12).length === 0) && (<div className="text-white/80">No forms yet.</div>)}
+              {list.slice(0,12).map((it) => (
+                <div key={it.id} className="p-3 announcement-card transform transition-all duration-200 hover:-translate-y-0.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-white">{it.title}</div>
+                      <div className="text-xs opacity-80">{it.type} • {new Date(it.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div>
+                      {isPrivileged ? (
+                        <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)} className="btn btn-ghost btn-sm">Edit</button>
+                      ) : (
+                        <button onClick={() => navigate(`${prefix}/PollingAndSurvey/${it.id}`)} className="btn btn-primary btn-sm">Respond</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

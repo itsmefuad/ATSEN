@@ -20,6 +20,7 @@ const Yuvraj_Announcements = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [role, setRole] = useState("student");
   const [isPrivileged, setIsPrivileged] = useState(false);
+  const [tab, setTab] = useState('recent');
   const navigate = useNavigate();
   const { institution, role: roleParam } = useParams();
 
@@ -28,7 +29,7 @@ const Yuvraj_Announcements = () => {
   setIsPrivileged(roleParam === 'admin' || roleParam === 'instructor' || yuvrajIsPrivileged());
   // persist institution for API header
   if (institution) { try { localStorage.setItem('yuvraj_institution', institution); } catch(e){} }
-    yuvrajListAnnouncements(7)
+  yuvrajListAnnouncements(12)
       .then(setAnnouncements)
       .catch(async () => {
         const seed = await yuvrajSeedData();
@@ -36,7 +37,8 @@ const Yuvraj_Announcements = () => {
       });
   }, []);
 
-  const visible = useMemo(() => announcements.slice(0, 7), [announcements]);
+  const recent = useMemo(() => announcements.slice(0, 4), [announcements]);
+  const all = useMemo(() => announcements.slice(0, 12), [announcements]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-600 p-6">
@@ -56,41 +58,55 @@ const Yuvraj_Announcements = () => {
         </div>
 
         <div className="rounded-3xl bg-white/20 p-5 shadow-2xl backdrop-blur">
-          <div
-            className="space-y-6 max-h-[70vh] overflow-y-auto pr-2"
-            style={{ scrollSnapType: "y proximity" }}
-          >
-            {visible.length === 0 && (
-              <YuvrajAnnouncementCard title="No announcements yet">
-                <p className="opacity-80">Announcements will appear here.</p>
-              </YuvrajAnnouncementCard>
-            )}
-
-            {visible.slice(0, 7).map((a) => (
-              <div
-                key={a.id}
-                className="scroll-snap-start transform transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-2xl"
-              >
-                <Link to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${a.id}`}>
-                  <YuvrajAnnouncementCard title={a.title}>
-                    <p className="line-clamp-3 opacity-80">{a.content}</p>
-                    <div className="mt-3 text-sm opacity-70">
-                      {new Date(a.createdAt).toLocaleString()} • {a.author}
-                    </div>
-                  </YuvrajAnnouncementCard>
-                </Link>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex gap-3">
+              <button onClick={() => setTab('recent')} className={`glass-pill ${tab==='recent' ? 'bg-white/40' : 'bg-white/20'}`}>Recent Announcements</button>
+              <button onClick={() => setTab('all')} className={`glass-pill ${tab==='all' ? 'bg-white/40' : 'bg-white/20'}`}>All Announcements</button>
+            </div>
+            <div className="text-white/80">{announcements.length} announcements available</div>
           </div>
 
-      {isPrivileged && (
+          {tab === 'recent' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto pr-2" style={{ scrollSnapType: 'y proximity' }}>
+              {(recent.length === 0) && (
+                <YuvrajAnnouncementCard title="No announcements yet">
+                  <p className="opacity-80">Announcements will appear here.</p>
+                </YuvrajAnnouncementCard>
+              )}
+              {recent.map((a) => (
+                <div key={a.id} className="transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl announcement-card">
+                  <Link to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${a.id}`}>
+                    <YuvrajAnnouncementCard title={a.title} className="p-4">
+                      <p className="line-clamp-3 opacity-80">{a.content}</p>
+                      <div className="mt-3 text-sm opacity-70">{new Date(a.createdAt).toLocaleString()} • {a.author}</div>
+                    </YuvrajAnnouncementCard>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto pr-2">
+              {(all.length === 0) && (
+                <div className="announcement-card p-4">No announcements yet.</div>
+              )}
+              {all.map((a) => (
+                <Link key={a.id} to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${a.id}`} className="transform transition-all duration-250 ease-out hover:-translate-y-0.5 hover:shadow-xl">
+                  <div className="announcement-card p-3 text-white/90">
+                    <div className="flex justify-between items-start">
+                      <div className="font-semibold text-lg">{a.title}</div>
+                      <div className="text-sm opacity-60">{new Date(a.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div className="mt-2 text-sm opacity-80 line-clamp-2">{a.content}</div>
+                    <div className="mt-3 text-xs opacity-70">By: {a.author}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {isPrivileged && (
             <div className="mt-6 flex justify-end">
-              <button
-                className="btn btn-primary"
-        onClick={() => navigate(`/${institution || 'yuvraj'}/${role || 'admin'}/announcements/new`)}
-              >
-                Create Announcement
-              </button>
+              <button className="btn btn-primary" onClick={() => navigate(`/${institution || 'yuvraj'}/${role || 'admin'}/announcements/new`)}>Create Announcement</button>
             </div>
           )}
         </div>
