@@ -1,6 +1,6 @@
 // frontend/src/pages/institution/AddRoom.jsx
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router";
+import { useParams, useNavigate, Link } from "react-router-dom";
 
 export default function AddRoom() {
   const { idOrName }         = useParams();
@@ -62,7 +62,7 @@ export default function AddRoom() {
       const res = await fetch(
         `http://localhost:5001/api/institutions/${encodeURIComponent(
           idOrName
-        )}/add-room`,
+        )}/rooms`,
         {
           method:  "POST",
           headers: { "Content-Type": "application/json" },

@@ -1,23 +1,40 @@
-// backend/routes/institutionRoutes.js
+// backend/src/routes/institutionRoutes.js
 
 import { Router } from "express";
 import {
+  registerInstitution,
+  loginInstitution,
   getInstitutionDashboard,
-  getInstitutionInstructors
+  getInstitutionInstructors,
+  getInstitutionStudents,
+  updateInstitutionSettings,
+  addInstructorToInstitution,
+  addStudent,
+  removeStudent
 } from "../controllers/institutionController.js";
 
 const router = Router();
 
-// List instructors for this institution (optionally filtered by ?search=…)
-router.get(
-  "/:idOrName/instructors",
-  getInstitutionInstructors
-);
+// Register and login
+router.post("/register", registerInstitution);
+router.post("/login",    loginInstitution);
 
-// Dynamic: idOrName can be ObjectId or name (case-insensitive exact match)
-router.get(
-  "/:idOrName/dashboard",
-  getInstitutionDashboard
-);
+// List instructors for an institution
+router.get("/:idOrName/instructors", getInstitutionInstructors);
+
+// List students for an institution
+router.get("/:idOrName/students", getInstitutionStudents);
+
+// Add an instructor to an institution
+router.post("/:idOrName/add-instructor", addInstructorToInstitution);
+
+// Fetch dashboard data
+router.get("/:idOrName/dashboard", getInstitutionDashboard);
+
+// Update institution settings
+router.put("/:idOrName/settings", updateInstitutionSettings);
+
+router.post("/:idOrName/add-student", addStudent);
+router.post("/:idOrName/remove-student", removeStudent);
 
 export default router;

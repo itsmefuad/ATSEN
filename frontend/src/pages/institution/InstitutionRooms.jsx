@@ -7,12 +7,11 @@ export default function InstitutionRooms() {
   const [rooms, setRooms]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg]   = useState("");
-
-  // constant light-orange for all bars
   const BAR_COLOR = "hsl(30, 100%, 85%)";
 
   useEffect(() => {
     if (!idOrName) return;
+
     fetch(
       `http://localhost:5001/api/institutions/${encodeURIComponent(
         idOrName
@@ -26,11 +25,18 @@ export default function InstitutionRooms() {
         setRooms(json);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("Error loading rooms:", err);
-        setErrMsg("Failed to load rooms.");
+      .catch(async (err) => {
+        // try to pull the real error text
+        let msg = err.message;
+        if (err.response) {
+          msg = await err.response.text();
+        }
+        console.error("Error loading rooms:", msg);
+        setErrMsg(msg);
         setLoading(false);
       });
+
+
   }, [idOrName]);
 
   if (loading) return <p>Loading rooms…</p>;
@@ -52,48 +58,70 @@ export default function InstitutionRooms() {
               ? room.instructors.length
               : 0;
 
+            const formattedTime = room.createdAt
+              ? new Date(room.createdAt).toLocaleString()
+              : "N/A";
+
             return (
               <li
                 key={room._id}
                 style={{
                   display:        "flex",
-                  alignItems:     "center",
-                  justifyContent: "space-between",
-                  marginBottom:   "0.75rem",
+                  flexDirection:  "column",
                   padding:        "0.75rem 1rem",
+                  marginBottom:   "0.75rem",
                   borderRadius:   "0.5rem",
                   background:     BAR_COLOR,
                   color:          "#0b1220",
                 }}
               >
-                <div>
-                  <strong style={{ fontSize: "1.1rem" }}>
-                    {room.room_name}
-                  </strong>
-                  <div
-                    style={{
-                      fontSize:  "0.9rem",
-                      color:     "#333",
-                      marginTop: "0.25rem",
-                    }}
-                  >
-                    {studentCount} student
-                    {studentCount !== 1 ? "s" : ""} &bull;{" "}
-                    {instructorCount} instructor
-                    {instructorCount !== 1 ? "s" : ""}
-                  </div>
-                </div>
-                <Link
-                  to={`/${encodeURIComponent(idOrName)}/rooms/${room._id}`}
+                <div
                   style={{
-                    fontSize:       "0.9rem",
-                    textDecoration: "none",
-                    color:          "#0b1220",
-                    fontWeight:     600,
+                    display:        "flex",
+                    alignItems:     "center",
+                    justifyContent: "space-between",
                   }}
                 >
-                  View
-                </Link>
+                  <div>
+                    <strong style={{ fontSize: "1.1rem" }}>
+                      {room.room_name}
+                    </strong>
+                    <div
+                      style={{
+                        fontSize:  "0.9rem",
+                        color:     "#333",
+                        marginTop: "0.25rem",
+                      }}
+                    >
+                      {studentCount} student
+                      {studentCount !== 1 ? "s" : ""} &bull;{" "}
+                      {instructorCount} instructor
+                      {instructorCount !== 1 ? "s" : ""}
+                    </div>
+                  </div>
+                  <Link
+                    to={`/${encodeURIComponent(idOrName)}/rooms/${room._id}`}
+                    style={{
+                      fontSize:       "0.9rem",
+                      textDecoration: "none",
+                      color:          "#0b1220",
+                      fontWeight:     600,
+                    }}
+                  >
+                    View
+                  </Link>
+                </div>
+
+                {/* createdTime display */}
+                <div
+                  style={{
+                    fontSize:  "0.8rem",
+                    color:     "#555",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  Created: {formattedTime}
+                </div>
               </li>
             );
           })}
