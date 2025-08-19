@@ -1,25 +1,37 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, Loader } from "lucide-react";
+import { MessageSquare, Loader, Megaphone, MessageCircle } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import CreateForumContent from "./CreateForumContent";
 import ForumContentCard from "./ForumContentCard";
 
 const DiscussionForum = ({ roomId }) => {
-  const [announcements, setAnnouncements] = useState([]);
+  const [forumContent, setForumContent] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [animatingAnnouncements, setAnimatingAnnouncements] = useState(new Set());
+  const [animatingContent, setAnimatingContent] = useState(new Set());
 
-  const fetchAnnouncements = async () => {
+  const fetchForumContent = async () => {
     try {
-      console.log("Fetching announcements for room:", roomId);
+      console.log("Fetching forum content for room:", roomId);
       const response = await api.get(`/forum-content/room/${roomId}`);
-      console.log("Fetched announcements:", response.data);
-      setAnnouncements(response.data);
+      console.log("Fetched forum content:", response.data);
+      
+      // Sort content: pinned first (by pin time), then by creation date
+      const sortedContent = response.data.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        if (a.isPinned && b.isPinned) {
+          // If both are pinned, sort by updatedAt (latest pinned first)
+          return new Date(b.updatedAt) - new Date(a.updatedAt);
+        }
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      
+      setForumContent(sortedContent);
     } catch (error) {
-      console.error("Error fetching announcements:", error);
+      console.error("Error fetching forum content:", error);
       console.error("Error response:", error.response?.data);
-      toast.error("Failed to fetch announcements");
+      toast.error("Failed to fetch forum content");
     } finally {
       setLoading(false);
     }
@@ -28,15 +40,15 @@ const DiscussionForum = ({ roomId }) => {
   useEffect(() => {
     console.log("DiscussionForum useEffect triggered with roomId:", roomId);
     if (roomId) {
-      fetchAnnouncements();
+      fetchForumContent();
     }
   }, [roomId]);
 
   const handleAnnouncementCreated = (newAnnouncement) => {
-    setAnnouncements(prev => {
-      // Sort announcements: pinned first (by pin time), then by creation date
-      const updatedAnnouncements = [...prev, newAnnouncement];
-      return updatedAnnouncements.sort((a, b) => {
+    setForumContent(prev => {
+      // Sort content: pinned first (by pin time), then by creation date
+      const updatedContent = [...prev, newAnnouncement];
+      return updatedContent.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
         if (a.isPinned && b.isPinned) {
@@ -48,18 +60,22 @@ const DiscussionForum = ({ roomId }) => {
     });
   };
 
+  // Separate announcements and discussions for teachers to see both
+  const announcements = forumContent.filter(item => item.contentType === 'announcement');
+  const discussions = forumContent.filter(item => item.contentType === 'discussion');
+
   const handleAnnouncementUpdated = (updatedAnnouncement) => {
-    // Add animation tracking for the updated announcement
-    setAnimatingAnnouncements(prev => new Set([...prev, updatedAnnouncement._id]));
+    // Add animation tracking for the updated content
+    setAnimatingContent(prev => new Set([...prev, updatedAnnouncement._id]));
     
-    setAnnouncements(prev => {
-      // Update the announcement and re-sort
-      const updatedAnnouncements = prev.map(announcement => 
-        announcement._id === updatedAnnouncement._id ? updatedAnnouncement : announcement
+    setForumContent(prev => {
+      // Update the content and re-sort
+      const updatedContent = prev.map(content => 
+        content._id === updatedAnnouncement._id ? updatedAnnouncement : content
       );
       
-      // Sort announcements: pinned first (by pin time), then by creation date
-      return updatedAnnouncements.sort((a, b) => {
+      // Sort content: pinned first (by pin time), then by creation date
+      return updatedContent.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
         if (a.isPinned && b.isPinned) {
@@ -72,7 +88,7 @@ const DiscussionForum = ({ roomId }) => {
     
     // Remove animation tracking after animation completes
     setTimeout(() => {
-      setAnimatingAnnouncements(prev => {
+      setAnimatingContent(prev => {
         const newSet = new Set(prev);
         newSet.delete(updatedAnnouncement._id);
         return newSet;
@@ -81,7 +97,7 @@ const DiscussionForum = ({ roomId }) => {
   };
 
   const handleAnnouncementDeleted = (deletedId) => {
-    setAnnouncements(prev => prev.filter(announcement => announcement._id !== deletedId));
+    setForumContent(prev => prev.filter(content => content._id !== deletedId));
   };
 
   if (loading) {
@@ -93,7 +109,7 @@ const DiscussionForum = ({ roomId }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center gap-2">
         <MessageSquare className="h-6 w-6 text-primary" />
         <h2 className="text-2xl font-bold">Discussion Forum</h2>
@@ -104,42 +120,95 @@ const DiscussionForum = ({ roomId }) => {
         onAnnouncementCreated={handleAnnouncementCreated}
       />
 
-      {announcements.length === 0 ? (
-        <div className="text-center py-12">
-          <MessageSquare className="h-12 w-12 text-base-content/30 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-base-content/70 mb-2">
-            No announcements yet
-          </h3>
-          <p className="text-base-content/50">
-            Be the first to create an announcement for this room!
-          </p>
+      {/* Teacher Announcements Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Megaphone className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Announcements</h3>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {announcements.map((announcement, index) => (
-            <div
-              key={announcement._id}
-              className={`transition-all duration-700 ease-in-out ${
-                animatingAnnouncements.has(announcement._id) 
-                  ? 'animate-pulse shadow-xl scale-105' 
-                  : ''
-              }`}
-              style={{
-                transform: `translateY(0px)`,
-                transitionDelay: `${index * 30}ms`,
-                order: index,
-                zIndex: animatingAnnouncements.has(announcement._id) ? 10 : 1
-              }}
-            >
-              <ForumContentCard
-                announcement={announcement}
-                onUpdate={handleAnnouncementUpdated}
-                onDelete={handleAnnouncementDeleted}
-              />
-            </div>
-          ))}
+        
+        {announcements.length === 0 ? (
+          <div className="text-center py-8">
+            <Megaphone className="h-10 w-10 text-base-content/30 mx-auto mb-3" />
+            <h4 className="text-md font-medium text-base-content/70 mb-1">
+              No announcements yet
+            </h4>
+            <p className="text-sm text-base-content/50">
+              Create your first announcement for this room!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {announcements.map((announcement, index) => (
+              <div
+                key={announcement._id}
+                className={`transition-all duration-700 ease-in-out ${
+                  animatingContent.has(announcement._id) 
+                    ? 'animate-pulse shadow-xl scale-105' 
+                    : ''
+                }`}
+                style={{
+                  transform: `translateY(0px)`,
+                  transitionDelay: `${index * 30}ms`,
+                  order: index,
+                  zIndex: animatingContent.has(announcement._id) ? 10 : 1
+                }}
+              >
+                <ForumContentCard
+                  announcement={announcement}
+                  onUpdate={handleAnnouncementUpdated}
+                  onDelete={handleAnnouncementDeleted}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Student Discussions Section */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="h-5 w-5 text-secondary" />
+          <h3 className="text-lg font-semibold">Class Discussions</h3>
         </div>
-      )}
+        
+        {discussions.length === 0 ? (
+          <div className="text-center py-8">
+            <MessageCircle className="h-10 w-10 text-base-content/30 mx-auto mb-3" />
+            <h4 className="text-md font-medium text-base-content/70 mb-1">
+              No discussions yet
+            </h4>
+            <p className="text-sm text-base-content/50">
+              Students can start discussions here!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {discussions.map((discussion, index) => (
+              <div
+                key={discussion._id}
+                className={`transition-all duration-700 ease-in-out ${
+                  animatingContent.has(discussion._id) 
+                    ? 'animate-pulse shadow-xl scale-105' 
+                    : ''
+                }`}
+                style={{
+                  transform: `translateY(0px)`,
+                  transitionDelay: `${index * 30}ms`,
+                  order: index,
+                  zIndex: animatingContent.has(discussion._id) ? 10 : 1
+                }}
+              >
+                <ForumContentCard
+                  announcement={discussion}
+                  onUpdate={handleAnnouncementUpdated}
+                  onDelete={handleAnnouncementDeleted}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

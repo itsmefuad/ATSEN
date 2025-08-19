@@ -1,9 +1,10 @@
+// frontend/src/pages/institution/I_Dashboard.jsx
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router";  
+import { useParams, Link } from "react-router-dom";
 
 export default function I_Dashboard() {
   const { idOrName } = useParams();
-  const [data, setData]   = useState(null);
+  const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg]   = useState("");
 
@@ -14,18 +15,18 @@ export default function I_Dashboard() {
         idOrName
       )}/dashboard`
     )
-      .then(async res => {
+      .then(async (res) => {
         if (!res.ok) {
           const text = await res.text();
           throw new Error(text || `Error ${res.status}`);
         }
         return res.json();
       })
-      .then(json => {
+      .then((json) => {
         setData(json);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setErrMsg("Failed to load dashboard data.");
         setLoading(false);
@@ -33,16 +34,8 @@ export default function I_Dashboard() {
   }, [idOrName]);
 
   if (loading) return <p>Loading...</p>;
-  if (errMsg)   return <p>{errMsg}</p>;
-  if (!data)    return <p>No data available</p>;
-
-  const bubbleBase = {
-    borderRadius: "1rem",
-    padding: "1rem 2rem",
-    minWidth: "160px",
-    textAlign: "center",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  };
+  if (errMsg) return <p>{errMsg}</p>;
+  if (!data)  return <p>No data available</p>;
 
   const addBtnStyle = {
     textDecoration: "none",
@@ -57,72 +50,157 @@ export default function I_Dashboard() {
 
   // Pencil SVG icon
   const pencilIcon = (
-    <svg width="16" height="16" fill="none" viewBox="0 0 20 20" style={{ verticalAlign: "middle", marginRight: 6 }}>
-      <path d="M14.85 2.85a2.12 2.12 0 0 1 3 3l-9.5 9.5-4 1 1-4 9.5-9.5Zm2.12-2.12a4.12 4.12 0 0 0-5.83 0l-9.5 9.5A2 2 0 0 0 1 11.34l-1 4A2 2 0 0 0 3.66 19l4-1a2 2 0 0 0 1.41-1.41l9.5-9.5a4.12 4.12 0 0 0 0-5.83Z" fill="#2563eb"/>
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 20 20"
+      style={{ verticalAlign: "middle", marginRight: 6 }}
+    >
+      <path
+        d="M14.85 2.85a2.12 2.12 0 0 1 3 3l-9.5 9.5-4 1 1-4 9.5-9.5Zm2.12-2.12a4.12 4.12 0 0 0-5.83 0l-9.5 9.5A2 2 0 0 0 1 11.34l-1 4A2 2 0 0 0 3.66 19l4-1a2 2 0 0 0 1.41-1.41l9.5-9.5a4.12 4.12 0 0 0 0-5.83Z"
+        fill="#2563eb"
+      />
     </svg>
   );
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1 style={{ fontSize: "2.5rem", margin: 0 }}>Dashboard</h1>
-      <div style={{
-        display: "flex",
-        gap: "2.5rem",
-        marginTop: "2rem",
-        alignItems: "flex-start",
-        justifyContent: "center",
-      }}>
-        {/* Left Section: Buttons */}
-        <div style={{ flex: 1, maxWidth: 480, display: "flex", flexDirection: "column", minWidth: 320 }}>
+      <h1
+        style={{
+          fontSize: "2.5rem",
+          margin: 0,
+          textAlign: "left",
+          marginTop: 0,
+          paddingTop: 0,
+        }}
+      >
+        Dashboard
+      </h1>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+          gap: "3rem",
+          marginTop: "2rem",
+        }}
+      >
+        {/* Left Section */}
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: "1rem",
+            padding: "2rem 1.5rem",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            minWidth: 320,
+            maxWidth: 420,
+            width: "fit-content",
+          }}
+        >
           {/* Stats */}
           <div
             style={{
+              background: "#e0f2fe",
+              borderRadius: "0.75rem",
+              padding: "1rem",
+              marginBottom: "1.5rem",
+              width: "100%",
               display: "flex",
               gap: "1rem",
-              flexWrap: "wrap",
-              marginBottom: "1.5rem",
+              flexWrap: "nowrap",
+              justifyContent: "center",
             }}
           >
+            {/* Active Rooms */}
             <Link
               to={`/${encodeURIComponent(idOrName)}/rooms`}
-              style={{ textDecoration: "none" }}
+              style={{ flex: 1, textDecoration: "none" }}
             >
-              <div style={{ ...bubbleBase, background: "#e0f2fe" }}>
-                <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+              <div
+                style={{
+                  borderRadius: "0.75rem",
+                  padding: "1rem 0.5rem",
+                  textAlign: "center",
+                  background: "#bbf7d0",
+                  color: "#166534",
+                  fontWeight: 600,
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                  minWidth: 100,
+                }}
+              >
+                <div style={{ fontSize: "1.2rem" }}>
                   {data.totalRooms ?? 0}
                 </div>
-                <div style={{ fontSize: "0.9rem", color: "#333" }}>
-                  Active Rooms
-                </div>
+                <div style={{ fontSize: "0.9rem" }}>Rooms</div>
               </div>
             </Link>
 
-            <div style={{ ...bubbleBase, background: "#dcfce7" }}>
-              <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
-                {data.activeStudents ?? 0}
+            {/* Active Students */}
+            <Link
+              to={`/${encodeURIComponent(idOrName)}/students`}
+              style={{ flex: 1, textDecoration: "none" }}
+            >
+              <div
+                style={{
+                  borderRadius: "0.75rem",
+                  padding: "1rem 0.5rem",
+                  textAlign: "center",
+                  background: "#bbf7d0",
+                  color: "#166534",
+                  fontWeight: 600,
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                  minWidth: 100,
+                }}
+              >
+                <div style={{ fontSize: "1.2rem" }}>
+                  {data.activeStudents ?? 0}
+                </div>
+                <div style={{ fontSize: "0.9rem" }}>Students</div>
               </div>
-              <div style={{ fontSize: "0.9rem", color: "#333" }}>
-                Active Students
-              </div>
-            </div>
+            </Link>
 
-            <div style={{ ...bubbleBase, background: "#fde68a" }}>
-              <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
-                {data.activeInstructors ?? 0}
+            {/* Total Instructors */}
+            <Link
+              to={`/${encodeURIComponent(idOrName)}/instructors`}
+              style={{ flex: 1, textDecoration: "none" }}
+            >
+              <div
+                style={{
+                  borderRadius: "0.75rem",
+                  padding: "1rem 0.5rem",
+                  textAlign: "center",
+                  background: "#bbf7d0",
+                  color: "#166534",
+                  fontWeight: 600,
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                  minWidth: 100,
+                }}
+              >
+                <div style={{ fontSize: "1.2rem" }}>
+                  {data.totalInstructors ?? 0}
+                </div>
+                <div style={{ fontSize: "0.9rem" }}>Instructors</div>
               </div>
-              <div style={{ fontSize: "0.9rem", color: "#333" }}>
-                Active Instructors
-              </div>
-            </div>
+            </Link>
           </div>
 
           {/* Add Buttons */}
           <div
             style={{
+              background: "#f1f5f9",
+              borderRadius: "0.75rem",
+              padding: "1rem",
+              marginBottom: "1.5rem",
+              width: "100%",
               display: "flex",
               gap: "0.75rem",
-              flexWrap: "wrap",
-              marginBottom: "1.5rem",
+              flexWrap: "nowrap",
+              justifyContent: "center",
             }}
           >
             <Link
@@ -146,35 +224,45 @@ export default function I_Dashboard() {
           </div>
         </div>
 
-        {/* Right Section: Institution Details */}
-        <div style={{
-          flex: 1,
-          background: "#f8fafc",
-          borderRadius: "1rem",
-          padding: "2rem",
-          minWidth: 320,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
-        }}>
+        {/* Right Section */}
+        <div
+          style={{
+            background: "#f8fafc",
+            borderRadius: "1rem",
+            padding: "2rem",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            minWidth: 320,
+            maxWidth: 420,
+            width: "fit-content",
+            margin: "0 auto",
+          }}
+        >
           <h2 style={{ marginTop: 0, marginBottom: "1.2rem", fontSize: "1.5rem" }}>
             {data.name}
           </h2>
           <div style={{ marginBottom: "0.8rem" }}>
             <strong>Description:</strong>
-            <div style={{ marginLeft: 8, color: "#444" }}>{data.description || <span style={{ color: "#aaa" }}>No description</span>}</div>
+            <div style={{ marginLeft: 8, color: "#444" }}>
+              {data.description || (
+                <span style={{ color: "#aaa" }}>No description</span>
+              )}
+            </div>
           </div>
           <div style={{ marginBottom: "0.8rem" }}>
             <strong>EIIN:</strong>
-            <span style={{ marginLeft: 8 }}>{data.eiin || <span style={{ color: "#aaa" }}>N/A</span>}</span>
+            <span style={{ marginLeft: 8 }}>
+              {data.eiin || <span style={{ color: "#aaa" }}>N/A</span>}
+            </span>
           </div>
           <div style={{ marginBottom: "0.8rem" }}>
             <strong>Address:</strong>
-            <span style={{ marginLeft: 8 }}>{data.address || <span style={{ color: "#aaa" }}>N/A</span>}</span>
+            <span style={{ marginLeft: 8 }}>
+              {data.address || <span style={{ color: "#aaa" }}>N/A</span>}
+            </span>
           </div>
-          <div style={{ flex: 1 }} /> {/* push button to bottom */}
-          {/* Edit Institution Details Button */}
           <Link
             to={`/${encodeURIComponent(idOrName)}/settings`}
             style={{
@@ -187,7 +275,8 @@ export default function I_Dashboard() {
               background: "#2563eb",
               border: "none",
               textDecoration: "none",
-              marginTop: "auto"
+              marginTop: "1.5rem",
+              alignSelf: "flex-start",
             }}
           >
             {pencilIcon}

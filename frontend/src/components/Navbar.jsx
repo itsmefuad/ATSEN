@@ -1,7 +1,39 @@
-import { Link } from "react-router";
-import { CircleUserRoundIcon, MenuIcon } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router";
+import { CircleUserRoundIcon, MenuIcon, BookOpen, User, LogOut } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 const Navbar = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  
+  // Determine if user is on student or teacher routes
+  const isStudent = location.pathname.startsWith('/student');
+  const isTeacher = location.pathname.startsWith('/teacher');
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+  
+  const getTitle = () => {
+    if (isStudent) return `Student: ${user?.name || 'Dashboard'}`;
+    if (isTeacher) return `Teacher: ${user?.name || 'Dashboard'}`;
+    return user?.name || "ATSEN";
+  };
+  
+  const getProfileLink = () => {
+    if (isStudent) return "/student/profile";
+    if (isTeacher) return "/teacher/dashboard";
+    return "/";
+  };
+  
+  const getDashboardLink = () => {
+    if (isStudent) return "/student/dashboard";
+    if (isTeacher) return "/teacher/dashboard";
+    return "/";
+  };
+
   return (
     <div className="navbar bg-base-300">
       <div className="flex-none m-4">
@@ -25,10 +57,16 @@ const Navbar = () => {
             <ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
               {/* Sidebar content here */}
               <li>
-                <a>Sidebar Item 1</a>
+                <Link to={getDashboardLink()}>
+                  <BookOpen className="size-5" />
+                  Dashboard
+                </Link>
               </li>
               <li>
-                <a>Sidebar Item 2</a>
+                <Link to={getProfileLink()}>
+                  <User className="size-5" />
+                  Profile
+                </Link>
               </li>
             </ul>
           </div>
@@ -36,34 +74,18 @@ const Navbar = () => {
       </div>
 
       <div className="flex-1">
-        {/* <a className="btn btn-ghost text-xl">Teacher's Dashboard</a> */}
         <h1 className="text-3xl font-bold text-primary font-mono tracking-tight">
-          Teacher's Dashboard
+          {getTitle()}
         </h1>
       </div>
 
       <div className="flex-none m-4">
-        <Link to={"/teacher/dashboard"} className="btn btn-Neutral">
-          <CircleUserRoundIcon className="size-5" />
-          <span>Profile</span>{" "}
-        </Link>
+        <button onClick={handleLogout} className="btn btn-error">
+          <LogOut className="size-5" />
+          <span>Logout</span>
+        </button>
       </div>
     </div>
-    // <header className="bg-base-300 border-base-content/10">
-    //   <div className="mx-auto p-4">
-    //     <div className="flex justify-between">
-    //       <div className="flex items-center gap-4">
-    //         <MenuIcon className="size-5" />
-    //       </div>
-    //       <div className="flex items-center">
-    //         <Link to={"/teacher/classroom/:id"} className="btn btn-Neutral">
-    //           <CircleUserRoundIcon className="size-5" />
-    //           <span>Profile</span>
-    //         </Link>
-    //       </div>
-    //     </div>
-    //   </div>
-    // </header>
   );
 };
 
