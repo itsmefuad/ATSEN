@@ -107,4 +107,17 @@
 	box-shadow: 0 12px 30px rgba(8,18,45,0.25);
 }
 
+/* scrollable recent list container */
+.recent-scroll {
+	max-height: 70vh;
+	overflow-y: auto;
+	padding-right: 6px;
+}
+
+/* Hover card motion and sheen */
+.card-hover { transition: transform 240ms cubic-bezier(.2,.9,.2,1), box-shadow 240ms, filter 240ms; }
+.card-hover:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 22px 48px rgba(6,18,50,0.45); filter: saturate(1.05); }
+
+.card-sheen { display: none !important; opacity: 0 !important; }
+
 

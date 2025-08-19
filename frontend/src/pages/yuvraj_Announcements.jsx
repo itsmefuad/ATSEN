@@ -67,14 +67,16 @@ const Yuvraj_Announcements = () => {
           </div>
 
           {tab === 'recent' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto pr-2" style={{ scrollSnapType: 'y proximity' }}>
+            <div className="recent-scroll">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" style={{ scrollSnapType: 'y proximity' }}>
               {(recent.length === 0) && (
                 <YuvrajAnnouncementCard title="No announcements yet">
                   <p className="opacity-80">Announcements will appear here.</p>
                 </YuvrajAnnouncementCard>
               )}
               {recent.map((a) => (
-                <div key={a.id} className="transform transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl announcement-card">
+                <div key={a.id} className="relative announcement-card card-hover">
+                  <div className="card-sheen" />
                   <Link to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${a.id}`}>
                     <YuvrajAnnouncementCard title={a.title} className="p-4">
                       <p className="line-clamp-3 opacity-80">{a.content}</p>
@@ -83,6 +85,7 @@ const Yuvraj_Announcements = () => {
                   </Link>
                 </div>
               ))}
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[70vh] overflow-y-auto pr-2">

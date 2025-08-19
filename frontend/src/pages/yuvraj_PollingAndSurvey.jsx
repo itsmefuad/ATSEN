@@ -81,10 +81,12 @@ const Yuvraj_PollingAndSurvey = () => {
 
         <div className="rounded-3xl bg-white/20 p-5 shadow-2xl backdrop-blur">
           {tab === 'recent' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(list.slice(0,4).length === 0) && (<div className="text-white/80">No forms yet.</div>)}
-              {list.slice(0,4).map((it) => (
-                <div key={it.id} className="announcement-card p-4 transform transition-all duration-300 hover:-translate-y-1">
+            <div className="recent-scroll">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(list.slice(0,4).length === 0) && (<div className="text-white/80">No forms yet.</div>)}
+                {list.slice(0,4).map((it) => (
+                  <div key={it.id} className="relative announcement-card p-4 card-hover">
+                    <div className="card-sheen" />
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="text-white font-semibold text-lg">{it.title}</div>
@@ -103,12 +105,14 @@ const Yuvraj_PollingAndSurvey = () => {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {(list.slice(0,12).length === 0) && (<div className="text-white/80">No forms yet.</div>)}
               {list.slice(0,12).map((it) => (
-                <div key={it.id} className="p-3 announcement-card transform transition-all duration-200 hover:-translate-y-0.5">
+                <div key={it.id} className="relative p-3 announcement-card card-hover">
+                  <div className="card-sheen" />
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold text-white">{it.title}</div>
