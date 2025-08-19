@@ -61,9 +61,9 @@ export default function App() {
               <Route path="/yuvraj/admin/announcements/:id" element={<Yuvraj_AnnouncementEditor />} />
               {/* New URL pattern: /:institution/:role/announcements */}
               <Route path="/:institution/:role/announcements" element={<Yuvraj_Announcements />} />
-              <Route path="/:institution/:role/announcements/:id" element={<Yuvraj_AnnouncementDetail />} />
               <Route path="/:institution/:role/announcements/new" element={<Yuvraj_AnnouncementEditor />} />
               <Route path="/:institution/:role/announcements/:id/edit" element={<Yuvraj_AnnouncementEditor />} />
+              <Route path="/:institution/:role/announcements/:id" element={<Yuvraj_AnnouncementDetail />} />
               <Route path="/PollingAndSurvey" element={<Yuvraj_PollingAndSurvey />} />
               <Route path="/PollingAndSurvey/:id" element={<Yuvraj_PollingAndSurveyEditor />} />
               <Route path="/PollingAndSurvey/new" element={<Yuvraj_PollingAndSurveyEditor />} />

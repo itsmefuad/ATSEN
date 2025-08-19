@@ -10,7 +10,10 @@ const YuvrajEnhancedAnnouncementCard = ({
   category,
   className = "",
   onClick,
-  isCompact = false
+  isCompact = false,
+  isPrivileged = false,
+  onDelete,
+  id
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -75,23 +78,44 @@ const YuvrajEnhancedAnnouncementCard = ({
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-white/10">
-          <div className="flex items-center space-x-3 text-sm text-white/70">
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 rounded-full bg-white/40"></div>
-              <span>{author}</span>
-            </div>
-            <span>•</span>
-            <span>{formatDate(createdAt)}</span>
+          <div className="text-sm text-white/70">
+            Created {formatDate(createdAt)}
           </div>
           
-          {/* Interactive indicator */}
-          <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-2 group-hover:translate-x-0">
-            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-              <svg className="w-3 h-3 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+          {/* Action buttons for privileged users */}
+          {isPrivileged && (
+            <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <button 
+                className="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-xs text-white/90 transition-colors duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onClick) onClick();
+                }}
+              >
+                Edit
+              </button>
+              <button 
+                className="px-3 py-1 rounded-full bg-red-500/20 hover:bg-red-500/30 text-xs text-red-400 transition-colors duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onDelete) onDelete(id);
+                }}
+              >
+                Delete
+              </button>
             </div>
-          </div>
+          )}
+          
+          {/* Interactive indicator for non-privileged users */}
+          {!isPrivileged && (
+            <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-2 group-hover:translate-x-0">
+              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                <svg className="w-3 h-3 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </YuvrajLiquidGlassCard>

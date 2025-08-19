@@ -49,4 +49,17 @@ export async function yuvrajUpdateAnnouncement(id, body) {
   return { ...d, id: d.id || d._id };
 }
 
+export async function yuvrajDeleteAnnouncement(id) {
+  const r = await fetch(`${API}/api/yuvraj/announcements/${id}`, {
+    method: "DELETE",
+    headers: { "x-admin-key": import.meta.env.VITE_ADMIN_KEY || "", ...getInstitutionHeader() },
+  });
+  if (!r.ok) {
+    let message = `${r.status} ${r.statusText}`;
+    try { const j = await r.json(); message += `: ${j.message || JSON.stringify(j)}`; } catch(e) { try { const t = await r.text(); if (t) message += `: ${t}`; } catch(e){} }
+    throw new Error(`Failed to delete announcement (${message})`);
+  }
+  return true;
+}
+
 

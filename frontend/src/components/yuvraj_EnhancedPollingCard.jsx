@@ -1,37 +1,38 @@
 import { useState } from 'react';
 import YuvrajLiquidGlassCard from './yuvraj_LiquidGlassCard.jsx';
 
-const YuvrajEnhancedPollingCard = ({ 
-  title, 
+const YuvrajEnhancedPollingCard = ({
+  title,
   type, // poll, qna, survey
-  createdAt, 
+  createdAt,
   responseCount = 0,
   isActive = true,
   className = "",
   onClick,
   isCompact = false,
-  isPrivileged = false
+  isPrivileged = false,
+  isMandatory = false
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const typeConfig = {
-    poll: { 
-      color: "from-purple-400/20 to-purple-600/10", 
-      border: "border-purple-400/30", 
+    poll: {
+      color: "from-blue-400/20 to-blue-600/10",
+      border: "border-blue-400/30",
       icon: "📊",
-      label: "Poll" 
+      label: "Poll"
     },
-    qna: { 
-      color: "from-cyan-400/20 to-cyan-600/10", 
-      border: "border-cyan-400/30", 
+    qna: {
+      color: "from-cyan-400/20 to-cyan-600/10",
+      border: "border-cyan-400/30",
       icon: "❓",
-      label: "Q&A" 
+      label: "Q&A"
     },
-    survey: { 
-      color: "from-emerald-400/20 to-emerald-600/10", 
-      border: "border-emerald-400/30", 
+    survey: {
+      color: "from-emerald-400/20 to-emerald-600/10",
+      border: "border-emerald-400/30",
       icon: "📝",
-      label: "Survey" 
+      label: "Survey"
     }
   };
 
@@ -42,12 +43,12 @@ const YuvrajEnhancedPollingCard = ({
     const creationDate = new Date(date);
     const diffTime = Math.abs(now - creationDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) return "Today";
     if (diffDays === 2) return "Yesterday";
     if (diffDays <= 7) return `${diffDays - 1} days ago`;
-    return creationDate.toLocaleDateString('en-US', { 
-      month: 'short', 
+    return creationDate.toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
       year: creationDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
     });
@@ -89,21 +90,32 @@ const YuvrajEnhancedPollingCard = ({
               {title}
             </h3>
           </div>
-          
-          {/* Status badge */}
-          <div className={`ml-3 px-3 py-1 rounded-full text-xs font-medium text-white/90 border bg-gradient-to-r ${getStatusColor()}`}>
-            {getStatusText()}
+
+          {/* Mandatory/Optional indicator */}
+          <div className={`ml-3 px-3 py-1 rounded-full text-xs font-medium border ${
+            isMandatory
+              ? 'bg-red-500/20 border-red-400/30 text-red-400'
+              : 'bg-green-500/20 border-green-400/30 text-green-400'
+          }`}>
+            {isMandatory ? '🔴 Mandatory' : '🟢 Optional'}
           </div>
+
+          {/* Status badge - Only show for privileged users */}
+          {isPrivileged && (
+            <div className={`ml-3 px-3 py-1 rounded-full text-xs font-medium text-white/90 border bg-gradient-to-r ${getStatusColor()}`}>
+              {getStatusText()}
+            </div>
+          )}
         </div>
 
-        {/* Response count visualization */}
-        {!isCompact && (
+        {/* Response count visualization - Only show for privileged users */}
+        {!isCompact && isPrivileged && responseCount !== undefined && (
           <div className="flex items-center space-x-3">
             <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-500"
-                style={{ 
-                  width: `${Math.min((responseCount / Math.max(responseCount, 1)) * 100, 100)}%` 
+              <div
+                className="h-full bg-gradient-to-r from-blue-400 to-emerald-400 transition-all duration-500"
+                style={{
+                  width: `${Math.min((responseCount / Math.max(responseCount, 1)) * 100, 100)}%`
                 }}
               />
             </div>
@@ -118,7 +130,7 @@ const YuvrajEnhancedPollingCard = ({
           <div className="text-sm text-white/70">
             Created {formatDate(createdAt)}
           </div>
-          
+
           {/* Action buttons for privileged users */}
           {isPrivileged && (
             <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
@@ -130,7 +142,7 @@ const YuvrajEnhancedPollingCard = ({
               </button>
             </div>
           )}
-          
+
           {/* Interactive indicator for non-privileged users */}
           {!isPrivileged && (
             <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-2 group-hover:translate-x-0">

@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { yuvrajListAnnouncements } from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
+import { useParams } from "react-router";
 import YuvrajEnhancedAnnouncementCard from "../components/yuvraj_EnhancedAnnouncementCard.jsx";
 import YuvrajModernNavPill from "../components/yuvraj_ModernNavPill.jsx";
 import YuvrajModernActionButton from "../components/yuvraj_ModernActionButton.jsx";
+import YuvrajLiquidGlassCard from "../components/yuvraj_LiquidGlassCard.jsx";
 import YuvrajModernHeader from "../components/yuvraj_ModernHeader.jsx";
-import { yuvrajGetRole, yuvrajIsPrivileged } from "../services/yuvraj_announcements.js";
-import { yuvrajListAnnouncements } from "../services/yuvraj_announcements_api.js";
-import { yuvrajSeedData } from "../services/yuvraj_seed.js";
+import { getAnnouncementSeedData } from "../services/yuvraj_seed.js";
 
 const Yuvraj_Announcements = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -16,68 +18,69 @@ const Yuvraj_Announcements = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { institution, role: roleParam } = useParams();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
+    const effectiveInstitution = institution || yuvrajGetInstitution();
+    try { yuvrajSetInstitution(effectiveInstitution); } catch (e) {}
     setRole(roleParam || yuvrajGetRole());
     setIsPrivileged(roleParam === 'admin' || roleParam === 'instructor' || yuvrajIsPrivileged());
-    
-    // persist institution for API header
-    if (institution) { 
-      try { 
-        localStorage.setItem('yuvraj_institution', institution); 
-      } catch(e){} 
-    }
-    
+
     setIsLoading(true);
-    yuvrajListAnnouncements(12)
+    yuvrajListAnnouncements(20)
       .then((data) => {
         setAnnouncements(data);
         setIsLoading(false);
       })
-      .catch(async () => {
-        const seed = await yuvrajSeedData();
-        setAnnouncements(seed);
+      .catch(() => {
+        setAnnouncements([]);
         setIsLoading(false);
       });
   }, [institution, roleParam]);
 
-  const recent = useMemo(() => announcements.slice(0, 4), [announcements]);
-  const all = useMemo(() => announcements.slice(0, 12), [announcements]);
+  // build prefix safely so we don't create a leading '//' when institution is empty
+  const effectiveInstitution = institution || yuvrajGetInstitution();
+  const prefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${role || 'student'}`;
 
   // Mock data for demonstration - you can remove this in production
-  const mockAnnouncements = [
-    {
-      id: '1',
-      title: 'Welcome to ATSEN Platform',
-      content: 'We are excited to announce the launch of our new learning management system. This platform will provide enhanced features for students and instructors.',
-      author: 'Admin Team',
-      createdAt: new Date().toISOString(),
-      priority: 'high',
-      category: 'Platform Update'
-    },
-    {
-      id: '2',
-      title: 'New Course Materials Available',
-      content: 'Updated course materials for Advanced Mathematics have been uploaded. Please review the new content before next week\'s session.',
-      author: 'Dr. Smith',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      priority: 'normal',
-      category: 'Course Update'
-    },
-    {
-      id: '3',
-      title: 'Holiday Schedule Update',
-      content: 'The institution will be closed for the upcoming holiday. All classes will resume on the following Monday.',
-      author: 'Administration',
-      createdAt: new Date(Date.now() - 172800000).toISOString(),
-      priority: 'low',
-      category: 'General'
-    }
-  ];
+  const mockData = getAnnouncementSeedData();
+  console.log("Announcements page - mockData:", mockData);
+  console.log("Announcements page - announcements:", announcements);
 
-  const displayAnnouncements = announcements.length > 0 ? announcements : mockAnnouncements;
-  const displayRecent = displayAnnouncements.slice(0, 4);
+  const displayAnnouncements = announcements.length > 0 ? announcements : mockData;
+  const displayRecent = displayAnnouncements.slice(0, 5);
   const displayAll = displayAnnouncements.slice(0, 12);
+
+  const handleDelete = async (id) => {
+    if (!confirm('Are you sure you want to delete this announcement? This action cannot be undone.')) {
+      return;
+    }
+    
+    setIsDeleting(true);
+    setDeletingId(id);
+    
+    try {
+      // Import the delete function
+      const { yuvrajDeleteAnnouncement } = await import('../services/yuvraj_announcements_api.js');
+      await yuvrajDeleteAnnouncement(id);
+      
+      // Remove from local state
+      setAnnouncements(prev => prev.filter(a => a._id !== id));
+      
+      // Also remove from mock data if it exists there
+      if (mockData.find(a => a._id === id)) {
+        const updatedMockData = mockData.filter(a => a._id !== id);
+        // Update mock data (in a real app, this would be handled by the backend)
+      }
+    } catch (error) {
+      console.error('Failed to delete announcement:', error);
+      alert('Failed to delete announcement: ' + (error?.message || String(error)));
+    } finally {
+      setIsDeleting(false);
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
@@ -94,6 +97,8 @@ const Yuvraj_Announcements = () => {
           title="Announcements"
           subtitle="Stay updated with the latest news and updates"
           variant="announcements"
+          showNavigation={true}
+          currentView="announcements"
         />
 
         {/* Tab Navigation */}
@@ -115,9 +120,17 @@ const Yuvraj_Announcements = () => {
             </YuvrajModernNavPill>
           </div>
           
-          <div className="text-white/80 text-sm">
-            {displayAnnouncements.length} announcements available
-          </div>
+          {/* Create Announcement Button for Privileged Users */}
+          {isPrivileged && (
+            <YuvrajModernActionButton
+              variant="primary"
+              size="medium"
+              icon="✨"
+              onClick={() => navigate(`${prefix}/announcements/new`)}
+            >
+              Create Announcement
+            </YuvrajModernActionButton>
+          )}
         </div>
 
         {/* Main Content Area */}
@@ -126,81 +139,116 @@ const Yuvraj_Announcements = () => {
             <div className="flex items-center justify-center py-20">
               <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
             </div>
-          ) : tab === 'recent' ? (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold text-white/90 mb-6">Recent Announcements</h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {displayRecent.length === 0 ? (
-                  <div className="col-span-full text-center py-12">
-                    <div className="text-6xl mb-4">📢</div>
-                    <h3 className="text-xl font-medium text-white/80 mb-2">No announcements yet</h3>
-                    <p className="text-white/60">Announcements will appear here when they're created.</p>
-                  </div>
-                ) : (
-                  displayRecent.map((announcement) => (
-                    <Link 
-                      key={announcement.id} 
-                      to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${announcement.id}`}
-                      className="block transform transition-all duration-300 hover:scale-[1.02]"
-                    >
-                      <YuvrajEnhancedAnnouncementCard
-                        title={announcement.title}
-                        content={announcement.content}
-                        author={announcement.author}
-                        createdAt={announcement.createdAt}
-                        priority={announcement.priority || 'normal'}
-                        category={announcement.category}
-                      />
-                    </Link>
-                  ))
-                )}
-              </div>
-            </div>
           ) : (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold text-white/90 mb-6">All Announcements</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-h-[70vh] overflow-y-auto pr-2">
-                {displayAll.length === 0 ? (
-                  <div className="col-span-full text-center py-12">
-                    <div className="text-6xl mb-4">📢</div>
-                    <h3 className="text-xl font-medium text-white/80 mb-2">No announcements yet</h3>
-                    <p className="text-white/60">Announcements will appear here when they're created.</p>
+            <>
+              {tab === 'recent' ? (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold text-white/90">Recent Announcements</h2>
+                    <div className="text-white/80 text-sm">
+                      {displayRecent.length} recent announcements
+                    </div>
                   </div>
-                ) : (
-                  displayAll.map((announcement) => (
-                    <Link 
-                      key={announcement.id} 
-                      to={`/${institution || 'yuvraj'}/${role || 'student'}/announcements/${announcement.id}`}
-                      className="block transform transition-all duration-300 hover:scale-[1.02]"
-                    >
-                      <YuvrajEnhancedAnnouncementCard
-                        title={announcement.title}
-                        content={announcement.content}
-                        author={announcement.author}
-                        createdAt={announcement.createdAt}
-                        priority={announcement.priority || 'normal'}
-                        category={announcement.category}
-                        isCompact={true}
-                      />
-                    </Link>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
+                  
+                  {/* Vertical scrollable recent announcements */}
+                  <div className="max-h-[70vh] overflow-y-auto space-y-4 pr-2">
+                    {displayRecent.length === 0 ? (
+                      <div className="text-center py-12">
+                        <div className="text-6xl mb-4">📢</div>
+                        <h3 className="text-xl font-medium text-white/80 mb-2">No recent announcements</h3>
+                        <p className="text-white/60">Check back later for updates.</p>
+                      </div>
+                    ) : (
+                      displayRecent.map((announcement) => (
+                        <div key={announcement._id} className="transform transition-all duration-300 hover:scale-[1.02]">
+                          <YuvrajEnhancedAnnouncementCard
+                            title={announcement.title}
+                            content={announcement.content}
+                            author={announcement.author}
+                            createdAt={announcement.createdAt}
+                            priority={announcement.priority}
+                            category={announcement.category}
+                            onClick={() => navigate(`${prefix}/announcements/${announcement._id}`)}
+                            onDelete={handleDelete}
+                            isPrivileged={isPrivileged}
+                            id={announcement._id}
+                            isDeleting={isDeleting && deletingId === announcement._id}
+                          />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold text-white/90">All Announcements</h2>
+                    <div className="text-white/80 text-sm">
+                      {displayAll.length} announcements available
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {displayAll.length === 0 ? (
+                      <div className="col-span-full text-center py-12">
+                        <div className="text-6xl mb-4">📢</div>
+                        <h3 className="text-xl font-medium text-white/80 mb-2">No announcements available</h3>
+                        <p className="text-white/60">Announcements will appear here when they're created.</p>
+                      </div>
+                    ) : (
+                      displayAll.map((announcement) => (
+                        <div key={announcement._id} className="transform transition-all duration-300 hover:scale-[1.02]">
+                          <YuvrajEnhancedAnnouncementCard
+                            title={announcement.title}
+                            content={announcement.content}
+                            author={announcement.author}
+                            createdAt={announcement.createdAt}
+                            priority={announcement.priority}
+                            category={announcement.category}
+                            isCompact={true}
+                            onClick={() => navigate(`${prefix}/announcements/${announcement._id}`)}
+                            onDelete={() => handleDelete(announcement._id)}
+                            isPrivileged={isPrivileged}
+                            id={announcement._id}
+                            isDeleting={isDeleting && deletingId === announcement._id}
+                          />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
 
-          {/* Create Announcement Button */}
-          {isPrivileged && (
-            <div className="mt-8 flex justify-end">
-              <YuvrajModernActionButton
-                variant="primary"
-                size="large"
-                icon="✨"
-                onClick={() => navigate(`/${institution || 'yuvraj'}/${role || 'admin'}/announcements/new`)}
-              >
-                Create Announcement
-              </YuvrajModernActionButton>
-            </div>
+              {/* Quick Stats for Privileged Users */}
+              {isPrivileged && displayAnnouncements.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-white/10">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-white/95">{displayAnnouncements.length}</div>
+                      <div className="text-white/70 text-sm">Total Announcements</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-white/95">
+                        {displayAnnouncements.filter(a => a.priority === 'urgent').length}
+                      </div>
+                      <div className="text-white/70 text-sm">Urgent</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-white/95">
+                        {displayAnnouncements.filter(a => a.priority === 'high').length}
+                      </div>
+                      <div className="text-white/70 text-sm">High Priority</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-white/95">
+                        {displayAnnouncements.filter(a => a.category === 'Academic').length}
+                      </div>
+                      <div className="text-white/70 text-sm">Academic</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

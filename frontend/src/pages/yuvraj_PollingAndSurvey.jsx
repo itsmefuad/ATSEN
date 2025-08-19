@@ -8,6 +8,7 @@ import YuvrajModernNavPill from "../components/yuvraj_ModernNavPill.jsx";
 import YuvrajModernActionButton from "../components/yuvraj_ModernActionButton.jsx";
 import YuvrajLiquidGlassCard from "../components/yuvraj_LiquidGlassCard.jsx";
 import YuvrajModernHeader from "../components/yuvraj_ModernHeader.jsx";
+import { getFormsSeedData } from "../services/yuvraj_seed.js";
 
 const Yuvraj_PollingAndSurvey = () => {
   const [list, setList] = useState([]);
@@ -15,6 +16,7 @@ const Yuvraj_PollingAndSurvey = () => {
   const [isPrivileged, setIsPrivileged] = useState(false);
   const [tab, setTab] = useState("recent");
   const [isLoading, setIsLoading] = useState(true);
+  const [activeView, setActiveView] = useState("forms"); // "forms" or "announcements"
   const navigate = useNavigate();
   const { institution, role: roleParam } = useParams();
 
@@ -42,52 +44,26 @@ const Yuvraj_PollingAndSurvey = () => {
   const prefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${role || 'student'}`;
 
   // Mock data for demonstration - you can remove this in production
-  const mockData = [
-    {
-      id: '1',
-      title: 'Student Satisfaction Survey',
-      type: 'survey',
-      createdAt: new Date().toISOString(),
-      responseCount: 45,
-      isActive: true
-    },
-    {
-      id: '2',
-      title: 'Course Difficulty Poll',
-      type: 'poll',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      responseCount: 23,
-      isActive: true
-    },
-    {
-      id: '3',
-      title: 'Q&A Session Feedback',
-      type: 'qna',
-      createdAt: new Date(Date.now() - 172800000).toISOString(),
-      responseCount: 12,
-      isActive: true
-    },
-    {
-      id: '4',
-      title: 'Platform Usability Survey',
-      type: 'survey',
-      createdAt: new Date(Date.now() - 259200000).toISOString(),
-      responseCount: 67,
-      isActive: true
-    }
-  ];
+  const mockData = getFormsSeedData();
 
   const displayData = list.length > 0 ? list : mockData;
   const recentData = displayData.slice(0, 4);
   const allData = displayData.slice(0, 12);
 
+  const handleViewSwitch = (view) => {
+    setActiveView(view);
+    if (view === "announcements") {
+      navigate(`${prefix}/announcements`);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       {/* Background orbs for iOS 26 aesthetic */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-20 left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl p-6">
@@ -95,7 +71,9 @@ const Yuvraj_PollingAndSurvey = () => {
         <YuvrajModernHeader
           title="Polls & Surveys"
           subtitle="Engage with interactive forms and gather feedback"
-          variant="polling"
+          variant="announcements"
+          showNavigation={true}
+          currentView="forms"
         />
 
         {/* Action Cards for Privileged Users */}
@@ -187,10 +165,11 @@ const Yuvraj_PollingAndSurvey = () => {
                             title={item.title}
                             type={item.type}
                             createdAt={item.createdAt}
-                            responseCount={item.responseCount}
+                            responseCount={isPrivileged ? item.responseCount : undefined}
                             isActive={item.isActive}
                             isPrivileged={isPrivileged}
-                            onClick={() => navigate(`${prefix}/PollingAndSurvey/${item.id}`)}
+                            isMandatory={item.isMandatory}
+                            onClick={() => navigate(`${prefix}/PollingAndSurvey/${item._id}`)}
                           />
                         </div>
                       ))
@@ -213,11 +192,12 @@ const Yuvraj_PollingAndSurvey = () => {
                             title={item.title}
                             type={item.type}
                             createdAt={item.createdAt}
-                            responseCount={item.responseCount}
+                            responseCount={isPrivileged ? item.responseCount : undefined}
                             isActive={item.isActive}
                             isPrivileged={isPrivileged}
+                            isMandatory={item.isMandatory}
                             isCompact={true}
-                            onClick={() => navigate(`${prefix}/PollingAndSurvey/${item.id}`)}
+                            onClick={() => navigate(`${prefix}/PollingAndSurvey/${item._id}`)}
                           />
                         </div>
                       ))
