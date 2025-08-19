@@ -1,8 +1,19 @@
+// src/pages/teacher/T_Room.jsx
+
 import { use, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams, useLocation } from "react-router";
 import api from "../../lib/axios";
-import { ArrowLeft, Loader, Trash2, Settings, MessageSquare, BookOpen, Calendar } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader,
+  Trash2,
+  Settings,
+  MessageSquare,
+  BookOpen,
+  Calendar,
+  Video         // ← added Video icon
+} from "lucide-react";
 import Navbar from "../../components/Navbar";
 import DiscussionForum from "../../components/room/DiscussionForum";
 import Materials from "../../components/room/Materials";
@@ -13,11 +24,11 @@ const T_Room = () => {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [meetingLoading, setMeetingLoading] = useState(false);  // ← added meetingLoading
   const [activeTab, setActiveTab] = useState("forum"); // Default to forum
 
   const navigate = useNavigate();
   const location = useLocation();
-
   const { id } = useParams();
 
   // Determine active tab based on URL
@@ -33,6 +44,7 @@ const T_Room = () => {
     }
   }, [location.pathname]);
 
+  // Fetch room details
   useEffect(() => {
     const fetchRoom = async () => {
       try {
@@ -49,6 +61,7 @@ const T_Room = () => {
     fetchRoom();
   }, [id]);
 
+  // Delete room handler
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this room?")) return;
     try {
@@ -61,6 +74,7 @@ const T_Room = () => {
     }
   };
 
+  // Save room settings handler
   const handleSave = async () => {
     if (!room.room_name.trim() || !room.description.trim()) {
       toast.error("All fields are required");
@@ -81,6 +95,21 @@ const T_Room = () => {
     }
   };
 
+  // Meeting creation handler
+  const handleMeeting = async () => {
+    setMeetingLoading(true);
+    try {
+      const res = await api.post(`/rooms/${id}/meeting`);
+      window.open(res.data.join_url, "_blank");
+      toast.success("Meeting started!");
+    } catch (error) {
+      console.error("Error creating meeting:", error);
+      toast.error("Could not start meeting");
+    } finally {
+      setMeetingLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
@@ -93,7 +122,7 @@ const T_Room = () => {
     <div className="min-h-screen bg-base-200">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        {/* Back to Dashboard Button - Floating left */}
+        {/* Back to Dashboard Button */}
         <div className="mb-6 flex justify-start">
           <Link to="/teacher/dashboard" className="btn btn-ghost">
             <ArrowLeft className="h-5 w-5" />
@@ -105,7 +134,7 @@ const T_Room = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content Area */}
             <div className="lg:col-span-2">
-              {/* Room Info Header with integrated settings */}
+              {/* Room Info Header with Settings & Meeting */}
               <div className="card bg-base-100 shadow-lg mb-6">
                 <div className="card-body">
                   <div className="flex items-start justify-between">
@@ -113,7 +142,7 @@ const T_Room = () => {
                       <h1 className="text-2xl font-bold">{room.room_name}</h1>
                       <p className="text-base-content/70">{room.description}</p>
                     </div>
-                    <div className="ml-4">
+                    <div className="ml-4 flex space-x-2">
                       <Link
                         to={`/teacher/room/${id}/edit`}
                         className={`btn btn-sm ${activeTab === "settings" ? "btn-primary" : "btn-ghost"}`}
@@ -121,6 +150,14 @@ const T_Room = () => {
                         <Settings className="h-4 w-4 mr-1" />
                         Settings
                       </Link>
+                      <button
+                        onClick={handleMeeting}
+                        disabled={meetingLoading}
+                        className="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <Video className="h-4 w-4 mr-1" />
+                        {meetingLoading ? "Starting…" : "Meeting"}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -204,17 +241,9 @@ const T_Room = () => {
                 </div>
               )}
 
-              {activeTab === "forum" && (
-                <DiscussionForum roomId={id} />
-              )}
-
-              {activeTab === "materials" && (
-                <Materials roomId={id} />
-              )}
-
-              {activeTab === "assessment" && (
-                <Assessment roomId={id} room={room} />
-              )}
+              {activeTab === "forum" && <DiscussionForum roomId={id} />}
+              {activeTab === "materials" && <Materials roomId={id} />}
+              {activeTab === "assessment" && <Assessment roomId={id} room={room} />}
             </div>
             
             {/* Timeline Sidebar */}
