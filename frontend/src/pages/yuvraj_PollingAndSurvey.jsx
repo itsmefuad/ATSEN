@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { listPollingAndSurveys } from "../services/pollingandsurvey_api.js";
-import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_auth.js";
 import { useParams } from "react-router";
 import YuvrajEnhancedPollingCard from "../components/yuvraj_EnhancedPollingCard.jsx";
 import YuvrajModernNavPill from "../components/yuvraj_ModernNavPill.jsx";
 import YuvrajModernActionButton from "../components/yuvraj_ModernActionButton.jsx";
 import YuvrajLiquidGlassCard from "../components/yuvraj_LiquidGlassCard.jsx";
 import YuvrajModernHeader from "../components/yuvraj_ModernHeader.jsx";
-import { getFormsSeedData } from "../services/yuvraj_seed.js";
 
 const Yuvraj_PollingAndSurvey = () => {
   const [list, setList] = useState([]);
@@ -16,6 +15,7 @@ const Yuvraj_PollingAndSurvey = () => {
   const [isPrivileged, setIsPrivileged] = useState(false);
   const [tab, setTab] = useState("recent");
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeView, setActiveView] = useState("forms"); // "forms" or "announcements"
   const navigate = useNavigate();
   const { institution, role: roleParam } = useParams();
@@ -28,34 +28,72 @@ const Yuvraj_PollingAndSurvey = () => {
     setIsPrivileged(roleParam === 'admin' || roleParam === 'instructor' || yuvrajIsPrivileged());
 
     setIsLoading(true);
-    listPollingAndSurveys(20)
+    listPollingAndSurveys(50) // Increased limit to get more data
       .then((data) => {
+        console.log("Forms fetched from database:", data);
         setList(data);
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Error fetching forms:", err);
+        setError("Failed to load forms from database");
         setList([]);
         setIsLoading(false);
       });
   }, [institution, roleParam]);
 
-  // build prefix safely so we don't create a leading '//' when institution is empty
-  const effectiveInstitution = institution || yuvrajGetInstitution();
-  const prefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${role || 'student'}`;
-
-  // Mock data for demonstration - you can remove this in production
-  const mockData = getFormsSeedData();
-
-  const displayData = list.length > 0 ? list : mockData;
+  // Use real data from database instead of mock data
+  const displayData = list;
   const recentData = displayData.slice(0, 4);
   const allData = displayData.slice(0, 12);
+
+  // Determine the base path for navigation based on current route
+  const getBasePath = () => {
+    if (institution && roleParam) {
+      // Role-based route: /:institution/:role/PollingAndSurvey
+      return `/${institution}/${roleParam}/PollingAndSurvey`;
+    } else {
+      // Standalone route: /yuvraj/PollingAndSurvey
+      return "/yuvraj/PollingAndSurvey";
+    }
+  };
 
   const handleViewSwitch = (view) => {
     setActiveView(view);
     if (view === "announcements") {
-      navigate(`${prefix}/announcements`);
+      if (institution && roleParam) {
+        navigate(`/${institution}/${roleParam}/announcements`);
+      } else {
+        navigate("/yuvraj/announcements");
+      }
     }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+        <div className="relative z-10 mx-auto max-w-4xl p-6">
+          <YuvrajModernHeader
+            title="Error Loading Forms"
+            subtitle="Failed to connect to database"
+            variant="announcements"
+          />
+          
+          <div className="glass-morphism rounded-3xl p-8 text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-semibold text-white/90 mb-4">Database Connection Error</h2>
+            <p className="text-white/70 mb-6">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors duration-200"
+            >
+              Retry Connection
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
@@ -82,7 +120,7 @@ const Yuvraj_PollingAndSurvey = () => {
             <YuvrajLiquidGlassCard 
               variant="elevated" 
               className="cursor-pointer group hover:scale-[1.02] transition-transform duration-300"
-              onClick={() => navigate(`${prefix}/PollingAndSurvey/new?type=poll`)}
+              onClick={() => navigate(`${getBasePath()}/new?type=poll`)}
             >
               <div className="text-center space-y-4">
                 <div className="text-6xl">📊</div>
@@ -99,7 +137,7 @@ const Yuvraj_PollingAndSurvey = () => {
             <YuvrajLiquidGlassCard 
               variant="elevated" 
               className="cursor-pointer group hover:scale-[1.02] transition-transform duration-300"
-              onClick={() => navigate(`${prefix}/PollingAndSurvey/new?type=qna`)}
+              onClick={() => navigate(`${getBasePath()}/new?type=qna`)}
             >
               <div className="text-center space-y-4">
                 <div className="text-6xl">❓</div>
@@ -143,64 +181,68 @@ const Yuvraj_PollingAndSurvey = () => {
             </div>
           ) : (
             <>
-              {!isPrivileged && (
-                <h2 className="text-2xl font-semibold text-white/90 mb-6">
-                  {tab === 'recent' ? 'Recent Forms' : 'All Forms'}
-                </h2>
-              )}
-
               {tab === 'recent' ? (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold text-white/90">Recent Forms</h2>
+                    <div className="text-white/80 text-sm">
+                      {recentData.length} recent forms
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {recentData.length === 0 ? (
                       <div className="col-span-full text-center py-12">
-                        <div className="text-6xl mb-4">📝</div>
-                        <h3 className="text-xl font-medium text-white/80 mb-2">No forms available</h3>
-                        <p className="text-white/60">Forms will appear here when they're created by instructors.</p>
+                        <div className="text-6xl mb-4">📊</div>
+                        <h3 className="text-xl font-medium text-white/80 mb-2">No forms yet</h3>
+                        <p className="text-white/60">Create the first poll or survey to get started.</p>
                       </div>
                     ) : (
-                      recentData.map((item) => (
-                        <div key={item.id} className="transform transition-all duration-300 hover:scale-[1.02]">
-                          <YuvrajEnhancedPollingCard
-                            title={item.title}
-                            type={item.type}
-                            createdAt={item.createdAt}
-                            responseCount={isPrivileged ? item.responseCount : undefined}
-                            isActive={item.isActive}
-                            isPrivileged={isPrivileged}
-                            isMandatory={item.isMandatory}
-                            onClick={() => navigate(`${prefix}/PollingAndSurvey/${item._id}`)}
-                          />
-                        </div>
-                      ))
+                      recentData.map((form) => {
+                        console.log("Rendering form card:", form);
+                        return (
+                          <div key={form._id} className="transform transition-all duration-300 hover:scale-[1.02]">
+                            <YuvrajEnhancedPollingCard
+                              form={form}
+                              onClick={() => navigate(`${getBasePath()}/${form._id}`)}
+                              isPrivileged={isPrivileged}
+                            />
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 </div>
               ) : (
                 <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold text-white/90">All Forms</h2>
+                    <div className="text-white/80 text-sm">
+                      {allData.length} forms available
+                    </div>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {allData.length === 0 ? (
                       <div className="col-span-full text-center py-12">
-                        <div className="text-6xl mb-4">📝</div>
+                        <div className="text-6xl mb-4">📊</div>
                         <h3 className="text-xl font-medium text-white/80 mb-2">No forms available</h3>
-                        <p className="text-white/60">Forms will appear here when they're created by instructors.</p>
+                        <p className="text-white/60">Forms will appear here when they're created.</p>
                       </div>
                     ) : (
-                      allData.map((item) => (
-                        <div key={item.id} className="transform transition-all duration-300 hover:scale-[1.02]">
-                          <YuvrajEnhancedPollingCard
-                            title={item.title}
-                            type={item.type}
-                            createdAt={item.createdAt}
-                            responseCount={isPrivileged ? item.responseCount : undefined}
-                            isActive={item.isActive}
-                            isPrivileged={isPrivileged}
-                            isMandatory={item.isMandatory}
-                            isCompact={true}
-                            onClick={() => navigate(`${prefix}/PollingAndSurvey/${item._id}`)}
-                          />
-                        </div>
-                      ))
+                      allData.map((form) => {
+                        console.log("Rendering allData form card:", form);
+                        return (
+                          <div key={form._id} className="transform transition-all duration-300 hover:scale-[1.02]">
+                            <YuvrajEnhancedPollingCard
+                              form={form}
+                              onClick={() => navigate(`${getBasePath()}/${form._id}`)}
+                              isPrivileged={isPrivileged}
+                              isCompact={true}
+                            />
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 </div>
@@ -209,22 +251,28 @@ const Yuvraj_PollingAndSurvey = () => {
               {/* Quick Stats for Privileged Users */}
               {isPrivileged && displayData.length > 0 && (
                 <div className="mt-8 pt-6 border-t border-white/10">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-white/95">{displayData.length}</div>
                       <div className="text-white/70 text-sm">Total Forms</div>
                     </div>
                     <div className="text-center">
                       <div className="text-3xl font-bold text-white/95">
-                        {displayData.reduce((sum, item) => sum + (item.responseCount || 0), 0)}
+                        {displayData.filter(f => f.type === 'poll').length}
                       </div>
-                      <div className="text-white/70 text-sm">Total Responses</div>
+                      <div className="text-white/70 text-sm">Polls</div>
                     </div>
                     <div className="text-center">
                       <div className="text-3xl font-bold text-white/95">
-                        {displayData.filter(item => item.isActive).length}
+                        {displayData.filter(f => f.type === 'qna').length}
                       </div>
-                      <div className="text-white/70 text-sm">Active Forms</div>
+                      <div className="text-white/70 text-sm">Q&A Forms</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-white/95">
+                        {displayData.filter(f => f.isActive).length}
+                      </div>
+                      <div className="text-white/70 text-sm">Active</div>
                     </div>
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_auth.js";
 import {
   createPollingAndSurvey,
   getPollingAndSurveyById,
@@ -472,7 +472,7 @@ const Yuvraj_PollingAndSurveyEditor = () => {
                     </YuvrajModernActionButton>
                   </Link>
                   
-                  {!isCreate && (
+                  {!isCreate && isPrivileged && (
                     <YuvrajModernActionButton
                       variant="danger"
                       size="medium"

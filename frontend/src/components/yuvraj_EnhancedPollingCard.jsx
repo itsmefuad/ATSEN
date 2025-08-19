@@ -2,7 +2,8 @@ import { useState } from 'react';
 import YuvrajLiquidGlassCard from './yuvraj_LiquidGlassCard.jsx';
 
 const YuvrajEnhancedPollingCard = ({
-  title,
+  form, // Pass the entire form object
+  title, // Keep for backward compatibility
   type, // poll, qna, survey
   createdAt,
   responseCount = 0,
@@ -14,6 +15,14 @@ const YuvrajEnhancedPollingCard = ({
   isMandatory = false
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+
+  // Extract properties from form object if provided, otherwise use props
+  const formTitle = form?.title || title || "Untitled Form";
+  const formType = form?.type || type || "poll";
+  const formCreatedAt = form?.createdAt || createdAt || new Date();
+  const formResponseCount = form?.responseCount || responseCount || 0;
+  const formIsActive = form?.isActive !== undefined ? form.isActive : isActive;
+  const formIsMandatory = form?.isMandatory || isMandatory || false;
 
   const typeConfig = {
     poll: {
@@ -36,7 +45,7 @@ const YuvrajEnhancedPollingCard = ({
     }
   };
 
-  const config = typeConfig[type] || typeConfig.poll;
+  const config = typeConfig[formType] || typeConfig.poll;
 
   const formatDate = (date) => {
     const now = new Date();
@@ -55,26 +64,26 @@ const YuvrajEnhancedPollingCard = ({
   };
 
   const getStatusColor = () => {
-    if (!isActive) return "from-gray-400/20 to-gray-600/10 border-gray-400/30";
-    if (responseCount === 0) return "from-amber-400/20 to-amber-600/10 border-amber-400/30";
-    if (responseCount < 10) return "from-blue-400/20 to-blue-600/10 border-blue-400/30";
+    if (!formIsActive) return "from-gray-400/20 to-gray-600/10 border-gray-400/30";
+    if (formResponseCount === 0) return "from-amber-400/20 to-amber-600/10 border-amber-400/30";
+    if (formResponseCount < 10) return "from-blue-400/20 to-blue-600/10 border-blue-400/30";
     return "from-emerald-400/20 to-emerald-600/10 border-emerald-400/30";
   };
 
   const getStatusText = () => {
-    if (!isActive) return "Inactive";
-    if (responseCount === 0) return "No responses";
-    if (responseCount < 10) return `${responseCount} responses`;
-    return `${responseCount}+ responses`;
+    if (!formIsActive) return "Inactive";
+    if (formResponseCount === 0) return "No responses";
+    if (formResponseCount < 10) return `${formResponseCount} responses`;
+    return `${formResponseCount}+ responses`;
   };
 
   return (
     <YuvrajLiquidGlassCard
       variant="interactive"
-      className={`${className} group ${!isActive ? 'opacity-75' : ''}`}
+      className={`${className} group ${!formIsActive ? 'opacity-75' : ''}`}
       onClick={onClick}
       shimmer={isHovered}
-      disabled={!isActive}
+      disabled={!formIsActive}
     >
       <div className="space-y-4">
         {/* Header with type and status */}
@@ -87,17 +96,17 @@ const YuvrajEnhancedPollingCard = ({
               </div>
             </div>
             <h3 className="text-xl font-semibold text-white/95 leading-tight line-clamp-2 group-hover:text-white transition-colors duration-200">
-              {title}
+              {formTitle}
             </h3>
           </div>
 
           {/* Mandatory/Optional indicator */}
           <div className={`ml-3 px-3 py-1 rounded-full text-xs font-medium border ${
-            isMandatory
+            formIsMandatory
               ? 'bg-red-500/20 border-red-400/30 text-red-400'
               : 'bg-green-500/20 border-green-400/30 text-green-400'
           }`}>
-            {isMandatory ? '🔴 Mandatory' : '🟢 Optional'}
+            {formIsMandatory ? '🔴 Mandatory' : '🟢 Optional'}
           </div>
 
           {/* Status badge - Only show for privileged users */}
@@ -109,18 +118,18 @@ const YuvrajEnhancedPollingCard = ({
         </div>
 
         {/* Response count visualization - Only show for privileged users */}
-        {!isCompact && isPrivileged && responseCount !== undefined && (
+        {!isCompact && isPrivileged && formResponseCount !== undefined && (
           <div className="flex items-center space-x-3">
             <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-blue-400 to-emerald-400 transition-all duration-500"
                 style={{
-                  width: `${Math.min((responseCount / Math.max(responseCount, 1)) * 100, 100)}%`
+                  width: `${Math.min((formResponseCount / Math.max(formResponseCount, 1)) * 100, 100)}%`
                 }}
               />
             </div>
             <span className="text-sm text-white/70 min-w-[60px] text-right">
-              {responseCount} responses
+              {formResponseCount} responses
             </span>
           </div>
         )}
@@ -128,7 +137,7 @@ const YuvrajEnhancedPollingCard = ({
         {/* Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-white/10">
           <div className="text-sm text-white/70">
-            Created {formatDate(createdAt)}
+            Created {formatDate(formCreatedAt)}
           </div>
 
           {/* Action buttons for privileged users */}

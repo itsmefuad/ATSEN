@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { yuvrajListAnnouncements } from "../services/yuvraj_announcements.js";
-import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
+import { yuvrajListAnnouncements } from "../services/yuvraj_announcements_api.js";
+import { yuvrajGetRole, yuvrajIsPrivileged, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_auth.js";
 import { useParams } from "react-router";
 import YuvrajEnhancedAnnouncementCard from "../components/yuvraj_EnhancedAnnouncementCard.jsx";
 import YuvrajModernNavPill from "../components/yuvraj_ModernNavPill.jsx";
 import YuvrajModernActionButton from "../components/yuvraj_ModernActionButton.jsx";
 import YuvrajLiquidGlassCard from "../components/yuvraj_LiquidGlassCard.jsx";
 import YuvrajModernHeader from "../components/yuvraj_ModernHeader.jsx";
-import { getAnnouncementSeedData } from "../services/yuvraj_seed.js";
 
 const Yuvraj_Announcements = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -16,6 +15,7 @@ const Yuvraj_Announcements = () => {
   const [isPrivileged, setIsPrivileged] = useState(false);
   const [tab, setTab] = useState('recent');
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { institution, role: roleParam } = useParams();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -28,27 +28,22 @@ const Yuvraj_Announcements = () => {
     setIsPrivileged(roleParam === 'admin' || roleParam === 'instructor' || yuvrajIsPrivileged());
 
     setIsLoading(true);
-    yuvrajListAnnouncements(20)
+    yuvrajListAnnouncements(50) // Increased limit to get more announcements
       .then((data) => {
+        console.log("Announcements fetched from database:", data);
         setAnnouncements(data);
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Error fetching announcements:", err);
+        setError("Failed to load announcements from database");
         setAnnouncements([]);
         setIsLoading(false);
       });
   }, [institution, roleParam]);
 
-  // build prefix safely so we don't create a leading '//' when institution is empty
-  const effectiveInstitution = institution || yuvrajGetInstitution();
-  const prefix = effectiveInstitution ? `/${effectiveInstitution}/${role || 'student'}` : `/${role || 'student'}`;
-
-  // Mock data for demonstration - you can remove this in production
-  const mockData = getAnnouncementSeedData();
-  console.log("Announcements page - mockData:", mockData);
-  console.log("Announcements page - announcements:", announcements);
-
-  const displayAnnouncements = announcements.length > 0 ? announcements : mockData;
+  // Use real data from database instead of mock data
+  const displayAnnouncements = announcements;
   const displayRecent = displayAnnouncements.slice(0, 5);
   const displayAll = displayAnnouncements.slice(0, 12);
 
@@ -67,12 +62,6 @@ const Yuvraj_Announcements = () => {
       
       // Remove from local state
       setAnnouncements(prev => prev.filter(a => a._id !== id));
-      
-      // Also remove from mock data if it exists there
-      if (mockData.find(a => a._id === id)) {
-        const updatedMockData = mockData.filter(a => a._id !== id);
-        // Update mock data (in a real app, this would be handled by the backend)
-      }
     } catch (error) {
       console.error('Failed to delete announcement:', error);
       alert('Failed to delete announcement: ' + (error?.message || String(error)));
@@ -81,6 +70,32 @@ const Yuvraj_Announcements = () => {
       setDeletingId(null);
     }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+        <div className="relative z-10 mx-auto max-w-4xl p-6">
+          <YuvrajModernHeader
+            title="Error Loading Announcements"
+            subtitle="Failed to connect to database"
+            variant="announcements"
+          />
+          
+          <div className="glass-morphism rounded-3xl p-8 text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-semibold text-white/90 mb-4">Database Connection Error</h2>
+            <p className="text-white/70 mb-6">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors duration-200"
+            >
+              Retry Connection
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
@@ -126,7 +141,7 @@ const Yuvraj_Announcements = () => {
               variant="primary"
               size="medium"
               icon="✨"
-              onClick={() => navigate(`${prefix}/announcements/new`)}
+              onClick={() => navigate("/yuvraj/announcements/new")}
             >
               Create Announcement
             </YuvrajModernActionButton>
@@ -155,8 +170,8 @@ const Yuvraj_Announcements = () => {
                     {displayRecent.length === 0 ? (
                       <div className="text-center py-12">
                         <div className="text-6xl mb-4">📢</div>
-                        <h3 className="text-xl font-medium text-white/80 mb-2">No recent announcements</h3>
-                        <p className="text-white/60">Check back later for updates.</p>
+                        <h3 className="text-xl font-medium text-white/80 mb-2">No announcements yet</h3>
+                        <p className="text-white/60">Create the first announcement to get started.</p>
                       </div>
                     ) : (
                       displayRecent.map((announcement) => (
@@ -168,7 +183,7 @@ const Yuvraj_Announcements = () => {
                             createdAt={announcement.createdAt}
                             priority={announcement.priority}
                             category={announcement.category}
-                            onClick={() => navigate(`${prefix}/announcements/${announcement._id}`)}
+                            onClick={() => navigate(`/yuvraj/announcements/${announcement._id}`)}
                             onDelete={handleDelete}
                             isPrivileged={isPrivileged}
                             id={announcement._id}
@@ -206,7 +221,7 @@ const Yuvraj_Announcements = () => {
                             priority={announcement.priority}
                             category={announcement.category}
                             isCompact={true}
-                            onClick={() => navigate(`${prefix}/announcements/${announcement._id}`)}
+                            onClick={() => navigate(`/yuvraj/announcements/${announcement._id}`)}
                             onDelete={() => handleDelete(announcement._id)}
                             isPrivileged={isPrivileged}
                             id={announcement._id}

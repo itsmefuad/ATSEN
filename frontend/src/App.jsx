@@ -115,30 +115,43 @@ export default function App() {
                 <Route path="/student/room/:id/assessment" element={<S_Room />} />
                 {/* Redirect old URL to new forum URL for backward compatibility */}
                 <Route path="/student/room/:id" element={<S_Room />} />
-              <Route path="/teacher/edit/room/:id" element={<T_Room />} />
+              
+              {/* 6. STANDALONE YUVRAJ ROUTES (No Authentication Required) */}
               <Route path="/yuvraj/announcements" element={<Yuvraj_Announcements />} />
+              <Route path="/yuvraj/announcements/new" element={<Yuvraj_AnnouncementEditor />} />
               <Route path="/yuvraj/announcements/:id" element={<Yuvraj_AnnouncementDetail />} />
-              <Route path="/yuvraj/admin/announcements/:id" element={<Yuvraj_AnnouncementEditor />} />
+              <Route path="/yuvraj/announcements/:id/edit" element={<Yuvraj_AnnouncementEditor />} />
+              
+              {/* Yuvraj Polling and Survey Routes */}
+              <Route path="/yuvraj/PollingAndSurvey" element={<Yuvraj_PollingAndSurvey />} />
+              <Route path="/yuvraj/PollingAndSurvey/new" element={<Yuvraj_PollingAndSurveyEditor />} />
+              <Route path="/yuvraj/PollingAndSurvey/:id" element={<Yuvraj_PollingAndSurveyEditor />} />
               
               {/* Demo route for timeline testing */}
               <Route path="/demo/timeline" element={<TimelineDemo />} />
+              
+              {/* 7. ROLE-BASED ROUTES (Institution/Role Pattern) */}
               {/* New URL pattern: /:institution/:role/announcements */}
               <Route path="/:institution/:role/announcements" element={<Yuvraj_Announcements />} />
               <Route path="/:institution/:role/announcements/new" element={<Yuvraj_AnnouncementEditor />} />
               <Route path="/:institution/:role/announcements/:id/edit" element={<Yuvraj_AnnouncementEditor />} />
               <Route path="/:institution/:role/announcements/:id" element={<Yuvraj_AnnouncementDetail />} />
+              
+              {/* New URL pattern: /:institution/:role/PollingAndSurvey */}
+              <Route path="/:institution/:role/PollingAndSurvey" element={<Yuvraj_PollingAndSurvey />} />
+              <Route path="/:institution/:role/PollingAndSurvey/new" element={<Yuvraj_PollingAndSurveyEditor />} />
+              <Route path="/:institution/:role/PollingAndSurvey/:id" element={<Yuvraj_PollingAndSurveyEditor />} />
+              
+              {/* 8. LEGACY ROUTES (For backward compatibility) */}
               <Route path="/PollingAndSurvey" element={<Yuvraj_PollingAndSurvey />} />
               <Route path="/PollingAndSurvey/:id" element={<Yuvraj_PollingAndSurveyEditor />} />
               <Route path="/PollingAndSurvey/new" element={<Yuvraj_PollingAndSurveyEditor />} />
-              {/* New URL pattern: /:institution/:role/PollingAndSurvey */}
-              <Route path="/:institution/:role/PollingAndSurvey" element={<Yuvraj_PollingAndSurvey />} />
-              <Route path="/:institution/:role/PollingAndSurvey/:id" element={<Yuvraj_PollingAndSurveyEditor />} />
-              <Route path="/:institution/:role/PollingAndSurvey/new" element={<Yuvraj_PollingAndSurveyEditor />} />
-        {/* Catch-all 404 */}
-        <Route
-          path="*"
-          element={<p>Page not found: {window.location.pathname}</p>}
-        />
+              
+              {/* Catch-all 404 */}
+              <Route
+                path="*"
+                element={<p>Page not found: {window.location.pathname}</p>}
+              />
       </Routes>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { yuvrajGetRole, yuvrajIsPrivileged } from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole, yuvrajIsPrivileged } from "../services/yuvraj_auth.js";
 import { yuvrajGetAnnouncementById, yuvrajDeleteAnnouncement } from "../services/yuvraj_announcements_api.js";
 import YuvrajModernHeader from "../components/yuvraj_ModernHeader.jsx";
 import YuvrajModernActionButton from "../components/yuvraj_ModernActionButton.jsx";

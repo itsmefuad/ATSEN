@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { yuvrajGetRole, yuvrajGetInstitution, yuvrajSetInstitution } from "../services/yuvraj_announcements.js";
+import { yuvrajGetRole, yuvrajGetInstitution, yuvrajSetInstitution, yuvrajIsPrivileged, yuvrajGetUserDisplayName } from "../services/yuvraj_auth.js";
 import {
   yuvrajCreateAnnouncement,
   yuvrajGetAnnouncementById,
@@ -26,7 +26,8 @@ const EnhancedField = ({ label, children, required = false }) => (
 const Yuvraj_AnnouncementEditor = () => {
   const { id, institution, role: roleParam } = useParams();
   const navigate = useNavigate();
-  const isCreate = id === "new";
+  // Check if this is a create operation - either id is "new" or we're at /yuvraj/announcements/new (no id param)
+  const isCreate = !id || id === "new";
   
   console.log("AnnouncementEditor render - id:", id, "institution:", institution, "roleParam:", roleParam, "isCreate:", isCreate);
   const [role, setRole] = useState("student");
@@ -58,7 +59,10 @@ const Yuvraj_AnnouncementEditor = () => {
     try { yuvrajSetInstitution(effectiveInstitution); } catch (e) {}
   }, [id, isCreate, institution, roleParam]);
 
-  if (role !== "admin") {
+  // Check if user has permission to create/edit announcements
+  const hasPermission = yuvrajIsPrivileged() || role === 'admin';
+  
+  if (!hasPermission) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -77,7 +81,7 @@ const Yuvraj_AnnouncementEditor = () => {
             <div className="text-6xl mb-4">🚫</div>
             <h2 className="text-2xl font-semibold text-white/90 mb-4">Admin Access Required</h2>
             <p className="text-white/70 mb-6">Only administrators can create and edit announcements.</p>
-            <Link to={`/${institution || 'yuvraj'}/student/announcements`}>
+            <Link to="/yuvraj/announcements">
               <YuvrajModernActionButton variant="secondary" size="medium">
                 Back to Announcements
               </YuvrajModernActionButton>
@@ -95,13 +99,11 @@ const Yuvraj_AnnouncementEditor = () => {
       return;
     }
 
-    // Validate that we have an ID for updates
+    // Validate that we have an ID for updates (only check if this is NOT a create operation)
     if (!isCreate && !id) {
       alert("Invalid announcement ID. Please go back and try again.");
       return;
     }
-
-    console.log("handleSubmit - isCreate:", isCreate, "id:", id, "announcementData:", announcementData);
 
     setIsSubmitting(true);
     try {
@@ -111,8 +113,10 @@ const Yuvraj_AnnouncementEditor = () => {
         priority,
         category: category.trim(),
         pinned, 
-        author: "Admin" 
+        author: yuvrajGetUserDisplayName() || "Admin" 
       };
+
+      console.log("handleSubmit - isCreate:", isCreate, "id:", id, "announcementData:", announcementData);
 
       if (isCreate) {
         await yuvrajCreateAnnouncement(announcementData);
@@ -125,7 +129,7 @@ const Yuvraj_AnnouncementEditor = () => {
       
       setTimeout(() => {
         setShowConfirmation(false);
-        navigate(`/${effectiveInstitution || 'yuvraj'}/${role || 'admin'}/announcements`, { replace: true });
+        navigate("/yuvraj/announcements", { replace: true });
       }, 2000);
     } catch (e) {
       console.error(e);
@@ -142,7 +146,7 @@ const Yuvraj_AnnouncementEditor = () => {
     try {
       await yuvrajDeleteAnnouncement(id);
       const effectiveInstitution = institution || yuvrajGetInstitution();
-      navigate(`/${effectiveInstitution || 'yuvraj'}/${role || 'admin'}/announcements`, { replace: true });
+      navigate("/yuvraj/announcements", { replace: true });
     } catch (e) {
       console.error(e);
       alert("Failed to delete announcement: " + (e?.message || String(e)));
@@ -256,7 +260,7 @@ const Yuvraj_AnnouncementEditor = () => {
             {/* Action Buttons */}
             <div className="flex items-center justify-between pt-6 border-t border-white/10">
               <div className="flex gap-3">
-                <Link to={`/${institution || 'yuvraj'}/${role || 'admin'}/announcements`}>
+                <Link to="/yuvraj/announcements">
                   <YuvrajModernActionButton variant="ghost" size="medium">
                     Cancel
                   </YuvrajModernActionButton>
