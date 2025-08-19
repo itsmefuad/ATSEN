@@ -2,8 +2,9 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import { BrowserRouter } from "react-router";
+import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { yuvrajGetInstitution, yuvrajSetInstitution } from "./services/yuvraj_announcements.js";
 
 // Ensure a default institution exists in localStorage so pages and API clients
@@ -16,8 +17,10 @@ try {
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
-      <Toaster />
+      <AuthProvider>
+        <App />
+        <Toaster />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>
 );

@@ -5,15 +5,19 @@ import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import { Link } from "react-router";
 import { BookOpen, Users, Calendar } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
 const S_Dashboard = () => {
+  const { user } = useAuth();
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRooms = async () => {
+      if (!user?.id) return;
+      
       try {
-        const res = await api.get("/rooms");
+        const res = await api.get(`/students/${user.id}/rooms`);
         console.log(res.data);
         setRooms(res.data);
         setIsRateLimited(false);
@@ -30,7 +34,7 @@ const S_Dashboard = () => {
     };
 
     fetchRooms();
-  }, []);
+  }, [user]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {

@@ -1,17 +1,25 @@
-import { Link, useLocation } from "react-router";
-import { CircleUserRoundIcon, MenuIcon, BookOpen, User } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router";
+import { CircleUserRoundIcon, MenuIcon, BookOpen, User, LogOut } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   
   // Determine if user is on student or teacher routes
   const isStudent = location.pathname.startsWith('/student');
   const isTeacher = location.pathname.startsWith('/teacher');
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   
   const getTitle = () => {
-    if (isStudent) return "Student Dashboard";
-    if (isTeacher) return "Teacher's Dashboard";
-    return "ATSEN";
+    if (isStudent) return `Student: ${user?.name || 'Dashboard'}`;
+    if (isTeacher) return `Teacher: ${user?.name || 'Dashboard'}`;
+    return user?.name || "ATSEN";
   };
   
   const getProfileLink = () => {
@@ -72,10 +80,10 @@ const Navbar = () => {
       </div>
 
       <div className="flex-none m-4">
-        <Link to={getProfileLink()} className="btn btn-Neutral">
-          <CircleUserRoundIcon className="size-5" />
-          <span>Profile</span>
-        </Link>
+        <button onClick={handleLogout} className="btn btn-error">
+          <LogOut className="size-5" />
+          <span>Logout</span>
+        </button>
       </div>
     </div>
   );

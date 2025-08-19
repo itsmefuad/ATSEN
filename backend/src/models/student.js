@@ -2,13 +2,7 @@ import mongoose from "mongoose";
 
 const studentSchema = new mongoose.Schema(
   {
-    studentId: {
-      type: String,
-      required: false, // changed from true -> false
-      unique: true,
-      index: true,
-      trim: true
-    },
+    
     name: {
       type: String,
       required: true
@@ -21,8 +15,12 @@ const studentSchema = new mongoose.Schema(
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Please fill a valid email address"]
     },
+    password: {
+      type: String,
+      required: true
+    },
     // changed: institution is now an array so a student can belong to multiple institutions
-    institution: [
+    institutions: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Institution"

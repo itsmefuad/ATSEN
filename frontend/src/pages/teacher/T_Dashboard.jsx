@@ -6,21 +6,25 @@ import toast from "react-hot-toast";
 import RoomCard from "../../components/RoomCard";
 import { Link } from "react-router";
 import { Plus } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext.jsx";
 const T_Dashboard = () => {
+  const { user } = useAuth();
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRooms = async () => {
+      if (!user?.id) return;
+      
       try {
-        const res = await api.get("/rooms");
+        const res = await api.get(`/instructors/${user.id}/rooms`);
         console.log(res.data);
         setRooms(res.data);
         setIsRateLimited(false);
       } catch (error) {
         console.error("Error fetching rooms");
-        if (error.response.status === 429) {
+        if (error.response?.status === 429) {
           setIsRateLimited(true);
         } else {
           toast.error("Failed to load rooms");
@@ -31,7 +35,7 @@ const T_Dashboard = () => {
     };
 
     fetchRooms();
-  }, []);
+  }, [user]);
 
   return (
     <div className="min-h-screen">
