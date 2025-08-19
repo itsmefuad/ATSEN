@@ -1,6 +1,6 @@
 // src/pages/teacher/T_Room.jsx
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams, useLocation } from "react-router";
 import api from "../../lib/axios";
@@ -12,7 +12,7 @@ import {
   MessageSquare,
   BookOpen,
   Calendar,
-  Video         // ← added Video icon
+  Video // ← added Video icon
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import DiscussionForum from "../../components/room/DiscussionForum";
@@ -24,7 +24,7 @@ const T_Room = () => {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [meetingLoading, setMeetingLoading] = useState(false);  // ← added meetingLoading
+  const [meetingLoading, setMeetingLoading] = useState(false); // ← added meetingLoading
   const [activeTab, setActiveTab] = useState("forum"); // Default to forum
 
   const navigate = useNavigate();
@@ -33,11 +33,11 @@ const T_Room = () => {
 
   // Determine active tab based on URL
   useEffect(() => {
-    if (location.pathname.includes('/edit')) {
+    if (location.pathname.includes("/edit")) {
       setActiveTab("settings");
-    } else if (location.pathname.includes('/materials')) {
+    } else if (location.pathname.includes("/materials")) {
       setActiveTab("materials");
-    } else if (location.pathname.includes('/assessment')) {
+    } else if (location.pathname.includes("/assessment")) {
       setActiveTab("assessment");
     } else {
       setActiveTab("forum");
@@ -129,12 +129,12 @@ const T_Room = () => {
             Back to Dashboard
           </Link>
         </div>
-        
+
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content Area */}
             <div className="lg:col-span-2">
-              {/* Room Info Header with Settings & Meeting */}
+              {/* Room Info Header with Meeting & Settings */}
               <div className="card bg-base-100 shadow-lg mb-6">
                 <div className="card-body">
                   <div className="flex items-start justify-between">
@@ -143,13 +143,7 @@ const T_Room = () => {
                       <p className="text-base-content/70">{room.description}</p>
                     </div>
                     <div className="ml-4 flex space-x-2">
-                      <Link
-                        to={`/teacher/room/${id}/edit`}
-                        className={`btn btn-sm ${activeTab === "settings" ? "btn-primary" : "btn-ghost"}`}
-                      >
-                        <Settings className="h-4 w-4 mr-1" />
-                        Settings
-                      </Link>
+                      {/* Meeting button first */}
                       <button
                         onClick={handleMeeting}
                         disabled={meetingLoading}
@@ -158,6 +152,16 @@ const T_Room = () => {
                         <Video className="h-4 w-4 mr-1" />
                         {meetingLoading ? "Starting…" : "Meeting"}
                       </button>
+                      {/* Settings button second */}
+                      <Link
+                        to={`/teacher/room/${id}/edit`}
+                        className={`btn btn-sm ${
+                          activeTab === "settings" ? "btn-primary" : "btn-ghost"
+                        }`}
+                      >
+                        <Settings className="h-4 w-4 mr-1" />
+                        Settings
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -243,9 +247,11 @@ const T_Room = () => {
 
               {activeTab === "forum" && <DiscussionForum roomId={id} />}
               {activeTab === "materials" && <Materials roomId={id} />}
-              {activeTab === "assessment" && <Assessment roomId={id} room={room} />}
+              {activeTab === "assessment" && (
+                <Assessment roomId={id} room={room} />
+              )}
             </div>
-            
+
             {/* Timeline Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-6">
