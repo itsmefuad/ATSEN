@@ -44,6 +44,11 @@ const Navbar = () => {
     }
   };
 
+  // Don't render navbar if no user is logged in
+  if (!user) {
+    return null;
+  }
+
   return (
     <nav className="bg-gray-50 border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between max-w-7xl mx-auto">

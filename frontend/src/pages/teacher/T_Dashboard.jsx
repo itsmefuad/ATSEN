@@ -44,6 +44,13 @@ const T_Dashboard = () => {
       {isRateLimited && <RateLimitedUi />}
 
       <div className="max-w-7xl mx-auto p-4 mt-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-primary mb-2">
+            Welcome, {user?.name || 'Instructor'}
+          </h1>
+          <p className="text-gray-600">Manage your rooms and students</p>
+        </div>
+
         {loading && (
           <div className="text-center text-primary py-10">Loading rooms...</div>
         )}
