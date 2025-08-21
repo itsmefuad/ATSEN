@@ -44,24 +44,21 @@ const Navbar = () => {
     }
   };
 
-  // Don't render navbar if no user is logged in
-  if (!user) {
-    return null;
-  }
-
   return (
     <nav className="bg-gray-50 border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Left side - Logo and User Info */}
         <div className="flex items-center space-x-4">
           {/* Logo */}
-          <img
-            src="/Atsenlogo.png"
-            alt="ATSEN"
-            className="h-8 w-auto"
-          />
+          <Link to="/">
+            <img
+              src="/Atsenlogo.png"
+              alt="ATSEN"
+              className="h-8 w-auto cursor-pointer"
+            />
+          </Link>
           
-          {/* Divider and User Info */}
+          {/* Divider and User Info - only show when logged in */}
           {user && (
             <>
               <div className="text-gray-400 text-xl font-light">|</div>
@@ -75,8 +72,9 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Right side - User Dropdown */}
-        {user && (
+        {/* Right side - User Dropdown or Login/Signup buttons */}
+        {user ? (
+          // Logged in user dropdown
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -116,6 +114,22 @@ const Navbar = () => {
                 </button>
               </div>
             )}
+          </div>
+        ) : (
+          // Not logged in - show login/signup buttons
+          <div className="flex items-center space-x-3">
+            <Link
+              to="/auth/login"
+              className="text-gray-700 hover:text-sky-600 font-medium transition-colors duration-200"
+            >
+              Login
+            </Link>
+            <Link
+              to="/auth/signup"
+              className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200"
+            >
+              Sign Up
+            </Link>
           </div>
         )}
       </div>

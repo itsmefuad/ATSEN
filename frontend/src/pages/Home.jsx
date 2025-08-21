@@ -1,6 +1,7 @@
 // src/pages/Home.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar.jsx";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -14,8 +15,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="max-w-6xl w-full mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <div className="flex items-center justify-center px-4" style={{ minHeight: 'calc(100vh - 64px)' }}>
+        <div className="max-w-6xl w-full mx-auto flex items-center justify-between">
         {/* Left Section */}
         <div className="flex-1 pr-8">
           <h1 className="text-4xl font-medium text-gray-800 mb-4">
@@ -57,6 +60,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

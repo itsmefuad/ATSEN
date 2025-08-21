@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchAnnouncements } from "../services/announcements";
 import AnnouncementCard from "../components/AnnouncementCard";
+import Navbar from "../components/Navbar.jsx";
 
 const Landing = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -29,6 +30,7 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-base-100">
+      <Navbar />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <header className="mb-8">
           <h1 className="text-3xl font-bold">Education Facilitation System</h1>

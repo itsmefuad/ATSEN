@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import api from "../../lib/axios";
+import Navbar from "../../components/Navbar.jsx";
 
 export default function Login() {
   const [role, setRole] = useState("institution");
@@ -65,8 +66,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8">
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="flex items-center justify-center px-4" style={{ minHeight: 'calc(100vh - 64px)' }}>
+        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">
             {role.charAt(0).toUpperCase() + role.slice(1)} Login
@@ -129,6 +132,7 @@ export default function Login() {
             ← Back to Home
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );
