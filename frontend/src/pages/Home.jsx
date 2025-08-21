@@ -22,10 +22,10 @@ export default function Home() {
         {/* Left Section */}
         <div className="flex-1 pr-8">
           <h1 className="text-4xl font-medium text-gray-800 mb-4">
-            Welcome to <span className="text-sky-500">Atsen</span>
+            Welcome to <span className="text-sky-500">Atsen,</span>
           </h1>
           <p className="text-lg text-gray-600">
-            Your comprehensive learning management system for institutions, instructors, and students.
+            The comprehensive learning management system.
           </p>
         </div>
 
