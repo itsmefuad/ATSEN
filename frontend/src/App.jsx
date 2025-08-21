@@ -2,13 +2,17 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
+// Home
+import Home from "./pages/Home.jsx";
+
 // Admin
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminProtectedRoute from "./pages/admin/ProtectedRoute";
 
 // Auth
-import Auth from "./pages/login/Auth.jsx";
+import AuthLogin from "./pages/auth/Login.jsx";
+import AuthSignup from "./pages/auth/Signup.jsx";
 
 
 // Institution
@@ -45,13 +49,17 @@ export default function App() {
   return (
     <div data-theme="nord">
       <Routes>
-        {/* 1. Root redirect → /login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* 1. Home page */}
+        <Route path="/" element={<Home />} />
 
-        {/* 2. Auth (login/register) */}
-        <Route path="/login" element={<Auth />} />
+        {/* 2. Auth (login/signup) */}
+        <Route path="/auth/login" element={<AuthLogin />} />
+        <Route path="/auth/signup" element={<AuthSignup />} />
 
-        {/* 3. Admin */}
+        {/* 3. Legacy redirect for old login path */}
+        <Route path="/login" element={<Navigate to="/auth/login" replace />} />
+
+        {/* 4. Admin */}
         <Route path="/admin/login" element={<Login />} />
         <Route
           path="/admin/dashboard"
@@ -62,7 +70,7 @@ export default function App() {
           }
         />
 
-        {/* 4. Dynamic Institution Routes */}
+        {/* 5. Dynamic Institution Routes */}
         <Route path="/:idOrName" element={
           <ProtectedRoute requiredRole="institution">
             <InstitutionLayout />
@@ -87,7 +95,7 @@ export default function App() {
           <Route path="settings" element={<InstitutionSettings />} />
         </Route>
 
-        {/* 5. Teacher */}
+        {/* 6. Teacher */}
         <Route path="/teacher/dashboard" element={
           <ProtectedRoute requiredRole="instructor">
             <T_Dashboard />

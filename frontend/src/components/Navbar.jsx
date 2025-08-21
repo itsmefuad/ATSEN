@@ -1,91 +1,128 @@
-import { Link, useLocation, useNavigate } from "react-router";
-import { CircleUserRoundIcon, MenuIcon, BookOpen, User, LogOut } from "lucide-react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ChevronDown, LogOut, User } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
 const Navbar = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  
-  // Determine if user is on student or teacher routes
-  const isStudent = location.pathname.startsWith('/student');
-  const isTeacher = location.pathname.startsWith('/teacher');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/auth/login');
+    setIsDropdownOpen(false);
   };
-  
-  const getTitle = () => {
-    if (isStudent) return `Student: ${user?.name || 'Dashboard'}`;
-    if (isTeacher) return `Teacher: ${user?.name || 'Dashboard'}`;
-    return user?.name || "ATSEN";
-  };
-  
-  const getProfileLink = () => {
-    if (isStudent) return "/student/profile";
-    if (isTeacher) return "/teacher/dashboard";
-    return "/";
-  };
-  
+
   const getDashboardLink = () => {
-    if (isStudent) return "/student/dashboard";
-    if (isTeacher) return "/teacher/dashboard";
-    return "/";
+    if (!user) return "/";
+    
+    switch (user.role) {
+      case "institution":
+        return `/${user.slug}/dashboard`;
+      case "instructor":
+        return "/teacher/dashboard";
+      case "student":
+        return "/student/dashboard";
+      default:
+        return "/";
+    }
+  };
+
+  const getUserDisplayText = () => {
+    if (!user) return "";
+    
+    switch (user.role) {
+      case "institution":
+        return user.name || "Institution";
+      case "instructor":
+        return "Instructor";
+      case "student":
+        return "Student";
+      default:
+        return "";
+    }
   };
 
   return (
-    <div className="navbar bg-base-300">
-      <div className="flex-none m-4">
-        <div className="drawer">
-          <input id="my-drawer" type="checkbox" className="drawer-toggle" />
-          <div className="drawer-content">
-            {/* Page content here */}
-            <label
-              htmlFor="my-drawer"
-              className="btn btn-primary drawer-button"
-            >
-              <MenuIcon className="size-5" />
-            </label>
-          </div>
-          <div className="drawer-side fixed inset-0 z-50">
-            <label
-              htmlFor="my-drawer"
-              aria-label="close sidebar"
-              className="drawer-overlay"
-            ></label>
-            <ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
-              {/* Sidebar content here */}
-              <li>
-                <Link to={getDashboardLink()}>
-                  <BookOpen className="size-5" />
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link to={getProfileLink()}>
-                  <User className="size-5" />
-                  Profile
-                </Link>
-              </li>
-            </ul>
-          </div>
+    <nav className="bg-gray-50 border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        {/* Left side - Logo and User Info */}
+        <div className="flex items-center space-x-4">
+          {/* Logo */}
+          <img
+            src="/Atsenlogo.png"
+            alt="ATSEN"
+            className="h-8 w-auto"
+          />
+          
+          {/* Divider and User Info */}
+          {user && (
+            <>
+              <div className="text-gray-400 text-xl font-light">|</div>
+              <Link
+                to={getDashboardLink()}
+                className="text-gray-700 hover:text-sky-600 font-medium transition-colors duration-200"
+              >
+                {getUserDisplayText()}
+              </Link>
+            </>
+          )}
         </div>
+
+        {/* Right side - User Dropdown */}
+        {user && (
+          <div className="relative">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center space-x-2 text-gray-700 hover:text-sky-600 transition-colors duration-200 p-2 rounded-md hover:bg-gray-100"
+            >
+              <div className="w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Dropdown Menu */}
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+                  {user.email || 'User Account'}
+                </div>
+                
+                {/* Profile option for students */}
+                {user.role === "student" && (
+                  <Link
+                    to="/student/profile"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                )}
+                
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="flex-1">
-        <h1 className="text-3xl font-bold text-primary font-mono tracking-tight">
-          {getTitle()}
-        </h1>
-      </div>
-
-      <div className="flex-none m-4">
-        <button onClick={handleLogout} className="btn btn-error">
-          <LogOut className="size-5" />
-          <span>Logout</span>
-        </button>
-      </div>
-    </div>
+      {/* Click outside to close dropdown */}
+      {isDropdownOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsDropdownOpen(false)}
+        />
+      )}
+    </nav>
   );
 };
 
