@@ -22,23 +22,22 @@ const RoomCard = ({ room, setRooms }) => {
   return (
     <Link
       to={`/teacher/room/${room._id}/forum`}
-      className="card bg-base-100 hover:shadow-lg transition-all duration-200
-        border-t-4 border-solid border-[#4f46e5]"
+      className="bg-white hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-sky-300"
     >
-      <div className="card-body">
-        <h3 className="card-title text-base-content">{room.room_name}</h3>
-        <p className="text-base-content/70 line-clamp-3">{room.description}</p>
-        <div className="card-actions justify-between items-center mt-4">
-          <span className="text-sm text-base-content/60">
+      <div className="p-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">{room.room_name}</h3>
+        <p className="text-gray-600 line-clamp-3 mb-4">{room.description}</p>
+        <div className="flex justify-between items-center mt-4">
+          <span className="text-sm text-gray-500">
             {formatDate(new Date(room.createdAt))}
           </span>
-          <div className="flex items-center gap-1">
-            <PenSquareIcon className="size-4" />
+          <div className="flex items-center gap-2">
+            <PenSquareIcon className="h-4 w-4 text-sky-500" />
             <button
-              className="btn btn-ghost btn-xs text-error"
+              className="p-1 hover:bg-red-50 rounded text-red-500 hover:text-red-600 transition-colors"
               onClick={(e) => handleDelete(e, room._id)}
             >
-              <Trash2Icon className="size-4" />
+              <Trash2Icon className="h-4 w-4" />
             </button>
           </div>
         </div>

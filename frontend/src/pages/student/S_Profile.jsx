@@ -12,30 +12,28 @@ const S_Profile = () => {
   });
 
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Back to Dashboard Button */}
           <div className="mb-6">
-            <Link to="/student/dashboard" className="btn btn-ghost">
-              <ArrowLeft className="h-5 w-5" />
+            <Link to="/student/dashboard" className="flex items-center text-gray-600 hover:text-sky-600 transition-colors">
+              <ArrowLeft className="h-5 w-5 mr-2" />
               Back to Dashboard
             </Link>
           </div>
 
           {/* Profile Header */}
-          <div className="card bg-base-100 shadow-lg mb-6">
-            <div className="card-body">
+          <div className="bg-white rounded-lg shadow-lg mb-6 border border-gray-200">
+            <div className="p-6">
               <div className="flex items-center gap-4">
-                <div className="avatar placeholder">
-                  <div className="bg-primary text-primary-content rounded-full w-20">
-                    <span className="text-2xl">{profile.name.charAt(0)}</span>
-                  </div>
+                <div className="w-20 h-20 bg-sky-500 text-white rounded-full flex items-center justify-center">
+                  <span className="text-2xl font-semibold">{profile.name.charAt(0)}</span>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">{profile.name}</h1>
-                  <p className="text-base-content/70">Student</p>
+                  <h1 className="text-3xl font-bold text-gray-800">{profile.name}</h1>
+                  <p className="text-gray-600">Student</p>
                 </div>
               </div>
             </div>
@@ -44,29 +42,29 @@ const S_Profile = () => {
           {/* Profile Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Personal Information */}
-            <div className="card bg-base-100 shadow-lg">
-              <div className="card-body">
-                <h2 className="card-title text-xl mb-4">Personal Information</h2>
+            <div className="bg-white rounded-lg shadow-lg border border-gray-200">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Personal Information</h2>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <User className="h-5 w-5 text-primary" />
+                    <User className="h-5 w-5 text-sky-500" />
                     <div>
-                      <p className="font-medium">Name</p>
-                      <p className="text-base-content/70">{profile.name}</p>
+                      <p className="font-medium text-gray-800">Name</p>
+                      <p className="text-gray-600">{profile.name}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-primary" />
+                    <Mail className="h-5 w-5 text-sky-500" />
                     <div>
-                      <p className="font-medium">Email</p>
-                      <p className="text-base-content/70">{profile.email}</p>
+                      <p className="font-medium text-gray-800">Email</p>
+                      <p className="text-gray-600">{profile.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-primary" />
+                    <Calendar className="h-5 w-5 text-sky-500" />
                     <div>
-                      <p className="font-medium">Enrollment Date</p>
-                      <p className="text-base-content/70">{profile.enrollmentDate}</p>
+                      <p className="font-medium text-gray-800">Enrollment Date</p>
+                      <p className="text-gray-600">{profile.enrollmentDate}</p>
                     </div>
                   </div>
                 </div>
@@ -74,12 +72,12 @@ const S_Profile = () => {
             </div>
 
             {/* Academic Information */}
-            <div className="card bg-base-100 shadow-lg">
-              <div className="card-body">
-                <h2 className="card-title text-xl mb-4">Academic Information</h2>
+            <div className="bg-white rounded-lg shadow-lg border border-gray-200">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Academic Information</h2>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <BookOpen className="h-5 w-5 text-primary" />
+                    <BookOpen className="h-5 w-5 text-sky-500" />
                     <div>
                       <p className="font-medium">Enrolled Courses</p>
                       <p className="text-base-content/70">{profile.enrolledCourses} courses</p>
@@ -100,15 +98,15 @@ const S_Profile = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="card bg-base-100 shadow-lg mt-6">
-            <div className="card-body">
-              <h2 className="card-title text-xl mb-4">Quick Actions</h2>
+          <div className="bg-white rounded-lg shadow-lg border border-gray-200 mt-6">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
               <div className="flex flex-wrap gap-4">
-                <Link to="/student/dashboard" className="btn btn-primary">
+                <Link to="/student/dashboard" className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
                   <BookOpen className="h-4 w-4 mr-2" />
                   View My Courses
                 </Link>
-                <button className="btn btn-outline">
+                <button className="border border-sky-500 text-sky-600 hover:bg-sky-50 px-4 py-2 rounded-lg flex items-center transition-colors">
                   <Mail className="h-4 w-4 mr-2" />
                   Contact Support
                 </button>

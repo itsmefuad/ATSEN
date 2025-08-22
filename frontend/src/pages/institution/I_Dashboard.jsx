@@ -42,9 +42,9 @@ export default function I_Dashboard() {
     padding: "0.6rem 1.2rem",
     borderRadius: "10px",
     fontWeight: 600,
-    color: "#0b1220",
-    background: "#e6f7ff",
-    border: "1px solid #b3e1ff",
+    color: "#075985",
+    background: "#f0f9ff",
+    border: "1px solid #7dd3fc",
     boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
   };
 
@@ -59,22 +59,14 @@ export default function I_Dashboard() {
     >
       <path
         d="M14.85 2.85a2.12 2.12 0 0 1 3 3l-9.5 9.5-4 1 1-4 9.5-9.5Zm2.12-2.12a4.12 4.12 0 0 0-5.83 0l-9.5 9.5A2 2 0 0 0 1 11.34l-1 4A2 2 0 0 0 3.66 19l4-1a2 2 0 0 0 1.41-1.41l9.5-9.5a4.12 4.12 0 0 0 0-5.83Z"
-        fill="#2563eb"
+        fill="#0284c7"
       />
     </svg>
   );
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1
-        style={{
-          fontSize: "2.5rem",
-          margin: 0,
-          textAlign: "left",
-          marginTop: 0,
-          paddingTop: 0,
-        }}
-      >
+    <div className="bg-gray-50 min-h-screen" style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+      <h1 className="text-4xl font-bold text-gray-800 mb-8">
         Dashboard
       </h1>
 
@@ -105,7 +97,7 @@ export default function I_Dashboard() {
           {/* Stats */}
           <div
             style={{
-              background: "#e0f2fe",
+              background: "#f0f9ff",
               borderRadius: "0.75rem",
               padding: "1rem",
               marginBottom: "1.5rem",
@@ -126,8 +118,8 @@ export default function I_Dashboard() {
                   borderRadius: "0.75rem",
                   padding: "1rem 0.5rem",
                   textAlign: "center",
-                  background: "#bbf7d0",
-                  color: "#166534",
+                  background: "#dbeafe",
+                  color: "#1e40af",
                   fontWeight: 600,
                   boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
                   minWidth: 100,
@@ -150,8 +142,8 @@ export default function I_Dashboard() {
                   borderRadius: "0.75rem",
                   padding: "1rem 0.5rem",
                   textAlign: "center",
-                  background: "#bbf7d0",
-                  color: "#166534",
+                  background: "#dbeafe",
+                  color: "#1e40af",
                   fontWeight: 600,
                   boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
                   minWidth: 100,
@@ -174,8 +166,8 @@ export default function I_Dashboard() {
                   borderRadius: "0.75rem",
                   padding: "1rem 0.5rem",
                   textAlign: "center",
-                  background: "#bbf7d0",
-                  color: "#166534",
+                  background: "#dbeafe",
+                  color: "#1e40af",
                   fontWeight: 600,
                   boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
                   minWidth: 100,

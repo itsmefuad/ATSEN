@@ -7,7 +7,7 @@ export default function InstitutionRooms() {
   const [rooms, setRooms]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg]   = useState("");
-  const BAR_COLOR = "hsl(30, 100%, 85%)";
+  const BAR_COLOR = "hsla(193, 47%, 76%, 1.00)";
 
   useEffect(() => {
     if (!idOrName) return;
