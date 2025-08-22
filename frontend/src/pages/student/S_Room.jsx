@@ -46,20 +46,20 @@ const S_Room = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader className="animate-spin size-10" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Back to Dashboard Button - Floating left */}
         <div className="mb-6 flex justify-start">
-          <Link to="/student/dashboard" className="btn btn-ghost">
-            <ArrowLeft className="h-5 w-5" />
+          <Link to="/student/dashboard" className="flex items-center px-4 py-2 text-gray-600 hover:text-sky-600 hover:bg-white rounded-md transition-colors">
+            <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Dashboard
           </Link>
         </div>
@@ -69,36 +69,48 @@ const S_Room = () => {
             {/* Main Content Area */}
             <div className="lg:col-span-2">
               {/* Room Info Header */}
-              <div className="card bg-base-100 shadow-lg mb-6">
-                <div className="card-body">
+              <div className="bg-white rounded-lg shadow-lg border border-gray-200 mb-6">
+                <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h1 className="text-2xl font-bold">{room.room_name}</h1>
-                      <p className="text-base-content/70">{room.description}</p>
+                      <h1 className="text-2xl font-bold text-gray-900">{room.room_name}</h1>
+                      <p className="text-gray-600 mt-2">{room.description}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Tabs */}
-              <div className="tabs tabs-boxed mb-6">
+              <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
                 <Link
                   to={`/student/room/${id}/forum`}
-                  className={`tab ${activeTab === "forum" ? "tab-active" : ""}`}
+                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                    activeTab === "forum" 
+                      ? "bg-sky-500 text-white shadow-sm" 
+                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                  }`}
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Discussion Forum
                 </Link>
                 <Link
                   to={`/student/room/${id}/materials`}
-                  className={`tab ${activeTab === "materials" ? "tab-active" : ""}`}
+                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                    activeTab === "materials" 
+                      ? "bg-sky-500 text-white shadow-sm" 
+                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                  }`}
                 >
                   <BookOpen className="h-4 w-4 mr-2" />
                   Materials
                 </Link>
                 <Link
                   to={`/student/room/${id}/assessment`}
-                  className={`tab ${activeTab === "assessment" ? "tab-active" : ""}`}
+                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                    activeTab === "assessment" 
+                      ? "bg-sky-500 text-white shadow-sm" 
+                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                  }`}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
                   Assessment

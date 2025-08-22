@@ -70,12 +70,12 @@ const S_Dashboard = () => {
                   <Link
                     key={room._id}
                     to={`/student/room/${room._id}/forum`}
-                    className="bg-white hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-sky-300"
+                    className="bg-white hover:bg-sky-50 hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-sky-300 group"
                   >
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-lg font-semibold text-gray-800">{room.room_name}</h3>
-                        <BookOpen className="h-5 w-5 text-sky-500" />
+                        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-sky-700">{room.room_name}</h3>
+                        <BookOpen className="h-5 w-5 text-sky-500 group-hover:text-sky-600" />
                       </div>
                       <p className="text-gray-600 line-clamp-3 mb-4">{room.description}</p>
                       
