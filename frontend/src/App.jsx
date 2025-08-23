@@ -33,10 +33,12 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
 import T_CreateRoom from "./pages/teacher/T_CreateRoom.jsx";
 import T_Room from "./pages/teacher/T_Room.jsx";
+import T_AssignmentDetail from "./pages/teacher/T_AssignmentDetail.jsx";
 
 import S_Dashboard from "./pages/student/S_Dashboard.jsx";
 import S_Room from "./pages/student/S_Room.jsx";
 import S_Profile from "./pages/student/S_Profile.jsx";
+import S_AssignmentDetail from "./pages/student/S_AssignmentDetail.jsx";
 
 
 // Yuvraj Announcements
@@ -104,7 +106,8 @@ export default function App() {
         <Route path="/teacher/create/room" element={<T_CreateRoom />} />
         <Route path="/teacher/room/:id/forum" element={<T_Room />} />
         <Route path="/teacher/room/:id/materials" element={<T_Room />} />
-                <Route path="/teacher/room/:id/assessment" element={<T_Room />} />
+        <Route path="/teacher/room/:id/assessment" element={<T_Room />} />
+        <Route path="/teacher/room/:id/assessment/:assessmentId" element={<T_AssignmentDetail />} />
         <Route path="/teacher/room/:id/edit" element={<T_Room />} />
         <Route path="/teacher/room/:id" element={<T_Room />} />
         <Route path="/teacher/edit/room/:id" element={<T_Room />} />
@@ -119,6 +122,7 @@ export default function App() {
                 <Route path="/student/room/:id/forum" element={<S_Room />} />
                 <Route path="/student/room/:id/materials" element={<S_Room />} />
                 <Route path="/student/room/:id/assessment" element={<S_Room />} />
+                <Route path="/student/room/:id/assessment/:assessmentId" element={<S_AssignmentDetail />} />
                 {/* Redirect old URL to new forum URL for backward compatibility */}
                 <Route path="/student/room/:id" element={<S_Room />} />
               <Route path="/teacher/edit/room/:id" element={<T_Room />} />

@@ -130,6 +130,23 @@ export const updateAssessment = async (req, res) => {
   }
 };
 
+// Get an assessment by ID
+export const getAssessmentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const assessment = await Assessment.findById(id);
+    if (!assessment) {
+      return res.status(404).json({ message: "Assessment not found" });
+    }
+
+    res.json(assessment);
+  } catch (error) {
+    console.error("Error fetching assessment:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
   // Delete an assessment
   export const deleteAssessment = async (req, res) => {
     try {

@@ -3,6 +3,7 @@ import {
   createAssessment,
   deleteAssessment,
   getAssessmentsByRoom,
+  getAssessmentById,
   updateAssessment,
 } from "../controllers/assessmentController.js";
 
@@ -16,6 +17,9 @@ router.post("/room/:roomId", createAssessment);
 
 // Update an assessment
 router.put("/:id", updateAssessment);
+
+// Get an assessment by ID
+router.get("/:id", getAssessmentById);
 
 // Delete an assessment
 router.delete("/:id", deleteAssessment);

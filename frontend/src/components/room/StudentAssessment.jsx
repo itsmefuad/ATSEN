@@ -117,6 +117,7 @@ const StudentAssessment = ({ roomId, room }) => {
                       onUpdate={handleAssessmentUpdated}
                       onDelete={handleAssessmentDeleted}
                       isStudent={true}
+                      roomId={roomId}
                     />
                   ))}
                 </div>
@@ -138,6 +139,7 @@ const StudentAssessment = ({ roomId, room }) => {
                       onUpdate={handleAssessmentUpdated}
                       onDelete={handleAssessmentDeleted}
                       isStudent={true}
+                      roomId={roomId}
                     />
                   ))}
                 </div>
@@ -163,6 +165,7 @@ const StudentAssessment = ({ roomId, room }) => {
                         onUpdate={handleAssessmentUpdated}
                         onDelete={handleAssessmentDeleted}
                         isStudent={true}
+                        roomId={roomId}
                       />
                     ))}
                   </div>
@@ -186,6 +189,7 @@ const StudentAssessment = ({ roomId, room }) => {
                         onUpdate={handleAssessmentUpdated}
                         onDelete={handleAssessmentDeleted}
                         isStudent={true}
+                        roomId={roomId}
                       />
                     ))}
                   </div>
@@ -209,6 +213,7 @@ const StudentAssessment = ({ roomId, room }) => {
                         onUpdate={handleAssessmentUpdated}
                         onDelete={handleAssessmentDeleted}
                         isStudent={true}
+                        roomId={roomId}
                       />
                     ))}
                   </div>

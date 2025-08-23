@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Edit, Trash2, Calendar, FileText, X, Check } from "lucide-react";
+import { Edit, Trash2, Calendar, FileText, X, Check, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
-const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false }) => {
+const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roomId }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editErrors, setEditErrors] = useState({});
@@ -150,7 +151,17 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false }) =
            <div className="flex items-start justify-between">
              <div className="flex-1">
               
-              <h3 className="font-semibold text-base-content mb-2">{assessment.title}</h3>
+              {(assessment.assessmentType === 'assignment' || assessment.assessmentType === 'project') ? (
+                <Link 
+                  to={isStudent ? `/student/room/${roomId}/assessment/${assessment._id}` : `/teacher/room/${roomId}/assessment/${assessment._id}`}
+                  className="font-semibold text-base-content mb-2 hover:text-primary cursor-pointer flex items-center gap-1"
+                >
+                  {assessment.title}
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              ) : (
+                <h3 className="font-semibold text-base-content mb-2">{assessment.title}</h3>
+              )}
               
               <p className="text-base-content/70 text-sm mb-3 whitespace-pre-wrap">
                 {assessment.description}

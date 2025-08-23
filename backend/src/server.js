@@ -16,6 +16,7 @@ import roomsRoutes from "./routes/roomsRoutes.js";
 import forumContentRoutes from "./routes/forumContentRoutes.js";
 import materialRoutes from "./routes/materialRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
+import submissionRoutes from "./routes/submissionRoutes.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
 
 dotenv.config();
@@ -50,6 +51,11 @@ app.get("/api/db-status", (req, res) => {
   });
 });
 
+// Test download route
+app.get("/api/test-download", (req, res) => {
+  res.json({ message: "Download route is working" });
+});
+
 // mount your routers
 app.use("/api/admin", adminRoutes);
 
@@ -68,6 +74,31 @@ app.use("/api/rooms", roomsRoutes);
 app.use("/api/forum-content", forumContentRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/assessments", assessmentRoutes);
+app.use("/api/assessments", submissionRoutes);
+
+// Direct download route
+app.get("/api/download/:submissionId", async (req, res) => {
+  try {
+    const { submissionId } = req.params;
+    const { default: Submission } = await import("./models/Submission.js");
+    const fs = await import("fs");
+    
+    const submission = await Submission.findById(submissionId);
+    if (!submission) {
+      return res.status(404).json({ message: "Submission not found" });
+    }
+
+    if (!fs.existsSync(submission.filePath)) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    res.download(submission.filePath, submission.fileName);
+  } catch (error) {
+    console.error("Download error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
 
 // connect to DB, then start the server
