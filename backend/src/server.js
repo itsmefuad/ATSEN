@@ -74,7 +74,7 @@ app.use("/api/rooms", roomsRoutes);
 app.use("/api/forum-content", forumContentRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/assessments", assessmentRoutes);
-app.use("/api/assessments", submissionRoutes);
+app.use("/api/submissions", submissionRoutes);
 
 // Direct download route
 app.get("/api/download/:submissionId", async (req, res) => {

@@ -56,7 +56,7 @@ const T_AssignmentDetail = () => {
   const fetchSubmissions = async () => {
     try {
       console.log('Fetching submissions for assessment ID:', assessmentId);
-      const response = await api.get(`/assessments/${assessmentId}/submissions`);
+      const response = await api.get(`/submissions/${assessmentId}/submissions`);
       console.log('Submissions response:', response.data);
       setSubmissions(response.data);
     } catch (error) {

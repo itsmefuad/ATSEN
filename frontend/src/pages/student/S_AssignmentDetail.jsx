@@ -54,7 +54,7 @@ const S_AssignmentDetail = () => {
 
   const fetchMySubmission = async () => {
     try {
-      const response = await api.get(`/assessments/${assessmentId}/my-submission`);
+      const response = await api.get(`/submissions/${assessmentId}/my-submission`);
       setSubmission(response.data);
     } catch (error) {
       console.error("Error fetching submission:", error);
@@ -77,7 +77,7 @@ const S_AssignmentDetail = () => {
       formData.append('file', submissionData.file);
       formData.append('comments', submissionData.comments);
 
-      const response = await api.post(`/assessments/${assessmentId}/submit`, formData, {
+      const response = await api.post(`/submissions/${assessmentId}/submit`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
