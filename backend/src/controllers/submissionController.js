@@ -2,6 +2,7 @@ import Submission from "../models/Submission.js";
 import Assessment from "../models/Assessment.js";
 import Student from "../models/student.js";
 import Room from "../models/Room.js";
+import Instructor from "../models/instructor.js";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
@@ -48,12 +49,21 @@ export const getAssessmentSubmissions = async (req, res) => {
 
     const submissions = await Submission.find({ assessment: assessmentId })
       .populate('student', 'name email')
+      .populate('gradedBy', 'name email')
       .sort({ submittedAt: -1 });
 
     // Filter out submissions with null student references
     const validSubmissions = submissions.filter(submission => submission.student);
 
-    res.json(validSubmissions);
+    // Add assessment type and max marks info to each submission
+    const submissionsWithGradingInfo = validSubmissions.map(submission => ({
+      ...submission.toObject(),
+      assessmentType: assessment.assessmentType,
+      defaultMaxMarks: assessment.assessmentType === 'assignment' ? 10 : 
+                      assessment.assessmentType === 'project' ? 15 : 10
+    }));
+
+    res.json(submissionsWithGradingInfo);
   } catch (error) {
     console.error("Error fetching submissions:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -117,13 +127,22 @@ export const getMySubmission = async (req, res) => {
     const submission = await Submission.findOne({ 
       assessment: assessmentId, 
       student: decoded.id 
-    });
+    }).populate('gradedBy', 'name email');
 
     if (!submission) {
       return res.status(404).json({ message: "No submission found" });
     }
 
-    res.json(submission);
+    // Get assessment info for context
+    const assessment = await Assessment.findById(assessmentId);
+    const submissionWithAssessmentInfo = {
+      ...submission.toObject(),
+      assessmentType: assessment?.assessmentType,
+      defaultMaxMarks: assessment?.assessmentType === 'assignment' ? 10 : 
+                      assessment?.assessmentType === 'project' ? 15 : 10
+    };
+
+    res.json(submissionWithAssessmentInfo);
   } catch (error) {
     console.error("Error fetching submission:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -216,6 +235,123 @@ export const downloadSubmission = async (req, res) => {
     res.download(filePath, submission.fileName);
   } catch (error) {
     console.error("Error downloading submission:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Grade a submission (teacher functionality)
+export const gradeSubmission = async (req, res) => {
+  try {
+    const { submissionId } = req.params;
+    const { marks, teacherFeedback } = req.body;
+    
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+    
+    const decoded = jwt.decode(token);
+    if (!decoded || !decoded.id) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    // Find the submission and populate assessment
+    const submission = await Submission.findById(submissionId).populate('assessment');
+    if (!submission) {
+      return res.status(404).json({ message: "Submission not found" });
+    }
+
+    // Determine max marks based on assessment type
+    const assessmentType = submission.assessment.assessmentType;
+    const maxMarks = assessmentType === 'assignment' ? 10 : 
+                    assessmentType === 'project' ? 15 : 10;
+
+    // Validate marks
+    if (marks < 0 || marks > maxMarks) {
+      return res.status(400).json({ 
+        message: `Marks must be between 0 and ${maxMarks} for ${assessmentType}` 
+      });
+    }
+
+    // Update submission with grading information
+    const updatedSubmission = await Submission.findByIdAndUpdate(
+      submissionId,
+      {
+        marks,
+        maxMarks,
+        teacherFeedback: teacherFeedback || "",
+        isGraded: true,
+        gradedAt: new Date(),
+        gradedBy: decoded.id
+      },
+      { new: true }
+    ).populate('student', 'name email')
+     .populate('gradedBy', 'name email');
+
+    res.json({
+      message: "Submission graded successfully",
+      submission: updatedSubmission
+    });
+  } catch (error) {
+    console.error("Error grading submission:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Update grade for a submission (teacher functionality)
+export const updateGrade = async (req, res) => {
+  try {
+    const { submissionId } = req.params;
+    const { marks, teacherFeedback } = req.body;
+    
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+    
+    const decoded = jwt.decode(token);
+    if (!decoded || !decoded.id) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    // Find the submission and populate assessment
+    const submission = await Submission.findById(submissionId).populate('assessment');
+    if (!submission) {
+      return res.status(404).json({ message: "Submission not found" });
+    }
+
+    // Determine max marks based on assessment type
+    const assessmentType = submission.assessment.assessmentType;
+    const maxMarks = assessmentType === 'assignment' ? 10 : 
+                    assessmentType === 'project' ? 15 : 10;
+
+    // Validate marks
+    if (marks < 0 || marks > maxMarks) {
+      return res.status(400).json({ 
+        message: `Marks must be between 0 and ${maxMarks} for ${assessmentType}` 
+      });
+    }
+
+    // Update submission with new grading information
+    const updatedSubmission = await Submission.findByIdAndUpdate(
+      submissionId,
+      {
+        marks,
+        maxMarks,
+        teacherFeedback: teacherFeedback || "",
+        gradedAt: new Date(),
+        gradedBy: decoded.id
+      },
+      { new: true }
+    ).populate('student', 'name email')
+     .populate('gradedBy', 'name email');
+
+    res.json({
+      message: "Grade updated successfully",
+      submission: updatedSubmission
+    });
+  } catch (error) {
+    console.error("Error updating grade:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

@@ -6,7 +6,9 @@ import {
   downloadSubmission,
   uploadMiddleware,
   getCurrentStudent,
-  deleteAllSubmissions
+  deleteAllSubmissions,
+  gradeSubmission,
+  updateGrade
 } from "../controllers/submissionController.js";
 
 const router = express.Router();
@@ -22,6 +24,12 @@ router.get("/:assessmentId/my-submission", getMySubmission);
 
 // Submit work for an assessment
 router.post("/:assessmentId/submit", uploadMiddleware, createSubmission);
+
+// Grade a submission (teacher only)
+router.post("/grade/:submissionId", gradeSubmission);
+
+// Update grade for a submission (teacher only)
+router.put("/grade/:submissionId", updateGrade);
 
 // Delete all submissions
 router.delete("/delete-all", deleteAllSubmissions);
