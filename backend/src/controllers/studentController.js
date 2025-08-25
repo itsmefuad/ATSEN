@@ -92,3 +92,29 @@ export async function getStudentRooms(req, res) {
   }
 }
 
+// Get student details with institutions populated
+export async function getStudentById(req, res) {
+  try {
+    const { studentId } = req.params;
+    
+    const student = await Student.findById(studentId, "-password")
+      .populate({
+        path: 'institutions',
+        select: 'name eiin email address description'
+      })
+      .populate({
+        path: 'room',
+        select: 'room_name description createdAt'
+      });
+    
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    
+    return res.json(student);
+  } catch (err) {
+    console.error("getStudentById error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+

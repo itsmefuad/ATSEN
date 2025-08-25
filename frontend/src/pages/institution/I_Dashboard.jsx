@@ -181,6 +181,39 @@ export default function I_Dashboard() {
             </Link>
           </div>
 
+          {/* Document Desk Section */}
+          <div
+            style={{
+              background: "#fef3c7",
+              borderRadius: "0.75rem",
+              padding: "1rem",
+              marginBottom: "1.5rem",
+              width: "100%",
+              textAlign: "center",
+            }}
+          >
+            <Link
+              to={`/${encodeURIComponent(idOrName)}/document-desk`}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                textDecoration: "none",
+                color: "#92400e",
+              }}
+            >
+              <div style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
+                📄
+              </div>
+              <div style={{ fontSize: "1.1rem", fontWeight: 600 }}>
+                Document Desk
+              </div>
+              <div style={{ fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                Manage Student Document Requests
+              </div>
+            </Link>
+          </div>
+
           {/* Add Buttons */}
           <div
             style={{

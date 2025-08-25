@@ -56,6 +56,13 @@ export async function createRoom(req, res) {
       institution: inst._id
     });
 
+    // Add the room to the institution's rooms array
+    await Institution.findByIdAndUpdate(
+      inst._id,
+      { $push: { rooms: room._id } },
+      { new: true }
+    );
+
     return res.status(201).json(room);
   } catch (err) {
     console.error("Error in createRoom:", err);

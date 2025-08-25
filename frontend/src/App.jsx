@@ -37,6 +37,10 @@ import T_Room from "./pages/teacher/T_Room.jsx";
 import S_Dashboard from "./pages/student/S_Dashboard.jsx";
 import S_Room from "./pages/student/S_Room.jsx";
 import S_Profile from "./pages/student/S_Profile.jsx";
+import S_Documents from "./pages/student/S_Documents.jsx";
+
+// Institution Document Management
+import DocumentDesk from "./pages/institution/DocumentDesk.jsx";
 
 
 // Yuvraj Announcements
@@ -93,6 +97,9 @@ export default function App() {
 
           {/* Settings */}
           <Route path="settings" element={<InstitutionSettings />} />
+          
+          {/* Document Desk */}
+          <Route path="document-desk" element={<DocumentDesk />} />
         </Route>
 
         {/* 6. Teacher */}
@@ -116,6 +123,11 @@ export default function App() {
                   </ProtectedRoute>
                 } />
                 <Route path="/student/profile" element={<S_Profile />} />
+                <Route path="/student/documents" element={
+                  <ProtectedRoute requiredRole="student">
+                    <S_Documents />
+                  </ProtectedRoute>
+                } />
                 <Route path="/student/room/:id/forum" element={<S_Room />} />
                 <Route path="/student/room/:id/materials" element={<S_Room />} />
                 <Route path="/student/room/:id/assessment" element={<S_Room />} />
