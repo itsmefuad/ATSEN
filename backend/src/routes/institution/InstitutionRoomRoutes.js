@@ -3,7 +3,8 @@
 import express from "express";
 import {
   createRoom,
-  listRooms
+  listRooms,
+  deleteRoom
 } from "../../controllers/institution/CreateRoomController.js";
 
 import {
@@ -25,6 +26,7 @@ router.post("/add-room", createRoom);
 
 // Room details and management
 router.get("/:roomId", getRoomDetails);
+router.delete("/:roomId", deleteRoom);
 router.post("/:roomId/add-student", addStudentToRoom);
 router.post("/:roomId/add-instructor", addInstructorToRoom);
 router.post("/:roomId/remove-student", removeStudentFromRoom);

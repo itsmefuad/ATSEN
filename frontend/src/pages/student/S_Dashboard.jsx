@@ -84,7 +84,7 @@ const S_Dashboard = () => {
               }`}
             >
               <BookOpen className="h-4 w-4 mr-2" />
-              My Courses
+              My Rooms
             </button>
             <button
               onClick={() => setActiveTab("institutions")}
