@@ -1,5 +1,37 @@
 import Material from "../models/Material.js";
 import Room from "../models/Room.js";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Configure multer for PDF uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads/materials';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'), false);
+    }
+  },
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
+
+export const uploadMiddleware = upload.single('pdfFile');
 
 // Get all materials for a room
 export const getMaterialsByRoom = async (req, res) => {
@@ -44,14 +76,43 @@ export const createMaterial = async (req, res) => {
       return res.status(400).json({ message: "Description is required" });
     }
 
-    // Create material
+    // Determine the file type based on what's provided
+    let materialFileType = 'text';
+    let materialFileUrl = '';
+    let materialFilePath = '';
+    let materialFileName = title.trim();
+    let originalFileName = '';
+
+    // Handle both link and PDF
+    if (fileUrl && req.file) {
+      materialFileType = 'link_and_pdf';
+      materialFileUrl = fileUrl;
+      materialFilePath = req.file.path;
+      materialFileName = req.file.originalname;
+      originalFileName = req.file.originalname;
+    }
+    // Handle only PDF
+    else if (req.file) {
+      materialFileType = 'pdf';
+      materialFilePath = req.file.path;
+      materialFileName = req.file.originalname;
+      originalFileName = req.file.originalname;
+    }
+    // Handle only link
+    else if (fileUrl) {
+      materialFileType = 'link';
+      materialFileUrl = fileUrl;
+    }
+
     const material = new Material({
       title: title.trim(),
       description: description.trim(),
       section,
-      fileType,
-      fileUrl: fileUrl || "",
-      fileName,
+      fileType: materialFileType,
+      fileUrl: materialFileUrl,
+      fileName: materialFileName,
+      filePath: materialFilePath,
+      originalFileName: originalFileName,
       room: roomId
     });
 
@@ -74,7 +135,7 @@ export const createMaterial = async (req, res) => {
 export const updateMaterial = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, section, fileType, fileUrl, fileName, isExpanded } = req.body;
+    const { title, description, section, fileUrl, fileName, isExpanded } = req.body;
 
     const material = await Material.findById(id);
     if (!material) {
@@ -90,14 +151,54 @@ export const updateMaterial = async (req, res) => {
       return res.status(400).json({ message: "Description is required" });
     }
 
-    // Update fields
+    // Update basic fields
     if (title) material.title = title.trim();
     if (description !== undefined) material.description = description.trim();
     if (section) material.section = section;
-    if (fileType) material.fileType = fileType;
-    if (fileUrl !== undefined) material.fileUrl = fileUrl || "";
     if (fileName) material.fileName = fileName;
     if (typeof isExpanded === 'boolean') material.isExpanded = isExpanded;
+
+    // Handle file updates
+    let hasLink = false;
+    let hasPdf = false;
+
+    // Update link
+    if (fileUrl !== undefined) {
+      material.fileUrl = fileUrl || "";
+      hasLink = !!fileUrl;
+    } else {
+      hasLink = !!material.fileUrl;
+    }
+
+    // Handle PDF upload
+    if (req.file) {
+      // Delete old PDF file if exists
+      if (material.filePath && fs.existsSync(material.filePath)) {
+        try {
+          fs.unlinkSync(material.filePath);
+        } catch (error) {
+          console.error("Error deleting old file:", error);
+        }
+      }
+      
+      material.filePath = req.file.path;
+      material.fileName = req.file.originalname;
+      material.originalFileName = req.file.originalname;
+      hasPdf = true;
+    } else {
+      hasPdf = !!material.filePath;
+    }
+
+    // Determine file type based on what's available
+    if (hasLink && hasPdf) {
+      material.fileType = 'link_and_pdf';
+    } else if (hasLink) {
+      material.fileType = 'link';
+    } else if (hasPdf) {
+      material.fileType = 'pdf';
+    } else {
+      material.fileType = 'text';
+    }
 
     const updatedMaterial = await material.save();
     res.status(200).json(updatedMaterial);
@@ -123,11 +224,21 @@ export const deleteMaterial = async (req, res) => {
       return res.status(404).json({ message: "Material not found" });
     }
 
+    // Delete associated PDF file if exists
+    if ((material.fileType === 'pdf' || material.fileType === 'link_and_pdf') && material.filePath && fs.existsSync(material.filePath)) {
+      try {
+        fs.unlinkSync(material.filePath);
+        console.log("Deleted PDF file:", material.filePath);
+      } catch (error) {
+        console.error("Error deleting PDF file:", error);
+      }
+    }
+
     await Material.findByIdAndDelete(id);
     res.status(200).json({ message: "Material deleted successfully" });
   } catch (error) {
     console.error("Error deleting material:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error", details: error.message });
   }
 };
 
@@ -147,6 +258,31 @@ export const toggleMaterialExpansion = async (req, res) => {
     res.status(200).json(updatedMaterial);
   } catch (error) {
     console.error("Error toggling material expansion:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Download a material PDF
+export const downloadMaterial = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const material = await Material.findById(id);
+    if (!material) {
+      return res.status(404).json({ message: "Material not found" });
+    }
+
+    if ((material.fileType !== 'pdf' && material.fileType !== 'link_and_pdf') || !material.filePath) {
+      return res.status(400).json({ message: "Material is not a PDF or file not found" });
+    }
+
+    if (!fs.existsSync(material.filePath)) {
+      return res.status(404).json({ message: "File not found on server" });
+    }
+
+    res.download(material.filePath, material.originalFileName || material.fileName);
+  } catch (error) {
+    console.error("Download error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
