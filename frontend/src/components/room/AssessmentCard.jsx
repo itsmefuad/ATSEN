@@ -1,10 +1,24 @@
 import { useState } from "react";
-import { Edit, Trash2, Calendar, FileText, X, Check, ExternalLink } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Calendar,
+  FileText,
+  X,
+  Check,
+  ExternalLink,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
-const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roomId }) => {
+const AssessmentCard = ({
+  assessment,
+  onUpdate,
+  onDelete,
+  isStudent = false,
+  roomId,
+}) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editErrors, setEditErrors] = useState({});
@@ -12,48 +26,56 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
   const [editFormData, setEditFormData] = useState({
     title: assessment.title,
     description: assessment.description,
-    topics: assessment.topics.join(', '),
-    date: new Date(assessment.date).toISOString().slice(0, 16)
+    topics: assessment.topics.join(", "),
+    date: new Date(assessment.date).toISOString().slice(0, 16),
   });
 
   // Check if description is required based on assessment type
-  const isDescriptionRequired = assessment.assessmentType === 'final_exam' || assessment.assessmentType === 'mid_term_exam';
+  const isDescriptionRequired =
+    assessment.assessmentType === "final_exam" ||
+    assessment.assessmentType === "mid_term_exam";
 
   const getTypeLabel = (type) => {
     switch (type) {
-      case 'final_exam': return 'Final Exam';
-      case 'mid_term_exam': return 'Mid-term Exam';
-      case 'quiz': return 'Quiz';
-      case 'assignment': return 'Assignment';
-      case 'project': return 'Project';
-      default: return type;
+      case "final_exam":
+        return "Final Exam";
+      case "mid_term_exam":
+        return "Mid-term Exam";
+      case "quiz":
+        return "Quiz";
+      case "assignment":
+        return "Assignment";
+      case "project":
+        return "Project";
+      default:
+        return type;
     }
   };
 
   const getCardColor = (type) => {
     switch (type) {
-      case 'final_exam':
-      case 'mid_term_exam':
-        return 'bg-base-100 border-l-4 border-l-primary';
-      case 'quiz':
-        return 'bg-base-100 border-l-4 border-l-secondary';
-      case 'assignment':
-        return 'bg-base-100 border-l-4 border-l-accent';
-      case 'project':
-        return 'bg-base-100 border-l-4 border-l-info';
+      case "final_exam":
+      case "mid_term_exam":
+        return "bg-white border-l-4 border-l-[#00A2E8]";
+      case "quiz":
+        return "bg-white border-l-4 border-l-[#00A2E8]";
+      case "assignment":
+        return "bg-white border-l-4 border-l-[#00A2E8]";
+      case "project":
+        return "bg-white border-l-4 border-l-[#00A2E8]";
       default:
-        return 'bg-base-100';
+        return "bg-white";
     }
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -62,15 +84,15 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
     setEditFormData({
       title: assessment.title,
       description: assessment.description,
-      topics: assessment.topics.join(', '),
-      date: new Date(assessment.date).toISOString().slice(0, 16)
+      topics: assessment.topics.join(", "),
+      date: new Date(assessment.date).toISOString().slice(0, 16),
     });
     setEditErrors({});
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Clear previous errors
     setEditErrors({});
 
@@ -96,20 +118,21 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
 
     try {
       const topicsArray = editFormData.topics
-        .split(',')
-        .map(topic => topic.trim())
-        .filter(topic => topic.length > 0);
+        .split(",")
+        .map((topic) => topic.trim())
+        .filter((topic) => topic.length > 0);
 
       const response = await api.put(`/assessments/${assessment._id}`, {
         ...editFormData,
-        topics: topicsArray
+        topics: topicsArray,
       });
 
       onUpdate(response.data);
       setIsEditModalOpen(false);
     } catch (error) {
       console.error("Error updating assessment:", error);
-      const errorMessage = error.response?.data?.message || "Failed to update assessment";
+      const errorMessage =
+        error.response?.data?.message || "Failed to update assessment";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -122,7 +145,8 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this assessment?")) return;
+    if (!window.confirm("Are you sure you want to delete this assessment?"))
+      return;
 
     setLoading(true);
     try {
@@ -130,7 +154,8 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
       onDelete(assessment._id);
     } catch (error) {
       console.error("Error deleting assessment:", error);
-      const errorMessage = error.response?.data?.message || "Failed to delete assessment";
+      const errorMessage =
+        error.response?.data?.message || "Failed to delete assessment";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -138,41 +163,56 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
   };
 
   const handleInputChange = (field, value) => {
-    setEditFormData(prev => ({ ...prev, [field]: value }));
+    setEditFormData((prev) => ({ ...prev, [field]: value }));
     if (editErrors[field]) {
-      setEditErrors(prev => ({ ...prev, [field]: null }));
+      setEditErrors((prev) => ({ ...prev, [field]: null }));
     }
   };
 
   return (
     <>
-             <div className={`card ${getCardColor(assessment.assessmentType)} shadow-md hover:shadow-lg transition-all duration-300`}>
-         <div className="card-body p-4">
-           <div className="flex items-start justify-between">
-             <div className="flex-1">
-              
-              {(assessment.assessmentType === 'assignment' || assessment.assessmentType === 'project') ? (
-                <Link 
-                  to={isStudent ? `/student/room/${roomId}/assessment/${assessment._id}` : `/teacher/room/${roomId}/assessment/${assessment._id}`}
-                  className="font-semibold text-base-content mb-2 hover:text-primary cursor-pointer flex items-center gap-1"
+      <div
+        className={`card ${getCardColor(
+          assessment.assessmentType
+        )} shadow-md hover:shadow-lg transition-all duration-300`}
+      >
+        <div className="card-body p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              {assessment.assessmentType === "assignment" ||
+              assessment.assessmentType === "project" ? (
+                <Link
+                  to={
+                    isStudent
+                      ? `/student/room/${roomId}/assessment/${assessment._id}`
+                      : `/teacher/room/${roomId}/assessment/${assessment._id}`
+                  }
+                  className="font-semibold text-gray-800 mb-2 hover:text-[#00A2E8] cursor-pointer flex items-center gap-1"
                 >
                   {assessment.title}
                   <ExternalLink className="h-4 w-4" />
                 </Link>
               ) : (
-                <h3 className="font-semibold text-base-content mb-2">{assessment.title}</h3>
+                <h3 className="font-semibold text-base-content mb-2">
+                  {assessment.title}
+                </h3>
               )}
-              
+
               <p className="text-base-content/70 text-sm mb-3 whitespace-pre-wrap">
                 {assessment.description}
               </p>
 
               {assessment.topics && assessment.topics.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-base-content/80 mb-1">Topics:</p>
+                  <p className="text-sm font-medium text-base-content/80 mb-1">
+                    Topics:
+                  </p>
                   <div className="flex flex-wrap gap-1">
                     {assessment.topics.map((topic, index) => (
-                      <span key={index} className="badge badge-outline badge-sm">
+                      <span
+                        key={index}
+                        className="badge badge-outline badge-sm"
+                      >
                         {topic}
                       </span>
                     ))}
@@ -234,13 +274,19 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
                 <input
                   type="text"
                   placeholder="Enter assessment title..."
-                  className={`input input-bordered ${editErrors.title ? 'border-red-300 focus:border-red-500' : ''}`}
+                  className={`input input-bordered ${
+                    editErrors.title
+                      ? "border-red-300 focus:border-red-500"
+                      : ""
+                  }`}
                   value={editFormData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
                 />
                 {editErrors.title && (
                   <label className="label">
-                    <span className="label-text-alt text-red-500">{editErrors.title}</span>
+                    <span className="label-text-alt text-red-500">
+                      {editErrors.title}
+                    </span>
                   </label>
                 )}
               </div>
@@ -249,18 +295,30 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
               <div className="form-control">
                 <label className="label">
                   <span className="label-text font-medium">
-                    Description {isDescriptionRequired ? '*' : '(Optional)'}
+                    Description {isDescriptionRequired ? "*" : "(Optional)"}
                   </span>
                 </label>
                 <textarea
-                  placeholder={isDescriptionRequired ? "Describe this assessment..." : "Describe this assessment (optional)..."}
-                  className={`textarea textarea-bordered h-24 ${editErrors.description ? 'border-red-300 focus:border-red-500' : ''}`}
+                  placeholder={
+                    isDescriptionRequired
+                      ? "Describe this assessment..."
+                      : "Describe this assessment (optional)..."
+                  }
+                  className={`textarea textarea-bordered h-24 ${
+                    editErrors.description
+                      ? "border-red-300 focus:border-red-500"
+                      : ""
+                  }`}
                   value={editFormData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
                 />
                 {editErrors.description && (
                   <label className="label">
-                    <span className="label-text-alt text-red-500">{editErrors.description}</span>
+                    <span className="label-text-alt text-red-500">
+                      {editErrors.description}
+                    </span>
                   </label>
                 )}
               </div>
@@ -268,17 +326,21 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
               {/* Topics */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">Topics (Optional)</span>
+                  <span className="label-text font-medium">
+                    Topics (Optional)
+                  </span>
                 </label>
                 <input
                   type="text"
                   placeholder="Enter topics separated by commas..."
                   className="input input-bordered"
                   value={editFormData.topics}
-                  onChange={(e) => handleInputChange('topics', e.target.value)}
+                  onChange={(e) => handleInputChange("topics", e.target.value)}
                 />
                 <label className="label">
-                  <span className="label-text-alt">e.g., Topic 1, Topic 2, Topic 3</span>
+                  <span className="label-text-alt">
+                    e.g., Topic 1, Topic 2, Topic 3
+                  </span>
                 </label>
               </div>
 
@@ -289,13 +351,17 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
                 </label>
                 <input
                   type="datetime-local"
-                  className={`input input-bordered ${editErrors.date ? 'border-red-300 focus:border-red-500' : ''}`}
+                  className={`input input-bordered ${
+                    editErrors.date ? "border-red-300 focus:border-red-500" : ""
+                  }`}
                   value={editFormData.date}
-                  onChange={(e) => handleInputChange('date', e.target.value)}
+                  onChange={(e) => handleInputChange("date", e.target.value)}
                 />
                 {editErrors.date && (
                   <label className="label">
-                    <span className="label-text-alt text-red-500">{editErrors.date}</span>
+                    <span className="label-text-alt text-red-500">
+                      {editErrors.date}
+                    </span>
                   </label>
                 )}
               </div>
@@ -312,7 +378,7 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary flex-1"
+                  className="btn bg-[#00A2E8] hover:bg-[#0082c4] text-white border-none flex-1"
                   disabled={loading}
                 >
                   {loading ? (

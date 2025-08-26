@@ -9,13 +9,13 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
     title: "",
     content: "",
     tags: "",
-    isPinned: false
+    isPinned: false,
   });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !formData.content.trim()) {
       toast.error("Title and content are required");
       return;
@@ -25,14 +25,14 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
     try {
       const tags = formData.tags
         .split(",")
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
 
       const response = await api.post(`/forum-content/room/${roomId}`, {
         title: formData.title,
         content: formData.content,
         tags,
-        isPinned: formData.isPinned
+        isPinned: formData.isPinned,
       });
 
       toast.success("Announcement created successfully!");
@@ -43,7 +43,11 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
       console.error("Error creating announcement:", error);
       console.error("Error response:", error.response?.data);
       console.error("Error status:", error.response?.status);
-      toast.error(`Failed to create announcement: ${error.response?.data?.details || error.message}`);
+      toast.error(
+        `Failed to create announcement: ${
+          error.response?.data?.details || error.message
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -56,18 +60,22 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
 
   if (!isOpen) {
     return (
-      <div 
+      <div
         onClick={() => setIsOpen(true)}
-        className="card bg-gradient-to-r from-primary/5 to-secondary/5 border-2 border-dashed border-primary/30 hover:border-primary/50 hover:from-primary/10 hover:to-secondary/10 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
+        className="card bg-gradient-to-r from-[#00A2E8]/5 to-blue-500/5 border-2 border-dashed border-[#00A2E8]/30 hover:border-[#00A2E8]/50 hover:from-[#00A2E8]/10 hover:to-blue-500/10 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
       >
         <div className="card-body py-6">
           <div className="flex items-center justify-center gap-3">
-            <div className="p-3 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors duration-300">
-              <Plus className="h-6 w-6 text-primary" />
+            <div className="p-3 bg-[#00A2E8]/10 rounded-full group-hover:bg-[#00A2E8]/20 transition-colors duration-300">
+              <Plus className="h-6 w-6 text-[#00A2E8]" />
             </div>
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-primary">Create New Announcement</h3>
-              <p className="text-sm text-base-content/60">Click to add a new announcement to this room</p>
+              <h3 className="text-lg font-semibold text-[#00A2E8]">
+                Create New Announcement
+              </h3>
+              <p className="text-sm text-base-content/60">
+                Click to add a new announcement to this room
+              </p>
             </div>
           </div>
         </div>
@@ -76,14 +84,16 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
   }
 
   return (
-    <div className="card bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 border-2 border-primary/20 shadow-lg animate-in slide-in-from-top-2 duration-300">
+    <div className="card bg-gradient-to-br from-[#00A2E8]/5 via-base-100 to-blue-500/5 border-2 border-[#00A2E8]/20 shadow-lg animate-in slide-in-from-top-2 duration-300">
       <div className="card-body">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Plus className="h-5 w-5 text-primary" />
+            <div className="p-2 bg-[#00A2E8]/10 rounded-full">
+              <Plus className="h-5 w-5 text-[#00A2E8]" />
             </div>
-            <h3 className="text-lg font-semibold text-primary">Create New Announcement</h3>
+            <h3 className="text-lg font-semibold text-[#00A2E8]">
+              Create New Announcement
+            </h3>
           </div>
           <button
             onClick={handleCancel}
@@ -103,7 +113,9 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
               placeholder="Enter announcement title..."
               className="input input-bordered"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               required
             />
           </div>
@@ -116,7 +128,9 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
               placeholder="Write your announcement content..."
               className="textarea textarea-bordered h-32"
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, content: e.target.value })
+              }
               required
             />
           </div>
@@ -133,7 +147,9 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
               placeholder="e.g., important, homework, exam"
               className="input input-bordered"
               value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, tags: e.target.value })
+              }
             />
           </div>
 
@@ -147,7 +163,9 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
                 type="checkbox"
                 className="checkbox checkbox-primary"
                 checked={formData.isPinned}
-                onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({ ...formData, isPinned: e.target.checked })
+                }
               />
             </label>
           </div>
@@ -163,7 +181,7 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn bg-[#00A2E8] hover:bg-[#0082c4] text-white border-none"
               disabled={loading}
             >
               {loading ? "Creating..." : "Create Announcement"}

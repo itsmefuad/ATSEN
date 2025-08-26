@@ -37,7 +37,11 @@ const Yuvraj_Announcements = () => {
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/atsen-circular-logo.svg" alt="ATSEN" className="h-10 w-10 drop-shadow" />
+            <img
+              src="/atsen-circular-logo.svg"
+              alt="ATSEN"
+              className="h-10 w-10 drop-shadow"
+            />
             <span className="hidden text-white/90 sm:inline">ATSEN</span>
           </div>
           <nav className="flex items-center gap-4">
@@ -79,7 +83,7 @@ const Yuvraj_Announcements = () => {
           {role === "admin" && (
             <div className="mt-6 flex justify-end">
               <button
-                className="btn btn-primary"
+                className="btn bg-[#00A2E8] hover:bg-[#0082c4] text-white border-none"
                 onClick={() => navigate("/yuvraj/admin/announcements/new")}
               >
                 Create Announcement
@@ -93,5 +97,3 @@ const Yuvraj_Announcements = () => {
 };
 
 export default Yuvraj_Announcements;
-
-

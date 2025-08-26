@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, Loader, Megaphone, MessageCircle, Users } from "lucide-react";
+import {
+  MessageSquare,
+  Loader,
+  Megaphone,
+  MessageCircle,
+  Users,
+} from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import ForumContentCard from "./ForumContentCard";
@@ -17,7 +23,7 @@ const StudentDiscussionForum = ({ roomId }) => {
       console.log("Fetching forum content for room:", roomId);
       const response = await api.get(`/forum-content/room/${roomId}`);
       console.log("Fetched forum content:", response.data);
-      
+
       // Sort content: pinned first (by pin time), then by creation date
       const sortedContent = response.data.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
@@ -28,7 +34,7 @@ const StudentDiscussionForum = ({ roomId }) => {
         }
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
-      
+
       setForumContent(sortedContent);
     } catch (error) {
       console.error("Error fetching forum content:", error);
@@ -40,7 +46,10 @@ const StudentDiscussionForum = ({ roomId }) => {
   };
 
   useEffect(() => {
-    console.log("StudentDiscussionForum useEffect triggered with roomId:", roomId);
+    console.log(
+      "StudentDiscussionForum useEffect triggered with roomId:",
+      roomId
+    );
     if (roomId) {
       fetchForumContent();
     }
@@ -48,14 +57,14 @@ const StudentDiscussionForum = ({ roomId }) => {
 
   const handleContentUpdated = (updatedContent) => {
     // Add animation tracking for the updated content
-    setAnimatingContent(prev => new Set([...prev, updatedContent._id]));
-    
-    setForumContent(prev => {
+    setAnimatingContent((prev) => new Set([...prev, updatedContent._id]));
+
+    setForumContent((prev) => {
       // Update the content and re-sort
-      const updatedContentList = prev.map(content => 
+      const updatedContentList = prev.map((content) =>
         content._id === updatedContent._id ? updatedContent : content
       );
-      
+
       // Sort content: pinned first (by pin time), then by creation date
       return updatedContentList.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
@@ -67,10 +76,10 @@ const StudentDiscussionForum = ({ roomId }) => {
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
     });
-    
+
     // Remove animation tracking after animation completes
     setTimeout(() => {
-      setAnimatingContent(prev => {
+      setAnimatingContent((prev) => {
         const newSet = new Set(prev);
         newSet.delete(updatedContent._id);
         return newSet;
@@ -79,11 +88,13 @@ const StudentDiscussionForum = ({ roomId }) => {
   };
 
   const handleContentDeleted = (deletedId) => {
-    setForumContent(prev => prev.filter(content => content._id !== deletedId));
+    setForumContent((prev) =>
+      prev.filter((content) => content._id !== deletedId)
+    );
   };
 
   const handleDiscussionCreated = (newDiscussion) => {
-    setForumContent(prev => {
+    setForumContent((prev) => {
       // Sort content: pinned first (by pin time), then by creation date
       const updatedContent = [...prev, newDiscussion];
       return updatedContent.sort((a, b) => {
@@ -99,8 +110,12 @@ const StudentDiscussionForum = ({ roomId }) => {
   };
 
   // Separate announcements and discussions
-  const announcements = forumContent.filter(item => item.contentType === 'announcement');
-  const discussions = forumContent.filter(item => item.contentType === 'discussion');
+  const announcements = forumContent.filter(
+    (item) => item.contentType === "announcement"
+  );
+  const discussions = forumContent.filter(
+    (item) => item.contentType === "discussion"
+  );
 
   if (loading) {
     return (
@@ -115,21 +130,21 @@ const StudentDiscussionForum = ({ roomId }) => {
       {/* Tab Navigation */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MessageSquare className="h-6 w-6 text-primary" />
+          <MessageSquare className="h-6 w-6 text-[#00A2E8]" />
           <h2 className="text-2xl font-bold">Communication Hub</h2>
         </div>
-        
+
         <div className="tabs tabs-boxed">
-          <button 
-            className={`tab ${activeTab === 'forum' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('forum')}
+          <button
+            className={`tab ${activeTab === "forum" ? "tab-active" : ""}`}
+            onClick={() => setActiveTab("forum")}
           >
             <MessageCircle className="h-4 w-4 mr-2" />
             Discussion Forum
           </button>
-          <button 
-            className={`tab ${activeTab === 'chat' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('chat')}
+          <button
+            className={`tab ${activeTab === "chat" ? "tab-active" : ""}`}
+            onClick={() => setActiveTab("chat")}
           >
             <Users className="h-4 w-4 mr-2" />
             Room Chat
@@ -138,15 +153,15 @@ const StudentDiscussionForum = ({ roomId }) => {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'forum' ? (
+      {activeTab === "forum" ? (
         <div className="space-y-8">
           {/* Teacher Announcements Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Megaphone className="h-5 w-5 text-primary" />
+              <Megaphone className="h-5 w-5 text-[#00A2E8]" />
               <h3 className="text-lg font-semibold">Announcements</h3>
             </div>
-            
+
             {announcements.length === 0 ? (
               <div className="text-center py-8">
                 <Megaphone className="h-10 w-10 text-base-content/30 mx-auto mb-3" />
@@ -163,15 +178,15 @@ const StudentDiscussionForum = ({ roomId }) => {
                   <div
                     key={announcement._id}
                     className={`transition-all duration-700 ease-in-out ${
-                      animatingContent.has(announcement._id) 
-                        ? 'animate-pulse shadow-xl scale-105' 
-                        : ''
+                      animatingContent.has(announcement._id)
+                        ? "animate-pulse shadow-xl scale-105"
+                        : ""
                     }`}
                     style={{
                       transform: `translateY(0px)`,
                       transitionDelay: `${index * 30}ms`,
                       order: index,
-                      zIndex: animatingContent.has(announcement._id) ? 10 : 1
+                      zIndex: animatingContent.has(announcement._id) ? 10 : 1,
                     }}
                   >
                     <ForumContentCard
@@ -189,12 +204,12 @@ const StudentDiscussionForum = ({ roomId }) => {
           {/* Student Discussions Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-secondary" />
+              <MessageCircle className="h-5 w-5 text-[#00A2E8]" />
               <h3 className="text-lg font-semibold">Class Discussions</h3>
             </div>
-            
-            <CreateDiscussion 
-              roomId={roomId} 
+
+            <CreateDiscussion
+              roomId={roomId}
               onDiscussionCreated={handleDiscussionCreated}
             />
 
@@ -214,15 +229,15 @@ const StudentDiscussionForum = ({ roomId }) => {
                   <div
                     key={discussion._id}
                     className={`transition-all duration-700 ease-in-out ${
-                      animatingContent.has(discussion._id) 
-                        ? 'animate-pulse shadow-xl scale-105' 
-                        : ''
+                      animatingContent.has(discussion._id)
+                        ? "animate-pulse shadow-xl scale-105"
+                        : ""
                     }`}
                     style={{
                       transform: `translateY(0px)`,
                       transitionDelay: `${index * 30}ms`,
                       order: index,
-                      zIndex: animatingContent.has(discussion._id) ? 10 : 1
+                      zIndex: animatingContent.has(discussion._id) ? 10 : 1,
                     }}
                   >
                     <ForumContentCard
@@ -239,7 +254,7 @@ const StudentDiscussionForum = ({ roomId }) => {
         </div>
       ) : (
         /* Room Chat Tab */
-        <div className="bg-base-100 rounded-lg p-6 shadow-lg">
+        <div className="bg-white rounded-lg p-6 shadow-lg">
           <RoomChat roomId={roomId} />
         </div>
       )}
