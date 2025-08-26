@@ -71,21 +71,46 @@ export async function getAllStudents(req, res) {
   }
 }
 
-// Get student's enrolled rooms
+// Get student's enrolled rooms grouped by institution
 export async function getStudentRooms(req, res) {
   try {
     const { studentId } = req.params;
     
-    const student = await Student.findById(studentId).populate({
-      path: 'room',
-      select: 'room_name description createdAt'
-    });
+    const student = await Student.findById(studentId)
+      .populate({
+        path: 'institutions',
+        select: 'name logo'
+      })
+      .populate({
+        path: 'room',
+        select: 'room_name description createdAt institution',
+        populate: {
+          path: 'institution',
+          select: 'name logo'
+        }
+      });
     
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
+
+    // Group rooms by institution
+    const roomsByInstitution = {};
     
-    return res.json(student.room || []);
+    student.institutions.forEach(institution => {
+      const institutionRooms = student.room.filter(room => 
+        room.institution && room.institution._id.toString() === institution._id.toString()
+      );
+      
+      if (institutionRooms.length > 0) {
+        roomsByInstitution[institution._id] = {
+          institution: institution,
+          rooms: institutionRooms
+        };
+      }
+    });
+    
+    return res.json(roomsByInstitution);
   } catch (err) {
     console.error("getStudentRooms error:", err);
     return res.status(500).json({ message: "Server error" });

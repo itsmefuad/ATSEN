@@ -17,6 +17,8 @@ import forumContentRoutes from "./routes/forumContentRoutes.js";
 import materialRoutes from "./routes/materialRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
+import quizGradeRoutes from "./routes/quizGradeRoutes.js";
+import gradeRoutes from "./routes/gradeRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
@@ -36,6 +38,12 @@ app.use(
 
 // parse JSON bodies
 app.use(express.json());
+
+// Add request logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
 
 // optional rate limiting
 // app.use(rateLimiter);
@@ -77,6 +85,8 @@ app.use("/api/forum-content", forumContentRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/assessments", assessmentRoutes);
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/quiz-grades", quizGradeRoutes);
+app.use("/api/grades", gradeRoutes);
 app.use("/api/chat", chatRoutes);
 
 // Direct download route

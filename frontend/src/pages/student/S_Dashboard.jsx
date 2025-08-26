@@ -11,18 +11,26 @@ const S_Dashboard = () => {
   const { user } = useAuth();
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [rooms, setRooms] = useState([]);
+  const [roomsByInstitution, setRoomsByInstitution] = useState({});
   const [institutions, setInstitutions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("courses");
+  const [activeTab, setActiveTab] = useState("rooms");
 
   useEffect(() => {
     const fetchStudentData = async () => {
       if (!user?.id) return;
 
       try {
-        // Fetch rooms
+        // Fetch rooms grouped by institution
         const roomsRes = await api.get(`/students/${user.id}/rooms`);
-        setRooms(roomsRes.data);
+        setRoomsByInstitution(roomsRes.data);
+
+        // Extract all rooms for backwards compatibility (if needed)
+        const allRooms = [];
+        Object.values(roomsRes.data).forEach((group) => {
+          allRooms.push(...group.rooms);
+        });
+        setRooms(allRooms);
 
         // Fetch student details with institutions
         const studentRes = await api.get(`/students/${user.id}`);
@@ -70,7 +78,7 @@ const S_Dashboard = () => {
             Welcome, {user?.name || "Student"}
           </h1>
           <p className="text-base-content/70">
-            Manage your courses and request documents from your institutions
+            Manage your rooms and request documents from your institutions
           </p>
         </div>
 
@@ -78,9 +86,9 @@ const S_Dashboard = () => {
         <div className="mb-8">
           <div className="flex bg-base-300 rounded-lg p-1 w-fit">
             <button
-              onClick={() => setActiveTab("courses")}
+              onClick={() => setActiveTab("rooms")}
               className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                activeTab === "courses"
+                activeTab === "rooms"
                   ? "bg-primary text-primary-content shadow-sm"
                   : "text-base-content/70 hover:bg-base-100 hover:text-primary"
               }`}
@@ -115,54 +123,88 @@ const S_Dashboard = () => {
 
         {loading && (
           <div className="text-center text-sky-600 py-10">
-            Loading your enrolled courses...
+            Loading your enrolled rooms...
           </div>
         )}
 
         {!isRateLimited && (
           <>
-            {/* Courses Tab */}
-            {activeTab === "courses" && (
+            {/* Rooms Tab */}
+            {activeTab === "rooms" && (
               <>
-                {rooms.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {rooms.map((room) => (
-                      <Link
-                        key={room._id}
-                        to={`/student/room/${room._id}/forum`}
-                        className="card bg-base-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 border border-base-300 group border-t-4 border-solid border-t-[#00A2E8]"
-                      >
-                        <div className="p-6">
-                          <h3 className="text-lg font-semibold text-base-content mb-2">
-                            {room.room_name}
-                          </h3>
-                          <p className="text-base-content/70 line-clamp-3 mb-4">
-                            {room.description}
-                          </p>
-                          <div className="flex justify-between items-center mt-4">
-                            <span className="text-sm text-base-content/60">
-                              {formatDate(room.createdAt)}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <BookOpen className="h-4 w-4 text-primary" />
-                              <div className="flex items-center gap-1 text-sm text-base-content/60">
-                                <Users className="h-4 w-4" />
-                                <span>Enrolled</span>
+                {Object.keys(roomsByInstitution).length > 0 ? (
+                  <div className="space-y-8">
+                    {Object.entries(roomsByInstitution).map(
+                      ([institutionId, data]) => (
+                        <div key={institutionId} className="mb-8">
+                          {/* Institution Header */}
+                          <div className="mb-6 border-b border-gray-200 pb-4">
+                            <div className="flex items-center gap-4">
+                              {data.institution.logo && (
+                                <img
+                                  src={data.institution.logo}
+                                  alt={data.institution.name}
+                                  className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                                />
+                              )}
+                              <div>
+                                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                  <Building className="h-6 w-6 text-sky-500" />
+                                  {data.institution.name}
+                                </h2>
+                                <p className="text-gray-600">
+                                  {data.rooms.length} room
+                                  {data.rooms.length !== 1 ? "s" : ""} enrolled
+                                </p>
                               </div>
                             </div>
                           </div>
+
+                          {/* Rooms Grid for this Institution */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {data.rooms.map((room) => (
+                              <Link
+                                key={room._id}
+                                to={`/student/room/${room._id}/forum`}
+                                className="bg-white hover:bg-sky-50 hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-sky-300 group"
+                              >
+                                <div className="p-6">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <h3 className="text-lg font-semibold text-gray-800 group-hover:text-sky-700">
+                                      {room.room_name}
+                                    </h3>
+                                    <BookOpen className="h-5 w-5 text-sky-500 group-hover:text-sky-600" />
+                                  </div>
+                                  <p className="text-gray-600 line-clamp-3 mb-4">
+                                    {room.description}
+                                  </p>
+
+                                  <div className="flex items-center justify-between text-sm text-gray-500">
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-3 w-3" />
+                                      <span>{formatDate(room.createdAt)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Users className="h-3 w-3" />
+                                      <span>Enrolled</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
                         </div>
-                      </Link>
-                    ))}
+                      )
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-20">
                     <BookOpen className="w-20 h-20 text-base-content/40 mx-auto mb-4" />
                     <h3 className="text-xl font-medium text-base-content/70 mb-2">
-                      No enrolled courses yet
+                      No enrolled rooms yet
                     </h3>
                     <p className="text-base-content/60 mb-6">
-                      You haven't been enrolled in any courses yet. Contact your
+                      You haven't been enrolled in any rooms yet. Contact your
                       instructor to get started.
                     </p>
                   </div>
