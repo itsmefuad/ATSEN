@@ -175,7 +175,7 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
 
   return (
     <>
-      <div className="card bg-white shadow-md hover:shadow-lg transition-all duration-300">
+      <div className="card bg-base-100 border border-base-300 hover:shadow-lg transition-all duration-300">
         <div className="card-body p-4">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -356,7 +356,7 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
       {/* Edit Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="card bg-base-100 shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">

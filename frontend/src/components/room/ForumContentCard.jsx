@@ -126,7 +126,7 @@ const ForumContentCard = ({
 
   if (isEditing) {
     return (
-      <div className="card bg-white shadow-lg border border-[#00A2E8]/20">
+      <div className="card bg-base-100 border border-primary/20">
         <div className="card-body">
           <form onSubmit={handleEdit} className="space-y-4">
             <div className="form-control">
@@ -226,11 +226,11 @@ const ForumContentCard = ({
   return (
     <div
       data-announcement-id={announcement._id}
-      className={`card bg-white shadow-lg transition-all duration-300 ease-in-out ${
+      className={`card bg-base-100 border border-base-300 transition-all duration-300 ease-in-out ${
         announcement.isPinned
           ? announcement.contentType === "discussion"
-            ? "border-l-4 border-l-[#00A2E8] scale-[1.02]"
-            : "border-l-4 border-l-[#00A2E8] scale-[1.02]"
+            ? "border-l-4 border-l-primary scale-[1.02]"
+            : "border-l-4 border-l-primary scale-[1.02]"
           : ""
       }`}
     >
@@ -238,9 +238,7 @@ const ForumContentCard = ({
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold">{announcement.title}</h3>
-            {announcement.isPinned && (
-              <Pin className="h-4 w-4 text-[#00A2E8]" />
-            )}
+            {announcement.isPinned && <Pin className="h-4 w-4 text-primary" />}
           </div>
           <div className="flex gap-1">
             {!isStudent && (
@@ -249,8 +247,8 @@ const ForumContentCard = ({
                   onClick={handleTogglePin}
                   className={`btn btn-ghost btn-sm transition-all duration-200 ${
                     announcement.isPinned
-                      ? "text-[#00A2E8] hover:bg-[#00A2E8]/10"
-                      : "hover:bg-gray-100"
+                      ? "text-primary hover:bg-primary/10"
+                      : "hover:bg-base-200"
                   }`}
                   title={announcement.isPinned ? "Unpin" : "Pin"}
                 >

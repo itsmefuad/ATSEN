@@ -22,7 +22,7 @@ export default function InstitutionLayout() {
   }, [idOrName]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-base-200">
       {/* Use unified navbar */}
       <Navbar />
 

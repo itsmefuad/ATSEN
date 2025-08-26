@@ -129,10 +129,10 @@ const Assessment = ({ roomId, room }) => {
       {/* Permanent Assessments */}
       <div className="space-y-4">
         {/* Final Exam Section */}
-        <div className="card bg-white shadow-md">
+        <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <div className="flex items-center gap-2 mb-4">
-              <FileText className="h-5 w-5 text-[#00A2E8]" />
+              <FileText className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold">Final Exam</h3>
             </div>
             {groupedAssessments.final_exam.length > 0 ? (
@@ -160,10 +160,10 @@ const Assessment = ({ roomId, room }) => {
         </div>
 
         {/* Mid-term Exam Section */}
-        <div className="card bg-white shadow-md">
+        <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <div className="flex items-center gap-2 mb-4">
-              <FileText className="h-5 w-5 text-[#00A2E8]" />
+              <FileText className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold">Mid-term Exam</h3>
             </div>
             {groupedAssessments.mid_term_exam.length > 0 ? (
@@ -204,10 +204,10 @@ const Assessment = ({ roomId, room }) => {
       <div className="space-y-4">
         {/* Quizzes Section */}
         {groupedAssessments.quiz.length > 0 && (
-          <div className="card bg-white shadow-md">
+          <div className="card bg-base-100 border border-base-300">
             <div className="card-body">
               <div className="flex items-center gap-2 mb-4">
-                <Calendar className="h-5 w-5 text-[#00A2E8]" />
+                <Calendar className="h-5 w-5 text-primary" />
                 <h3 className="text-lg font-semibold">Quizzes</h3>
               </div>
               <div className="space-y-3">
@@ -227,10 +227,10 @@ const Assessment = ({ roomId, room }) => {
 
         {/* Assignments Section */}
         {groupedAssessments.assignment.length > 0 && (
-          <div className="card bg-white shadow-md">
+          <div className="card bg-base-100 border border-base-300">
             <div className="card-body">
               <div className="flex items-center gap-2 mb-4">
-                <Calendar className="h-5 w-5 text-[#00A2E8]" />
+                <Calendar className="h-5 w-5 text-primary" />
                 <h3 className="text-lg font-semibold">Assignments</h3>
               </div>
               <div className="space-y-3">
@@ -250,10 +250,10 @@ const Assessment = ({ roomId, room }) => {
 
         {/* Projects Section */}
         {groupedAssessments.project.length > 0 && (
-          <div className="card bg-white shadow-md">
+          <div className="card bg-base-100 border border-base-300">
             <div className="card-body">
               <div className="flex items-center gap-2 mb-4">
-                <Calendar className="h-5 w-5 text-[#00A2E8]" />
+                <Calendar className="h-5 w-5 text-primary" />
                 <h3 className="text-lg font-semibold">Projects</h3>
               </div>
               <div className="space-y-3">

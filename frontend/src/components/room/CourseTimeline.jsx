@@ -80,17 +80,17 @@ const CourseTimeline = ({
   const getAssessmentColor = (type) => {
     switch (type) {
       case "final_exam":
-        return "text-[#00A2E8]";
+        return "text-primary";
       case "mid_term_exam":
-        return "text-[#00A2E8]";
+        return "text-primary";
       case "quiz":
-        return "text-[#00A2E8]";
+        return "text-primary";
       case "assignment":
-        return "text-[#00A2E8]";
+        return "text-primary";
       case "project":
-        return "text-[#00A2E8]";
+        return "text-primary";
       default:
-        return "text-[#00A2E8]";
+        return "text-primary";
     }
   };
 
@@ -208,7 +208,7 @@ const CourseTimeline = ({
 
   if (timelineEvents.length === 0) {
     return (
-      <div className="card bg-white shadow-lg">
+      <div className="card bg-base-100 border border-base-300 shadow-lg">
         <div className="card-body text-center py-8">
           <Calendar className="h-12 w-12 text-base-content/50 mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No Timeline Events</h3>
@@ -221,11 +221,11 @@ const CourseTimeline = ({
   }
 
   return (
-    <div className="card bg-white shadow-lg">
+    <div className="card bg-base-100 border border-base-300 shadow-lg">
       <div className="card-body">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-[#00A2E8]" />
+            <Calendar className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-bold">Course Timeline</h2>
           </div>
           {timelineEvents.length > 0 && (
@@ -237,7 +237,7 @@ const CourseTimeline = ({
 
         <div className="relative">
           {/* Central timeline line with progress */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gray-300 transform -translate-x-1/2"></div>
+          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-base-300 transform -translate-x-1/2"></div>
           {/* Progress bar overlay */}
           <div
             className="absolute left-1/2 top-0 w-0.5 bg-[#00A2E8] transform -translate-x-1/2 transition-all duration-500 ease-in-out"
@@ -257,7 +257,7 @@ const CourseTimeline = ({
                   className={`absolute left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full transition-all duration-300 ${
                     index <= currentProgress
                       ? "bg-[#00A2E8] scale-125"
-                      : "bg-gray-300"
+                      : "bg-base-300"
                   }`}
                   style={{ top: "50%", marginTop: "-4px" }}
                 ></div>
@@ -266,8 +266,8 @@ const CourseTimeline = ({
                   <div className="flex items-center">
                     {/* Left side content */}
                     <div className="w-1/2 pr-4">
-                      <div className="bg-gray-50 border-l-4 border-l-[#00A2E8] p-3 rounded-r-lg max-w-xs">
-                        <div className="font-bold text-[#00A2E8] text-sm">
+                      <div className="bg-base-200 border-l-4 border-l-primary p-3 rounded-r-lg max-w-xs">
+                        <div className="font-bold text-primary text-sm">
                           {event.title}
                         </div>
                         <div className="text-xs opacity-70 line-clamp-2">
@@ -285,7 +285,7 @@ const CourseTimeline = ({
                         className={`p-2 rounded-full shadow-lg transition-all duration-300 ${
                           index <= currentProgress
                             ? "bg-[#00A2E8] text-white"
-                            : "bg-white"
+                            : "bg-base-100"
                         } ${
                           !isStudent
                             ? "cursor-pointer hover:scale-110"
@@ -331,7 +331,7 @@ const CourseTimeline = ({
                         className={`p-2 rounded-full shadow-lg transition-all duration-300 ${
                           index <= currentProgress
                             ? "bg-[#00A2E8] text-white"
-                            : "bg-white"
+                            : "bg-base-100"
                         } ${
                           !isStudent
                             ? "cursor-pointer hover:scale-110"
@@ -371,8 +371,8 @@ const CourseTimeline = ({
 
                     {/* Right side content */}
                     <div className="w-1/2 pl-4 ml-auto">
-                      <div className="bg-gray-50 border-r-4 border-r-[#00A2E8] p-3 rounded-l-lg max-w-xs ml-auto">
-                        <div className="font-bold text-[#00A2E8] text-sm">
+                      <div className="bg-base-200 border-r-4 border-r-primary p-3 rounded-l-lg max-w-xs ml-auto">
+                        <div className="font-bold text-primary text-sm">
                           {event.title}
                         </div>
                         <div className="text-xs opacity-70 line-clamp-2">

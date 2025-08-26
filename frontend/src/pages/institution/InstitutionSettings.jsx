@@ -130,29 +130,29 @@ export default function InstitutionSettings() {
       <div className="flex items-center gap-4 mb-8">
         <Link
           to={`/${encodeURIComponent(idOrName)}`}
-          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          className="btn btn-ghost btn-sm"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <Settings className="h-8 w-8 text-gray-500" />
+          <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
+            <Settings className="h-8 w-8 text-base-content/60" />
             Institution Settings
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-base-content/70 mt-1">
             Manage your institution's profile and information
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="card bg-base-100 border border-base-300 p-6">
         <div className="space-y-6">
           {/* Phone */}
-          <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-start justify-between p-4 bg-base-200 rounded-lg">
             <div className="flex items-center gap-3">
-              <Phone className="h-5 w-5 text-gray-500" />
+              <Phone className="h-5 w-5 text-base-content/60" />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-base-content mb-1">
                   Phone Number
                 </label>
                 {edit.phone ? (
@@ -160,28 +160,30 @@ export default function InstitutionSettings() {
                     type="text"
                     value={fields.phone}
                     onChange={(e) => handleChange("phone", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="input input-bordered w-full"
                     placeholder="Enter phone number"
                   />
                 ) : (
-                  <p className="text-gray-900">{fields.phone || "Not set"}</p>
+                  <p className="text-base-content">
+                    {fields.phone || "Not set"}
+                  </p>
                 )}
               </div>
             </div>
             <button
               onClick={() => handleEdit("phone")}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="btn btn-ghost btn-sm"
             >
               <Edit3 className="h-4 w-4" />
             </button>
           </div>
 
           {/* Address */}
-          <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-start justify-between p-4 bg-base-200 rounded-lg">
             <div className="flex items-start gap-3 flex-1">
-              <MapPin className="h-5 w-5 text-gray-500 mt-1" />
+              <MapPin className="h-5 w-5 text-base-content/60 mt-1" />
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-base-content mb-1">
                   Address
                 </label>
                 {edit.address ? (
@@ -189,28 +191,30 @@ export default function InstitutionSettings() {
                     value={fields.address}
                     onChange={(e) => handleChange("address", e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="textarea textarea-bordered w-full"
                     placeholder="Enter institution address"
                   />
                 ) : (
-                  <p className="text-gray-900">{fields.address || "Not set"}</p>
+                  <p className="text-base-content">
+                    {fields.address || "Not set"}
+                  </p>
                 )}
               </div>
             </div>
             <button
               onClick={() => handleEdit("address")}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="btn btn-ghost btn-sm"
             >
               <Edit3 className="h-4 w-4" />
             </button>
           </div>
 
           {/* Description */}
-          <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-start justify-between p-4 bg-base-200 rounded-lg">
             <div className="flex items-start gap-3 flex-1">
-              <FileText className="h-5 w-5 text-gray-500 mt-1" />
+              <FileText className="h-5 w-5 text-base-content/60 mt-1" />
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-base-content mb-1">
                   Description
                 </label>
                 {edit.description ? (
@@ -220,11 +224,11 @@ export default function InstitutionSettings() {
                       handleChange("description", e.target.value)
                     }
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="textarea textarea-bordered w-full"
                     placeholder="Enter institution description"
                   />
                 ) : (
-                  <p className="text-gray-900">
+                  <p className="text-base-content">
                     {fields.description || "Not set"}
                   </p>
                 )}
@@ -232,7 +236,7 @@ export default function InstitutionSettings() {
             </div>
             <button
               onClick={() => handleEdit("description")}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="btn btn-ghost btn-sm"
             >
               <Edit3 className="h-4 w-4" />
             </button>
@@ -241,15 +245,15 @@ export default function InstitutionSettings() {
 
         {/* Action Buttons */}
         {Object.keys(edit).length > 0 && (
-          <div className="flex items-center gap-4 mt-8 pt-6 border-t border-gray-200">
+          <div className="flex items-center gap-4 mt-8 pt-6 border-t border-base-300">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              className="btn btn-primary"
             >
               {saving ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="loading loading-spinner loading-sm"></div>
                   Saving...
                 </>
               ) : (
@@ -263,7 +267,7 @@ export default function InstitutionSettings() {
             <button
               onClick={handleCancel}
               disabled={saving}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 transition-colors font-medium"
+              className="btn btn-outline"
             >
               Cancel
             </button>

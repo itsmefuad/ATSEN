@@ -130,7 +130,7 @@ const StudentDiscussionForum = ({ roomId }) => {
       {/* Tab Navigation */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MessageSquare className="h-6 w-6 text-[#00A2E8]" />
+          <MessageSquare className="h-6 w-6 text-primary" />
           <h2 className="text-2xl font-bold">Communication Hub</h2>
         </div>
 
@@ -158,7 +158,7 @@ const StudentDiscussionForum = ({ roomId }) => {
           {/* Teacher Announcements Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Megaphone className="h-5 w-5 text-[#00A2E8]" />
+              <Megaphone className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold">Announcements</h3>
             </div>
 
@@ -204,7 +204,7 @@ const StudentDiscussionForum = ({ roomId }) => {
           {/* Student Discussions Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-[#00A2E8]" />
+              <MessageCircle className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold">Class Discussions</h3>
             </div>
 
@@ -254,7 +254,7 @@ const StudentDiscussionForum = ({ roomId }) => {
         </div>
       ) : (
         /* Room Chat Tab */
-        <div className="bg-white rounded-lg p-6 shadow-lg">
+        <div className="card bg-base-100 border border-base-300 p-6">
           <RoomChat roomId={roomId} />
         </div>
       )}

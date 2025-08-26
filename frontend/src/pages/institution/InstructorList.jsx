@@ -71,7 +71,7 @@ export default function InstructorList() {
   if (errMsg)
     return (
       <div className="max-w-7xl mx-auto p-4 mt-6">
-        <div className="text-center text-red-600 py-10">{errMsg}</div>
+        <div className="text-center text-error py-10">{errMsg}</div>
       </div>
     );
 
@@ -82,16 +82,16 @@ export default function InstructorList() {
         <div className="flex items-center gap-4">
           <Link
             to={`/${encodeURIComponent(idOrName)}`}
-            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
               <Users className="h-8 w-8 text-purple-500" />
               Instructors
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-base-content/70 mt-1">
               Manage your institution's instructors
             </p>
           </div>
@@ -99,7 +99,7 @@ export default function InstructorList() {
 
         <Link
           to={`/${encodeURIComponent(idOrName)}/add-instructor`}
-          className="flex items-center px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-medium group"
+          className="btn btn-secondary flex items-center px-6 py-3 font-medium group"
         >
           <UserPlus className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
           Add Instructor
@@ -109,16 +109,16 @@ export default function InstructorList() {
       {/* Instructors List */}
       {insts.length === 0 ? (
         <div className="text-center py-20">
-          <Users className="w-20 h-20 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-medium text-gray-600 mb-2">
+          <Users className="w-20 h-20 text-base-content/40 mx-auto mb-4" />
+          <h3 className="text-xl font-medium text-base-content/70 mb-2">
             No instructors found
           </h3>
-          <p className="text-gray-500 mb-6">
+          <p className="text-base-content/60 mb-6">
             Start by adding instructors to your institution.
           </p>
           <Link
             to={`/${encodeURIComponent(idOrName)}/add-instructor`}
-            className="inline-flex items-center px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-medium"
+            className="btn btn-secondary inline-flex items-center px-6 py-3 font-medium"
           >
             <UserPlus className="h-5 w-5 mr-2" />
             Add First Instructor
@@ -129,24 +129,24 @@ export default function InstructorList() {
           {insts.map((instructor) => (
             <div
               key={instructor._id}
-              className="bg-white hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-purple-300 group p-6"
+              className="card bg-base-100 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-purple-300 group p-6"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-purple-700 mb-2">
+                  <h3 className="text-lg font-semibold text-base-content group-hover:text-purple-700 mb-2">
                     {instructor.name}
                   </h3>
 
                   {instructor.email && (
-                    <div className="flex items-center text-sm text-gray-600 mb-2">
-                      <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                    <div className="flex items-center text-sm text-base-content/70 mb-2">
+                      <Mail className="h-4 w-4 mr-2 text-base-content/40" />
                       <span>{instructor.email}</span>
                     </div>
                   )}
 
                   {instructor.phone && (
-                    <div className="flex items-center text-sm text-gray-600 mb-2">
-                      <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                    <div className="flex items-center text-sm text-base-content/70 mb-2">
+                      <Phone className="h-4 w-4 mr-2 text-base-content/40" />
                       <span>{instructor.phone}</span>
                     </div>
                   )}
@@ -154,17 +154,17 @@ export default function InstructorList() {
 
                 <button
                   onClick={() => handleRemoveInstructor(instructor._id)}
-                  className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-2 text-error hover:text-error/80 hover:bg-error/10 rounded-lg transition-colors"
                   title="Remove instructor"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="pt-3 border-t border-gray-100">
+              <div className="pt-3 border-t border-base-300">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Instructor</span>
-                  <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                  <span className="text-base-content/60">Instructor</span>
+                  <span className="badge badge-secondary text-xs font-medium">
                     Active
                   </span>
                 </div>

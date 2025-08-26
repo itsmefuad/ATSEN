@@ -7,43 +7,45 @@ const InstitutionCard = ({ institution, onRequestSuccess }) => {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div className="card bg-base-100 border border-base-300 p-6 hover:shadow-md transition-shadow">
         <div className="flex items-start justify-between">
           <div className="flex items-center mb-4">
             <div className="flex-shrink-0">
-              <Building className="h-10 w-10 text-sky-500" />
+              <Building className="h-10 w-10 text-primary" />
             </div>
             <div className="ml-4">
-              <h3 className="text-lg font-semibold text-gray-900">{institution.name}</h3>
+              <h3 className="text-lg font-semibold text-base-content">
+                {institution.name}
+              </h3>
               {institution.eiin && (
-                <p className="text-sm text-gray-600">EIIN: {institution.eiin}</p>
+                <p className="text-sm text-base-content/60">
+                  EIIN: {institution.eiin}
+                </p>
               )}
             </div>
           </div>
         </div>
 
         {institution.address && (
-          <div className="flex items-center text-sm text-gray-500 mb-3">
+          <div className="flex items-center text-sm text-base-content/60 mb-3">
             <MapPin className="h-4 w-4 mr-2" />
             <span>{institution.address}</span>
           </div>
         )}
 
         {institution.description && (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          <p className="text-base-content/70 text-sm mb-4 line-clamp-2">
             {institution.description}
           </p>
         )}
 
-        <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-          <div className="text-sm text-gray-500">
-            {institution.email && (
-              <span>{institution.email}</span>
-            )}
+        <div className="flex justify-between items-center pt-4 border-t border-base-300">
+          <div className="text-sm text-base-content/60">
+            {institution.email && <span>{institution.email}</span>}
           </div>
           <button
             onClick={() => setShowRequestForm(true)}
-            className="flex items-center px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors text-sm font-medium"
+            className="btn btn-primary btn-sm"
           >
             <FileText className="h-4 w-4 mr-2" />
             Request Document

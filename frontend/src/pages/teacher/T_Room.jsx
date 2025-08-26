@@ -119,15 +119,12 @@ const T_Room = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-base-200">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Back to Dashboard Button */}
         <div className="mb-6 flex justify-start">
-          <Link
-            to="/teacher/dashboard"
-            className="flex items-center text-gray-600 hover:text-sky-600 transition-colors"
-          >
+          <Link to="/teacher/dashboard" className="btn btn-ghost">
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Dashboard
           </Link>
@@ -138,21 +135,21 @@ const T_Room = () => {
             {/* Main Content Area */}
             <div className="lg:col-span-2">
               {/* Room Info Header with Meeting & Settings */}
-              <div className="bg-white rounded-lg shadow-lg mb-6 border border-gray-200">
+              <div className="card bg-base-100 border border-base-300 mb-6">
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h1 className="text-2xl font-bold text-gray-800">
+                      <h1 className="text-2xl font-bold text-base-content">
                         {room.room_name}
                       </h1>
-                      <p className="text-gray-600">{room.description}</p>
+                      <p className="text-base-content/70">{room.description}</p>
                     </div>
                     <div className="ml-4 flex space-x-2">
                       {/* Meeting button first */}
                       <button
                         onClick={handleMeeting}
                         disabled={meetingLoading}
-                        className="px-4 py-2 text-sm bg-[#00A2E8] hover:bg-[#0082c4] text-white rounded-md transition-colors disabled:opacity-50 flex items-center"
+                        className="btn btn-primary btn-sm"
                       >
                         <Video className="h-4 w-4 mr-1" />
                         {meetingLoading ? "Starting…" : "Meeting"}
@@ -160,10 +157,8 @@ const T_Room = () => {
                       {/* Settings button second */}
                       <Link
                         to={`/teacher/room/${id}/edit`}
-                        className={`px-4 py-2 text-sm rounded-md transition-colors flex items-center ${
-                          activeTab === "settings"
-                            ? "bg-[#00A2E8] text-white"
-                            : "text-gray-600 hover:bg-gray-100"
+                        className={`btn btn-sm ${
+                          activeTab === "settings" ? "btn-primary" : "btn-ghost"
                         }`}
                       >
                         <Settings className="h-4 w-4 mr-1" />
@@ -175,24 +170,18 @@ const T_Room = () => {
               </div>
 
               {/* Tabs */}
-              <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+              <div className="tabs tabs-boxed mb-6">
                 <Link
                   to={`/teacher/room/${id}/forum`}
-                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                    activeTab === "forum"
-                      ? "bg-[#00A2E8] text-white shadow-sm"
-                      : "text-gray-600 hover:bg-white hover:text-[#00A2E8]"
-                  }`}
+                  className={`tab ${activeTab === "forum" ? "tab-active" : ""}`}
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Discussion Forum
                 </Link>
                 <Link
                   to={`/teacher/room/${id}/materials`}
-                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                    activeTab === "materials"
-                      ? "bg-[#00A2E8] text-white shadow-sm"
-                      : "text-gray-600 hover:bg-white hover:text-[#00A2E8]"
+                  className={`tab ${
+                    activeTab === "materials" ? "tab-active" : ""
                   }`}
                 >
                   <BookOpen className="h-4 w-4 mr-2" />
@@ -200,10 +189,8 @@ const T_Room = () => {
                 </Link>
                 <Link
                   to={`/teacher/room/${id}/assessment`}
-                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                    activeTab === "assessment"
-                      ? "bg-[#00A2E8] text-white shadow-sm"
-                      : "text-gray-600 hover:bg-white hover:text-[#00A2E8]"
+                  className={`tab ${
+                    activeTab === "assessment" ? "tab-active" : ""
                   }`}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
@@ -213,16 +200,16 @@ const T_Room = () => {
 
               {/* Tab Content */}
               {activeTab === "settings" && (
-                <div className="bg-white rounded-lg shadow-lg border border-gray-200">
+                <div className="card bg-base-100 border border-base-300">
                   <div className="p-6">
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Room name
+                      <label className="label">
+                        <span className="label-text">Room name</span>
                       </label>
                       <input
                         type="text"
                         placeholder="room name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00A2E8] focus:border-[#00A2E8]"
+                        className="input input-bordered w-full"
                         value={room.room_name}
                         onChange={(e) =>
                           setRoom({ ...room, room_name: e.target.value })
@@ -230,12 +217,12 @@ const T_Room = () => {
                       />
                     </div>
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Description
+                      <label className="label">
+                        <span className="label-text">Description</span>
                       </label>
                       <textarea
                         placeholder="Write your description here..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00A2E8] focus:border-[#00A2E8] h-32 resize-none"
+                        className="textarea textarea-bordered w-full h-32"
                         value={room.description}
                         onChange={(e) =>
                           setRoom({ ...room, description: e.target.value })
@@ -247,13 +234,13 @@ const T_Room = () => {
                       <button
                         type="button"
                         onClick={handleDelete}
-                        className="flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors border border-red-500"
+                        className="btn btn-error"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete Room
                       </button>
                       <button
-                        className="px-4 py-2 bg-[#00A2E8] text-white rounded-md hover:bg-[#0082c4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn btn-primary"
                         disabled={saving}
                         onClick={handleSave}
                       >

@@ -8,6 +8,20 @@ export default {
   },
   plugins: [daisyui],
   daisyui: {
-    themes: ["light", "dark", "nord"],
+    themes: [
+      {
+        nord: {
+          primary: "#0ea5e9",
+          secondary: "#f472b6",
+          accent: "#37cdbe",
+          neutral: "#3d4451",
+          "base-100": "#ffffff",
+          "base-200": "#f9fafb",
+          "base-300": "#f3f4f6",
+          "base-content": "#1f2937",
+        },
+      },
+      "dim",
+    ],
   },
 };

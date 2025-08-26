@@ -56,15 +56,15 @@ const AssessmentCard = ({
     switch (type) {
       case "final_exam":
       case "mid_term_exam":
-        return "bg-white border-l-4 border-l-[#00A2E8]";
+        return "card bg-base-100 border-l-4 border-l-primary";
       case "quiz":
-        return "bg-white border-l-4 border-l-[#00A2E8]";
+        return "card bg-base-100 border-l-4 border-l-primary";
       case "assignment":
-        return "bg-white border-l-4 border-l-[#00A2E8]";
+        return "card bg-base-100 border-l-4 border-l-primary";
       case "project":
-        return "bg-white border-l-4 border-l-[#00A2E8]";
+        return "card bg-base-100 border-l-4 border-l-primary";
       default:
-        return "bg-white";
+        return "card bg-base-100";
     }
   };
 
@@ -187,7 +187,7 @@ const AssessmentCard = ({
                       ? `/student/room/${roomId}/assessment/${assessment._id}`
                       : `/teacher/room/${roomId}/assessment/${assessment._id}`
                   }
-                  className="font-semibold text-gray-800 mb-2 hover:text-[#00A2E8] cursor-pointer flex items-center gap-1"
+                  className="font-semibold text-base-content mb-2 hover:text-primary cursor-pointer flex items-center gap-1"
                 >
                   {assessment.title}
                   <ExternalLink className="h-4 w-4" />

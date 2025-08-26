@@ -66,11 +66,11 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
       >
         <div className="card-body py-6">
           <div className="flex items-center justify-center gap-3">
-            <div className="p-3 bg-[#00A2E8]/10 rounded-full group-hover:bg-[#00A2E8]/20 transition-colors duration-300">
-              <Plus className="h-6 w-6 text-[#00A2E8]" />
+            <div className="p-3 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors duration-300">
+              <Plus className="h-6 w-6 text-primary" />
             </div>
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-[#00A2E8]">
+              <h3 className="text-lg font-semibold text-primary">
                 Create New Announcement
               </h3>
               <p className="text-sm text-base-content/60">
@@ -88,10 +88,10 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
       <div className="card-body">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#00A2E8]/10 rounded-full">
-              <Plus className="h-5 w-5 text-[#00A2E8]" />
+            <div className="p-2 bg-primary/10 rounded-full">
+              <Plus className="h-5 w-5 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold text-[#00A2E8]">
+            <h3 className="text-lg font-semibold text-primary">
               Create New Announcement
             </h3>
           </div>
