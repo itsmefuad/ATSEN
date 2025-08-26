@@ -1,12 +1,22 @@
 // frontend/src/pages/institution/I_Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import {
+  Building,
+  Users,
+  BookOpen,
+  UserPlus,
+  GraduationCap,
+  Plus,
+  FileText,
+  Settings,
+} from "lucide-react";
 
 export default function I_Dashboard() {
   const { idOrName } = useParams();
-  const [data, setData]       = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [errMsg, setErrMsg]   = useState("");
+  const [errMsg, setErrMsg] = useState("");
 
   useEffect(() => {
     if (!idOrName) return;
@@ -33,280 +43,185 @@ export default function I_Dashboard() {
       });
   }, [idOrName]);
 
-  if (loading) return <p>Loading...</p>;
-  if (errMsg) return <p>{errMsg}</p>;
-  if (!data)  return <p>No data available</p>;
-
-  const addBtnStyle = {
-    textDecoration: "none",
-    padding: "0.6rem 1.2rem",
-    borderRadius: "10px",
-    fontWeight: 600,
-    color: "#075985",
-    background: "#f0f9ff",
-    border: "1px solid #7dd3fc",
-    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-  };
-
-  // Pencil SVG icon
-  const pencilIcon = (
-    <svg
-      width="16"
-      height="16"
-      fill="none"
-      viewBox="0 0 20 20"
-      style={{ verticalAlign: "middle", marginRight: 6 }}
-    >
-      <path
-        d="M14.85 2.85a2.12 2.12 0 0 1 3 3l-9.5 9.5-4 1 1-4 9.5-9.5Zm2.12-2.12a4.12 4.12 0 0 0-5.83 0l-9.5 9.5A2 2 0 0 0 1 11.34l-1 4A2 2 0 0 0 3.66 19l4-1a2 2 0 0 0 1.41-1.41l9.5-9.5a4.12 4.12 0 0 0 0-5.83Z"
-        fill="#0284c7"
-      />
-    </svg>
-  );
+  if (loading)
+    return (
+      <div className="max-w-7xl mx-auto p-4 mt-6">
+        <div className="text-center text-sky-600 py-10">
+          Loading dashboard...
+        </div>
+      </div>
+    );
+  if (errMsg)
+    return (
+      <div className="max-w-7xl mx-auto p-4 mt-6">
+        <div className="text-center text-red-600 py-10">{errMsg}</div>
+      </div>
+    );
+  if (!data)
+    return (
+      <div className="max-w-7xl mx-auto p-4 mt-6">
+        <div className="text-center text-gray-600 py-10">No data available</div>
+      </div>
+    );
 
   return (
-    <div className="bg-gray-50 min-h-screen" style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">
-        Dashboard
-      </h1>
+    <div className="max-w-7xl mx-auto p-4 mt-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          {data.name} Dashboard
+        </h1>
+        <p className="text-gray-600">
+          Manage your institution's resources and data
+        </p>
+      </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          gap: "2rem",
-          marginTop: "2rem",
-        }}
-      >
-        {/* Left Section */}
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "1rem",
-            padding: "2rem 1.5rem",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            minWidth: 320,
-            maxWidth: 420,
-            width: "fit-content",
-          }}
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Link
+          to={`/${encodeURIComponent(idOrName)}/rooms`}
+          className="bg-white hover:bg-blue-50 hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-blue-300 group p-6"
         >
-          {/* Stats */}
-          <div
-            style={{
-              background: "#f0f9ff",
-              borderRadius: "0.75rem",
-              padding: "1rem",
-              marginBottom: "1.5rem",
-              width: "100%",
-              display: "flex",
-              gap: "1rem",
-              flexWrap: "nowrap",
-              justifyContent: "center",
-            }}
-          >
-            {/* Active Rooms */}
-            <Link
-              to={`/${encodeURIComponent(idOrName)}/rooms`}
-              style={{ flex: 1, textDecoration: "none" }}
-            >
-              <div
-                style={{
-                  borderRadius: "0.75rem",
-                  padding: "1rem 0.5rem",
-                  textAlign: "center",
-                  background: "#dbeafe",
-                  color: "#1e40af",
-                  fontWeight: 600,
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                  minWidth: 100,
-                }}
-              >
-                <div style={{ fontSize: "1.2rem" }}>
-                  {data.totalRooms ?? 0}
-                </div>
-                <div style={{ fontSize: "0.9rem" }}>Rooms</div>
-              </div>
-            </Link>
-
-            {/* Active Students */}
-            <Link
-              to={`/${encodeURIComponent(idOrName)}/students`}
-              style={{ flex: 1, textDecoration: "none" }}
-            >
-              <div
-                style={{
-                  borderRadius: "0.75rem",
-                  padding: "1rem 0.5rem",
-                  textAlign: "center",
-                  background: "#dbeafe",
-                  color: "#1e40af",
-                  fontWeight: 600,
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                  minWidth: 100,
-                }}
-              >
-                <div style={{ fontSize: "1.2rem" }}>
-                  {data.activeStudents ?? 0}
-                </div>
-                <div style={{ fontSize: "0.9rem" }}>Students</div>
-              </div>
-            </Link>
-
-            {/* Total Instructors */}
-            <Link
-              to={`/${encodeURIComponent(idOrName)}/instructors`}
-              style={{ flex: 1, textDecoration: "none" }}
-            >
-              <div
-                style={{
-                  borderRadius: "0.75rem",
-                  padding: "1rem 0.5rem",
-                  textAlign: "center",
-                  background: "#dbeafe",
-                  color: "#1e40af",
-                  fontWeight: 600,
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                  minWidth: 100,
-                }}
-              >
-                <div style={{ fontSize: "1.2rem" }}>
-                  {data.totalInstructors ?? 0}
-                </div>
-                <div style={{ fontSize: "0.9rem" }}>Instructors</div>
-              </div>
-            </Link>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 group-hover:text-blue-600">
+                Total Rooms
+              </p>
+              <p className="text-3xl font-bold text-gray-900 group-hover:text-blue-700">
+                {data.totalRooms ?? 0}
+              </p>
+            </div>
+            <BookOpen className="h-12 w-12 text-blue-500 group-hover:text-blue-600" />
           </div>
+        </Link>
 
-          {/* Add Buttons */}
-          <div
-            style={{
-              background: "#f1f5f9",
-              borderRadius: "0.75rem",
-              padding: "1rem",
-              marginBottom: "1.5rem",
-              width: "100%",
-              display: "flex",
-              gap: "0.75rem",
-              flexWrap: "nowrap",
-              justifyContent: "center",
-            }}
-          >
-            <Link
-              to={`/${encodeURIComponent(idOrName)}/add-room`}
-              style={addBtnStyle}
-            >
-              Add Room +
-            </Link>
-            <Link
-              to={`/${encodeURIComponent(idOrName)}/add-student`}
-              style={addBtnStyle}
-            >
-              Add Student +
-            </Link>
-            <Link
-              to={`/${encodeURIComponent(idOrName)}/add-instructor`}
-              style={addBtnStyle}
-            >
-              Add Instructor +
-            </Link>
+        <Link
+          to={`/${encodeURIComponent(idOrName)}/students`}
+          className="bg-white hover:bg-green-50 hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-green-300 group p-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 group-hover:text-green-600">
+                Active Students
+              </p>
+              <p className="text-3xl font-bold text-gray-900 group-hover:text-green-700">
+                {data.activeStudents ?? 0}
+              </p>
+            </div>
+            <GraduationCap className="h-12 w-12 text-green-500 group-hover:text-green-600" />
           </div>
+        </Link>
 
-          {/* Document Desk Section */}
-          <div
-            style={{
-              background: "#fef3c7",
-              borderRadius: "0.75rem",
-              padding: "1rem",
-              marginBottom: "1.5rem",
-              width: "100%",
-              textAlign: "center",
-            }}
-          >
-            <Link
-              to={`/${encodeURIComponent(idOrName)}/document-desk`}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                textDecoration: "none",
-                color: "#92400e",
-              }}
-            >
-              <div style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
-                📄
-              </div>
-              <div style={{ fontSize: "1.1rem", fontWeight: 600 }}>
-                Document Desk
-              </div>
-              <div style={{ fontSize: "0.85rem", marginTop: "0.25rem" }}>
-                Manage Student Document Requests
-              </div>
-            </Link>
+        <Link
+          to={`/${encodeURIComponent(idOrName)}/instructors`}
+          className="bg-white hover:bg-purple-50 hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-purple-300 group p-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 group-hover:text-purple-600">
+                Total Instructors
+              </p>
+              <p className="text-3xl font-bold text-gray-900 group-hover:text-purple-700">
+                {data.totalInstructors ?? 0}
+              </p>
+            </div>
+            <Users className="h-12 w-12 text-purple-500 group-hover:text-purple-600" />
           </div>
+        </Link>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-6">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            to={`/${encodeURIComponent(idOrName)}/add-room`}
+            className="flex items-center justify-center px-6 py-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium group"
+          >
+            <Plus className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+            Add Room
+          </Link>
+          <Link
+            to={`/${encodeURIComponent(idOrName)}/add-student`}
+            className="flex items-center justify-center px-6 py-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium group"
+          >
+            <UserPlus className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+            Add Student
+          </Link>
+          <Link
+            to={`/${encodeURIComponent(idOrName)}/add-instructor`}
+            className="flex items-center justify-center px-6 py-4 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-medium group"
+          >
+            <Users className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+            Add Instructor
+          </Link>
+        </div>
+      </div>
+
+      {/* Additional Features */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Document Desk */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center mb-4">
+            <FileText className="h-6 w-6 text-yellow-500 mr-3" />
+            <h3 className="text-lg font-semibold text-gray-800">
+              Document Desk
+            </h3>
+          </div>
+          <p className="text-gray-600 mb-4">
+            Manage document requests and institutional paperwork efficiently.
+          </p>
+          <Link
+            to={`/${encodeURIComponent(idOrName)}/document-desk`}
+            className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium"
+          >
+            View Document Desk
+          </Link>
         </div>
 
-        {/* Right Section */}
-        <div
-          style={{
-            background: "#f8fafc",
-            borderRadius: "1rem",
-            padding: "2rem",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            minWidth: 320,
-            maxWidth: 420,
-            width: "fit-content",
-            margin: "0 auto",
-          }}
-        >
-          <h2 style={{ marginTop: 0, marginBottom: "1.2rem", fontSize: "1.5rem" }}>
-            {data.name}
-          </h2>
-          <div style={{ marginBottom: "0.8rem" }}>
-            <strong>Description:</strong>
-            <div style={{ marginLeft: 8, color: "#444" }}>
-              {data.description || (
-                <span style={{ color: "#aaa" }}>No description</span>
-              )}
+        {/* Institution Details */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <Building className="h-6 w-6 text-gray-500 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-800">
+                Institution Details
+              </h3>
             </div>
+            <Link
+              to={`/${encodeURIComponent(idOrName)}/settings`}
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Settings className="h-5 w-5" />
+            </Link>
           </div>
-          <div style={{ marginBottom: "0.8rem" }}>
-            <strong>EIIN:</strong>
-            <span style={{ marginLeft: 8 }}>
-              {data.eiin || <span style={{ color: "#aaa" }}>N/A</span>}
-            </span>
+          <div className="space-y-3">
+            {data.description && (
+              <div>
+                <p className="text-sm font-medium text-gray-500">Description</p>
+                <p className="text-gray-900">{data.description}</p>
+              </div>
+            )}
+            {data.address && (
+              <div>
+                <p className="text-sm font-medium text-gray-500">Address</p>
+                <p className="text-gray-900">{data.address}</p>
+              </div>
+            )}
+            {data.email && (
+              <div>
+                <p className="text-sm font-medium text-gray-500">Email</p>
+                <p className="text-gray-900">{data.email}</p>
+              </div>
+            )}
+            {data.phone && (
+              <div>
+                <p className="text-sm font-medium text-gray-500">Phone</p>
+                <p className="text-gray-900">{data.phone}</p>
+              </div>
+            )}
           </div>
-          <div style={{ marginBottom: "0.8rem" }}>
-            <strong>Address:</strong>
-            <span style={{ marginLeft: 8 }}>
-              {data.address || <span style={{ color: "#aaa" }}>N/A</span>}
-            </span>
-          </div>
-          <Link
-            to={`/${encodeURIComponent(idOrName)}/settings`}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "0.6rem 1.2rem",
-              borderRadius: "10px",
-              fontWeight: 600,
-              color: "#fff",
-              background: "#2563eb",
-              border: "none",
-              textDecoration: "none",
-              marginTop: "1.5rem",
-              alignSelf: "flex-start",
-            }}
-          >
-            {pencilIcon}
-            Edit Institution Details
-          </Link>
         </div>
       </div>
     </div>

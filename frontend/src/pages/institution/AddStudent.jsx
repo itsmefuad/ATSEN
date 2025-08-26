@@ -1,27 +1,37 @@
 // frontend/src/pages/institution/AddStudent.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
+import {
+  Search,
+  UserPlus,
+  ArrowLeft,
+  X,
+  Check,
+  GraduationCap,
+} from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function AddStudent() {
-  const { idOrName }               = useParams();
-  const navigate                   = useNavigate();
+  const { idOrName } = useParams();
+  const navigate = useNavigate();
 
   // search + selection state
-  const [searchQuery, setSearchQuery]           = useState("");
-  const [allStudents, setAllStudents]           = useState([]);
-  const [filtered, setFiltered]                 = useState([]);
-  const [selectedStudent, setSelectedStudent]   = useState(null);
-  const [error, setError]                       = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [allStudents, setAllStudents] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // 1) load all students from your global collection
   useEffect(() => {
     fetch(`http://localhost:5001/api/students`)
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error(`Status ${res.status}`);
         return res.json();
       })
-      .then(json => setAllStudents(json))
-      .catch(err => {
+      .then((json) => setAllStudents(json))
+      .catch((err) => {
         console.error("Fetch all students failed:", err);
         setError("Could not load students.");
       });
@@ -35,13 +45,15 @@ export default function AddStudent() {
       return;
     }
     setFiltered(
-      allStudents.filter(stu =>
-        stu.email.toLowerCase().includes(q)
+      allStudents.filter(
+        (stu) =>
+          stu.email.toLowerCase().includes(q) ||
+          stu.name.toLowerCase().includes(q)
       )
     );
   }, [searchQuery, allStudents]);
 
-  // 3) submit handler: POST to your institution’s add-student endpoint
+  // 3) submit handler: POST to your institution's add-student endpoint
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!selectedStudent) {
@@ -49,14 +61,17 @@ export default function AddStudent() {
       return;
     }
 
+    setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(idOrName)}/add-student`,
+        `http://localhost:5001/api/institutions/${encodeURIComponent(
+          idOrName
+        )}/add-student`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            studentId: selectedStudent._id
+            studentId: selectedStudent._id,
           }),
         }
       );
@@ -65,133 +80,164 @@ export default function AddStudent() {
         throw new Error(txt || `Status ${res.status}`);
       }
 
+      toast.success("Student added successfully!");
       // on success, go back to the student list
       navigate(`/${encodeURIComponent(idOrName)}/students`);
     } catch (err) {
       console.error("Add student failed:", err);
       setError("Could not add student to institution.");
+      toast.error("Failed to add student");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>Add Student to Institution</h1>
-
-      {error && (
-        <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>
-      )}
-
-      <form onSubmit={handleAdd}>
-        {/* Search by Email */}
-        <div style={{ marginBottom: "1.5rem", position: "relative" }}>
-          <label>
-            Search by Email<br />
-            <input
-              type="text"
-              placeholder="Type student’s email…"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setSelectedStudent(null);
-                setError("");
-              }}
-              style={{ width: "100%", padding: "0.5rem" }}
-              autoComplete="off"
-            />
-          </label>
-
-          {searchQuery && (
-            <ul
-              style={{
-                listStyle: "none",
-                padding: 0,
-                margin: "4px 0 0",
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                right: 0,
-                maxHeight: "200px",
-                overflowY: "auto",
-                border: "1px solid #ccc",
-                background: "#fff",
-                zIndex: 10,
-              }}
-            >
-              {filtered.length > 0 ? (
-                filtered.map(stu => (
-                  <li
-                    key={stu._id}
-                    onClick={() => {
-                      setSelectedStudent(stu);
-                      setSearchQuery("");
-                    }}
-                    style={{
-                      padding: "0.5rem",
-                      cursor: "pointer",
-                      background:
-                        selectedStudent?._id === stu._id
-                          ? "#def"
-                          : "#fff",
-                    }}
-                  >
-                    {stu.email}
-                  </li>
-                ))
-              ) : (
-                <li style={{ padding: "0.5rem", color: "#888" }}>
-                  No matches
-                </li>
-              )}
-            </ul>
-          )}
+    <div className="max-w-4xl mx-auto p-4 mt-6">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <Link
+          to={`/${encodeURIComponent(idOrName)}/students`}
+          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+            <UserPlus className="h-8 w-8 text-green-500" />
+            Add Student
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Search and add a student to your institution
+          </p>
         </div>
+      </div>
 
-        {/* Show selected student */}
-        {selectedStudent && (
-          <div style={{ marginBottom: "1.5rem" }}>
-            Selected: <strong>{selectedStudent.name}</strong>{" "}
-            (<em>{selectedStudent.email}</em>){" "}
-            <button
-              type="button"
-              onClick={() => setSelectedStudent(null)}
-              style={{
-                marginLeft: "0.5rem",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "1.2rem",
-              }}
-            >
-              ×
-            </button>
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700">{error}</p>
           </div>
         )}
 
-        {/* Actions */}
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <button
-            type="submit"
-            style={{
-              padding: "0.6rem 1.2rem",
-              background: "#10b981",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-            disabled={!selectedStudent}
-          >
-            Add to Institution
-          </button>
+        <form onSubmit={handleAdd}>
+          {/* Search Input */}
+          <div className="mb-6 relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search for Student
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Type student's name or email..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSelectedStudent(null);
+                  setError("");
+                }}
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                autoComplete="off"
+              />
+            </div>
 
-          <Link
-            to={`/${encodeURIComponent(idOrName)}/students`}
-            style={{ alignSelf: "center", color: "#555" }}
-          >
-            Cancel
-          </Link>
-        </div>
-      </form>
+            {/* Search Results Dropdown */}
+            {searchQuery && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {filtered.length > 0 ? (
+                  filtered.map((stu) => (
+                    <div
+                      key={stu._id}
+                      onClick={() => {
+                        setSelectedStudent(stu);
+                        setSearchQuery("");
+                        setError("");
+                      }}
+                      className={`p-4 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
+                        selectedStudent?._id === stu._id ? "bg-green-50" : ""
+                      }`}
+                    >
+                      <div className="font-medium text-gray-900">
+                        {stu.name}
+                      </div>
+                      <div className="text-sm text-gray-500">{stu.email}</div>
+                      {stu.studentId && (
+                        <div className="text-xs text-gray-400">
+                          ID: {stu.studentId}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    No students found
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Selected Student Display */}
+          {selectedStudent && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-green-900">
+                    Selected Student
+                  </h3>
+                  <p className="text-green-700">{selectedStudent.name}</p>
+                  <p className="text-sm text-green-600">
+                    {selectedStudent.email}
+                  </p>
+                  {selectedStudent.studentId && (
+                    <p className="text-sm text-green-600">
+                      Student ID: {selectedStudent.studentId}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStudent(null)}
+                  className="p-1 text-green-400 hover:text-green-600 hover:bg-green-100 rounded"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-4">
+            <button
+              type="submit"
+              disabled={!selectedStudent || loading}
+              className="flex items-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Check className="h-5 w-5 mr-2" />
+                  Add to Institution
+                </>
+              )}
+            </button>
+
+            <Link
+              to={`/${encodeURIComponent(idOrName)}/students`}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
