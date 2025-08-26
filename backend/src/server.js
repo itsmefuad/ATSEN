@@ -22,6 +22,8 @@ import gradeRoutes from "./routes/gradeRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
+import supportRoutes from "./routes/supportRoutes.js";
+import achievementRoutes from "./routes/achievementRoutes.js";
 
 dotenv.config();
 
@@ -114,6 +116,8 @@ app.get("/api/download/:submissionId", async (req, res) => {
 
 app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/support", supportRoutes);
+app.use("/api/achievements", achievementRoutes);
 
 // connect to DB, then start the server
 connectDB().then(() => {

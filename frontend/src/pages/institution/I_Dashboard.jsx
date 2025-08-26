@@ -10,6 +10,8 @@ import {
   Plus,
   FileText,
   Settings,
+  HelpCircle,
+  MessageCircle,
 } from "lucide-react";
 
 export default function I_Dashboard() {
@@ -160,7 +162,7 @@ export default function I_Dashboard() {
       </div>
 
       {/* Additional Features */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Document Desk */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center mb-4">
@@ -177,6 +179,26 @@ export default function I_Dashboard() {
             className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium"
           >
             View Document Desk
+          </Link>
+        </div>
+
+        {/* Support Desk */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center mb-4">
+            <HelpCircle className="h-6 w-6 text-green-500 mr-3" />
+            <h3 className="text-lg font-semibold text-gray-800">
+              Support Desk
+            </h3>
+          </div>
+          <p className="text-gray-600 mb-4">
+            Handle student support queries and provide assistance efficiently.
+          </p>
+          <Link
+            to={`/${encodeURIComponent(idOrName)}/support-desk`}
+            className="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            View Support Desk
           </Link>
         </div>
 

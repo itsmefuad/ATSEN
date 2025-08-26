@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { calculateAchievements } from "./achievementController.js";
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -287,6 +288,12 @@ export const gradeSubmission = async (req, res) => {
       { new: true }
     ).populate('student', 'name email')
      .populate('gradedBy', 'name email');
+
+    // Get the room from assessment to trigger achievement calculation
+    const assessment = await Assessment.findById(updatedSubmission.assessment).populate('room');
+    if (assessment && assessment.room) {
+      await calculateAchievements(updatedSubmission.student, assessment.room._id);
+    }
 
     res.json({
       message: "Submission graded successfully",

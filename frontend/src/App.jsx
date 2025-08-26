@@ -40,9 +40,12 @@ import S_Dashboard from "./pages/student/S_Dashboard.jsx";
 import S_Room from "./pages/student/S_Room.jsx";
 import S_Profile from "./pages/student/S_Profile.jsx";
 import S_Documents from "./pages/student/S_Documents.jsx";
+import S_SupportTickets from "./pages/student/S_SupportTickets.jsx";
+import MyProgress from "./pages/MyProgress.jsx";
 
 // Institution Document Management
 import DocumentDesk from "./pages/institution/DocumentDesk.jsx";
+import InstitutionSupportDesk from "./pages/institution/InstitutionSupportDesk.jsx";
 import S_AssignmentDetail from "./pages/student/S_AssignmentDetail.jsx";
 import S_QuizDetail from "./pages/student/S_QuizDetail.jsx";
 
@@ -104,6 +107,9 @@ export default function App() {
           
           {/* Document Desk */}
           <Route path="document-desk" element={<DocumentDesk />} />
+          
+          {/* Support Desk */}
+          <Route path="support-desk" element={<InstitutionSupportDesk />} />
         </Route>
 
         {/* 6. Teacher */}
@@ -135,14 +141,27 @@ export default function App() {
                     <S_Documents />
                   </ProtectedRoute>
                 } />
+                <Route path="/student/support-tickets" element={
+                  <ProtectedRoute requiredRole="student">
+                    <S_SupportTickets />
+                  </ProtectedRoute>
+                } />
                 <Route path="/student/room/:id/forum" element={<S_Room />} />
                 <Route path="/student/room/:id/materials" element={<S_Room />} />
                 <Route path="/student/room/:id/assessment" element={<S_Room />} />
                 <Route path="/student/room/:id/grades" element={<S_Room />} />
+                <Route path="/student/room/:id/standings" element={<S_Room />} />
                 <Route path="/student/room/:id/assessment/:assessmentId" element={<S_AssignmentDetail />} />
                 <Route path="/student/room/:id/quiz/:assessmentId" element={<S_QuizDetail />} />
                 {/* Redirect old URL to new forum URL for backward compatibility */}
                 <Route path="/student/room/:id" element={<S_Room />} />
+              
+              {/* My Progress Route */}
+              <Route path="/my-progress" element={
+                <ProtectedRoute>
+                  <MyProgress />
+                </ProtectedRoute>
+              } />
               <Route path="/teacher/edit/room/:id" element={<T_Room />} />
               <Route path="/yuvraj/announcements" element={<Yuvraj_Announcements />} />
               <Route path="/yuvraj/announcements/:id" element={<Yuvraj_AnnouncementDetail />} />

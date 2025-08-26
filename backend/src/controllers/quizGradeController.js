@@ -4,6 +4,7 @@ import Student from "../models/student.js";
 import Room from "../models/Room.js";
 import Instructor from "../models/instructor.js";
 import jwt from "jsonwebtoken";
+import { calculateAchievements } from "./achievementController.js";
 
 // Get all quiz grades for an assessment (teacher view)
 export const getQuizGrades = async (req, res) => {
@@ -171,6 +172,12 @@ export const gradeQuiz = async (req, res) => {
       { new: true, upsert: true }
     ).populate('student', 'name email')
      .populate('gradedBy', 'name email');
+
+    // Get the assessment to find room and trigger achievement calculation
+    const assessmentForAchievements = await Assessment.findById(assessmentId);
+    if (assessmentForAchievements) {
+      await calculateAchievements(studentId, assessmentForAchievements.room);
+    }
 
     res.json({
       message: "Quiz graded successfully",

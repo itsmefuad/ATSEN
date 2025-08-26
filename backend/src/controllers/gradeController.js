@@ -5,6 +5,7 @@ import Submission from "../models/Submission.js";
 import QuizGrade from "../models/QuizGrade.js";
 import Assessment from "../models/Assessment.js";
 import jwt from "jsonwebtoken";
+import { calculateAchievements } from "./achievementController.js";
 
 // Get comprehensive grade sheet for all students in a room (teacher view)
 export const getRoomGrades = async (req, res) => {
@@ -385,6 +386,9 @@ export const updateExamMarks = async (req, res) => {
       gradeData,
       { new: true, upsert: true }
     ).populate('student', 'name email');
+
+    // Calculate achievements after grade update
+    await calculateAchievements(studentId, roomId);
 
     res.json({
       message: "Exam marks updated successfully",
