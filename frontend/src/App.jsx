@@ -116,6 +116,7 @@ export default function App() {
         <Route path="/teacher/room/:id/forum" element={<T_Room />} />
         <Route path="/teacher/room/:id/materials" element={<T_Room />} />
         <Route path="/teacher/room/:id/assessment" element={<T_Room />} />
+        <Route path="/teacher/room/:id/grades" element={<T_Room />} />
         <Route path="/teacher/room/:id/assessment/:assessmentId" element={<T_AssignmentDetail />} />
         <Route path="/teacher/room/:id/quiz/:assessmentId" element={<T_QuizDetail />} />
         <Route path="/teacher/room/:id/edit" element={<T_Room />} />
@@ -137,6 +138,7 @@ export default function App() {
                 <Route path="/student/room/:id/forum" element={<S_Room />} />
                 <Route path="/student/room/:id/materials" element={<S_Room />} />
                 <Route path="/student/room/:id/assessment" element={<S_Room />} />
+                <Route path="/student/room/:id/grades" element={<S_Room />} />
                 <Route path="/student/room/:id/assessment/:assessmentId" element={<S_AssignmentDetail />} />
                 <Route path="/student/room/:id/quiz/:assessmentId" element={<S_QuizDetail />} />
                 {/* Redirect old URL to new forum URL for backward compatibility */}
