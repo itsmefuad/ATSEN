@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router";
-import { ArrowLeft, Loader, MessageSquare, BookOpen, Calendar } from "lucide-react";
+import { ArrowLeft, Loader, MessageSquare, BookOpen, Calendar, TrendingUp } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import StudentDiscussionForum from "../../components/room/StudentDiscussionForum";
 import StudentMaterials from "../../components/room/StudentMaterials";
 import StudentAssessment from "../../components/room/StudentAssessment";
+import StudentGrades from "../../components/room/StudentGrades";
 import CourseTimeline from "../../components/room/CourseTimeline";
 
 const S_Room = () => {
@@ -23,6 +24,8 @@ const S_Room = () => {
       setActiveTab("materials");
     } else if (location.pathname.includes('/assessment')) {
       setActiveTab("assessment");
+    } else if (location.pathname.includes('/grades')) {
+      setActiveTab("grades");
     } else {
       setActiveTab("forum");
     }
@@ -115,6 +118,17 @@ const S_Room = () => {
                   <Calendar className="h-4 w-4 mr-2" />
                   Assessment
                 </Link>
+                <Link
+                  to={`/student/room/${id}/grades`}
+                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                    activeTab === "grades" 
+                      ? "bg-sky-500 text-white shadow-sm" 
+                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Grades
+                </Link>
               </div>
 
               {/* Tab Content */}
@@ -128,6 +142,10 @@ const S_Room = () => {
 
               {activeTab === "assessment" && (
                 <StudentAssessment roomId={id} room={room} />
+              )}
+
+              {activeTab === "grades" && (
+                <StudentGrades roomId={id} />
               )}
             </div>
             

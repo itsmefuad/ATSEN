@@ -12,12 +12,14 @@ import {
   MessageSquare,
   BookOpen,
   Calendar,
+  TrendingUp,
   Video, // ← added Video icon
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import DiscussionForum from "../../components/room/DiscussionForum";
 import Materials from "../../components/room/Materials";
 import Assessment from "../../components/room/Assessment";
+import TeacherGrades from "../../components/room/TeacherGrades";
 import CourseTimeline from "../../components/room/CourseTimeline";
 
 const T_Room = () => {
@@ -39,6 +41,8 @@ const T_Room = () => {
       setActiveTab("materials");
     } else if (location.pathname.includes("/assessment")) {
       setActiveTab("assessment");
+    } else if (location.pathname.includes("/grades")) {
+      setActiveTab("grades");
     } else {
       setActiveTab("forum");
     }
@@ -209,6 +213,17 @@ const T_Room = () => {
                   <Calendar className="h-4 w-4 mr-2" />
                   Assessment
                 </Link>
+                <Link
+                  to={`/teacher/room/${id}/grades`}
+                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                    activeTab === "grades" 
+                      ? "bg-sky-500 text-white shadow-sm" 
+                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Grades
+                </Link>
               </div>
 
               {/* Tab Content */}
@@ -269,6 +284,7 @@ const T_Room = () => {
               {activeTab === "assessment" && (
                 <Assessment roomId={id} room={room} />
               )}
+              {activeTab === "grades" && <TeacherGrades roomId={id} />}
             </div>
 
             {/* Timeline Sidebar */}
