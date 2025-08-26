@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Building, FileText, MapPin } from "lucide-react";
+import { Building, FileText, MapPin, HelpCircle } from "lucide-react";
 import DocumentRequestForm from "./DocumentRequestForm";
+import SupportDeskForm from "./SupportDeskForm";
+import { useAuth } from "../contexts/AuthContext";
 
 const InstitutionCard = ({ institution, onRequestSuccess }) => {
+  const { user } = useAuth();
   const [showRequestForm, setShowRequestForm] = useState(false);
+  const [showSupportForm, setShowSupportForm] = useState(false);
 
   return (
     <>
@@ -39,17 +43,32 @@ const InstitutionCard = ({ institution, onRequestSuccess }) => {
           </p>
         )}
 
-        <div className="flex justify-between items-center pt-4 border-t border-base-300">
-          <div className="text-sm text-base-content/60">
-            {institution.email && <span>{institution.email}</span>}
+        <div className="flex flex-col gap-2 pt-4 border-t border-gray-200">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-500">
+              {institution.email && (
+                <span>{institution.email}</span>
+              )}
+            </div>
           </div>
-          <button
-            onClick={() => setShowRequestForm(true)}
-            className="btn btn-primary btn-sm"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Request Document
-          </button>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowRequestForm(true)}
+              className="flex-1 flex items-center justify-center px-3 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors text-sm font-medium"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Request Document
+            </button>
+            
+            <button
+              onClick={() => setShowSupportForm(true)}
+              className="flex-1 flex items-center justify-center px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
+            >
+              <HelpCircle className="h-4 w-4 mr-2" />
+              Contact Support
+            </button>
+          </div>
         </div>
       </div>
 
@@ -58,6 +77,14 @@ const InstitutionCard = ({ institution, onRequestSuccess }) => {
         isOpen={showRequestForm}
         onClose={() => setShowRequestForm(false)}
         onSuccess={onRequestSuccess}
+      />
+      
+      <SupportDeskForm
+        institution={institution}
+        isOpen={showSupportForm}
+        onClose={() => setShowSupportForm(false)}
+        onSuccess={() => setShowSupportForm(false)}
+        student={user}
       />
     </>
   );

@@ -6,7 +6,7 @@ import {
   MessageSquare,
   BookOpen,
   Calendar,
-  TrendingUp,
+  TrendingUp, Trophy,
 } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
@@ -16,6 +16,7 @@ import StudentMaterials from "../../components/room/StudentMaterials";
 import StudentAssessment from "../../components/room/StudentAssessment";
 import StudentGrades from "../../components/room/StudentGrades";
 import CourseTimeline from "../../components/room/CourseTimeline";
+import RoomStandings from "../../components/room/RoomStandings";
 
 const S_Room = () => {
   const [room, setRoom] = useState(null);
@@ -33,6 +34,8 @@ const S_Room = () => {
       setActiveTab("assessment");
     } else if (location.pathname.includes("/grades")) {
       setActiveTab("grades");
+    } else if (location.pathname.includes('/standings')) {
+      setActiveTab("standings");
     } else {
       setActiveTab("forum");
     }
@@ -134,6 +137,17 @@ const S_Room = () => {
                   <TrendingUp className="h-4 w-4 mr-2" />
                   Grades
                 </Link>
+                <Link
+                  to={`/student/room/${id}/standings`}
+                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                    activeTab === "standings" 
+                      ? "bg-sky-500 text-white shadow-sm" 
+                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                  }`}
+                >
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Standings
+                </Link>
               </div>
 
               {/* Tab Content */}
@@ -146,6 +160,10 @@ const S_Room = () => {
               )}
 
               {activeTab === "grades" && <StudentGrades roomId={id} />}
+
+              {activeTab === "standings" && (
+                <RoomStandings roomId={id} />
+              )}
             </div>
 
             {/* Timeline Sidebar */}

@@ -5,7 +5,7 @@ import InstitutionCard from "../../components/InstitutionCard";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import { Link } from "react-router";
-import { BookOpen, Users, Calendar, Building, FileText } from "lucide-react";
+import { BookOpen, Users, Calendar, Building, FileText, MessageCircle } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 const S_Dashboard = () => {
   const { user } = useAuth();
@@ -117,6 +117,17 @@ const S_Dashboard = () => {
             >
               <FileText className="h-4 w-4 mr-2" />
               My Documents
+            </button>
+            <button
+              onClick={() => setActiveTab("support")}
+              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                activeTab === "support"
+                  ? "bg-sky-500 text-white shadow-sm"
+                  : "text-gray-600 hover:bg-white hover:text-sky-600"
+              }`}
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Support Tickets
             </button>
           </div>
         </div>
@@ -268,6 +279,26 @@ const S_Dashboard = () => {
                 >
                   <FileText className="h-5 w-5 mr-2" />
                   View All Documents
+                </Link>
+              </div>
+            )}
+
+            {/* Support Tickets Tab */}
+            {activeTab === "support" && (
+              <div className="text-center py-12">
+                <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-600 mb-4">
+                  Your Support Tickets
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  View and manage your support requests to institutions. Track responses and resolve issues.
+                </p>
+                <Link
+                  to="/student/support-tickets"
+                  className="inline-flex items-center px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors font-medium"
+                >
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  View Support Tickets
                 </Link>
               </div>
             )}
