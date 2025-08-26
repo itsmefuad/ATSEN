@@ -17,6 +17,7 @@ import forumContentRoutes from "./routes/forumContentRoutes.js";
 import materialRoutes from "./routes/materialRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
+import quizGradeRoutes from "./routes/quizGradeRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
@@ -77,6 +78,7 @@ app.use("/api/forum-content", forumContentRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/assessments", assessmentRoutes);
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/quiz-grades", quizGradeRoutes);
 app.use("/api/chat", chatRoutes);
 
 // Direct download route

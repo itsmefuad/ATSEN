@@ -159,6 +159,14 @@ const AssessmentCard = ({ assessment, onUpdate, onDelete, isStudent = false, roo
                   {assessment.title}
                   <ExternalLink className="h-4 w-4" />
                 </Link>
+              ) : assessment.assessmentType === 'quiz' ? (
+                <Link 
+                  to={isStudent ? `/student/room/${roomId}/quiz/${assessment._id}` : `/teacher/room/${roomId}/quiz/${assessment._id}`}
+                  className="font-semibold text-base-content mb-2 hover:text-primary cursor-pointer flex items-center gap-1"
+                >
+                  {assessment.title}
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
               ) : (
                 <h3 className="font-semibold text-base-content mb-2">{assessment.title}</h3>
               )}
