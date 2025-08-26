@@ -164,6 +164,7 @@ const Navbar = () => {
           </div>
         )}
       </div>
+      {/* End of flex container */}
 
       {/* Click outside to close dropdown */}
       {isDropdownOpen && (
@@ -172,6 +173,7 @@ const Navbar = () => {
           onClick={() => setIsDropdownOpen(false)}
         />
       )}
+    </div>
     </nav>
   );
 };

@@ -124,7 +124,7 @@ const S_Room = () => {
                   }`}
                 >
                   <TrendingUp className="h-4 w-4 mr-2" />
-                  Grades
+                  Assessment
                 </Link>
                 <Link
                   to={`/student/room/${id}/grades`}
