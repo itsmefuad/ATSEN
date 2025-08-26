@@ -13,10 +13,13 @@ const materialSchema = new Schema(
     fileType: { 
       type: String, 
       required: true,
-      enum: ['link', 'text']
+      enum: ['link', 'text', 'pdf', 'link_and_pdf']
     },
     fileUrl: { type: String, required: false, default: "" },
     fileName: { type: String, required: true },
+    // PDF-specific fields
+    filePath: { type: String, required: false }, // File system path for PDFs
+    originalFileName: { type: String, required: false }, // Original uploaded filename
     room: { type: Schema.Types.ObjectId, ref: "Room", required: true },
     uploadedBy: {
       type: Schema.Types.ObjectId,

@@ -112,6 +112,10 @@ const S_AssignmentDetail = () => {
     }
   };
 
+  const getMaxMarks = (assessmentType) => {
+    return assessmentType === 'assignment' ? 10 : assessmentType === 'project' ? 15 : 10;
+  };
+
   const isOverdue = () => {
     return new Date() > new Date(assessment.date);
   };
@@ -195,27 +199,60 @@ const S_AssignmentDetail = () => {
                   <span>Submitted on {formatDate(submission.submittedAt)}</span>
                 </div>
                 
+                {/* Grading Information */}
+                {submission.isGraded && (
+                  <div className="card bg-success/10 border border-success/20">
+                    <div className="card-body">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-success">Graded</h3>
+                        <div className="text-sm text-base-content/60">
+                          Graded on {formatDate(submission.gradedAt)}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Your Score:</p>
+                          <div className="text-3xl font-bold text-success">
+                            {submission.marks}/{submission.maxMarks || getMaxMarks(assessment.assessmentType)}
+                          </div>
+                          <div className="text-sm text-base-content/60 mt-1">
+                            {((submission.marks / (submission.maxMarks || getMaxMarks(assessment.assessmentType))) * 100).toFixed(1)}%
+                          </div>
+                        </div>
+                        
+                        {submission.teacherFeedback && (
+                          <div>
+                            <p className="text-sm font-medium mb-2">Teacher Feedback:</p>
+                            <div className="bg-base-100 p-3 rounded border">
+                              <p className="text-sm whitespace-pre-wrap">{submission.teacherFeedback}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="border border-base-300 rounded-lg p-4">
                   {submission.fileName && (
                     <div className="mb-3">
                       <button
                         onClick={async () => {
                           try {
-                            const response = await fetch(`/api/download/${submission._id}`);
-                            if (response.ok) {
-                              const blob = await response.blob();
-                              const url = window.URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.download = submission.fileName;
-                              a.click();
-                              window.URL.revokeObjectURL(url);
-                            } else {
-                              alert('Download failed');
-                            }
+                            const response = await api.get(`/submissions/download/${submission._id}`, {
+                              responseType: 'blob'
+                            });
+                            const blob = new Blob([response.data]);
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = submission.fileName;
+                            a.click();
+                            window.URL.revokeObjectURL(url);
                           } catch (error) {
                             console.error('Download error:', error);
-                            alert('Download failed');
+                            toast.error('Download failed');
                           }
                         }}
                         className="btn btn-primary btn-sm"
@@ -228,7 +265,7 @@ const S_AssignmentDetail = () => {
                   
                   {submission.comments && (
                     <div>
-                      <p className="font-medium mb-2">Comments:</p>
+                      <p className="font-medium mb-2">Your Comments:</p>
                       <p className="text-base-content/70">{submission.comments}</p>
                     </div>
                   )}

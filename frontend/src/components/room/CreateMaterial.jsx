@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, FileText, File, Link, Upload } from "lucide-react";
+import { Plus, X, FileText, File, Link, Upload, Paperclip } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
@@ -9,8 +9,8 @@ const CreateMaterial = ({ roomId, onMaterialCreated }) => {
     title: "",
     description: "",
     section: "course_materials",
-    attachmentType: "", // link (optional)
-    attachmentData: "", // URL
+    linkUrl: "", // For link attachment
+    pdfFile: null, // For PDF attachment
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -31,11 +31,6 @@ const CreateMaterial = ({ roomId, onMaterialCreated }) => {
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
     }
-
-    // Link is optional, but if selected, URL is required
-    if (formData.attachmentType === "link" && !formData.attachmentData.trim()) {
-      newErrors.attachmentData = "Please provide a link URL";
-    }
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -44,25 +39,35 @@ const CreateMaterial = ({ roomId, onMaterialCreated }) => {
 
     setLoading(true);
     try {
-      // Convert to backend format
-      const backendData = {
-        title: formData.title,
-        description: formData.description || "",
-        section: formData.section,
-        fileType: formData.attachmentType || "text", // Default to text if no attachment
-        fileUrl: formData.attachmentData || "",
-        fileName: formData.title
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('section', formData.section);
+      formDataToSend.append('fileName', formData.title);
 
-      const response = await api.post(`/materials/room/${roomId}`, backendData);
+      // Add link if provided
+      if (formData.linkUrl.trim()) {
+        formDataToSend.append('fileUrl', formData.linkUrl);
+      }
+
+      // Add PDF if provided
+      if (formData.pdfFile) {
+        formDataToSend.append('pdfFile', formData.pdfFile);
+      }
+
+      const response = await api.post(`/materials/room/${roomId}`, formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       toast.success("Material uploaded successfully!");
       setFormData({
         title: "",
         description: "",
         section: "course_materials",
-        attachmentType: "",
-        attachmentData: ""
+        linkUrl: "",
+        pdfFile: null,
       });
       setIsOpen(false);
       onMaterialCreated(response.data);
@@ -79,29 +84,11 @@ const CreateMaterial = ({ roomId, onMaterialCreated }) => {
       title: "",
       description: "",
       section: "course_materials",
-      attachmentType: "",
-      attachmentData: ""
+      linkUrl: "",
+      pdfFile: null,
     });
     setErrors({});
     setIsOpen(false);
-  };
-
-  const handleAttachmentTypeChange = (type) => {
-    if (formData.attachmentType === type) {
-      // Unselect if already selected
-      setFormData({ 
-        ...formData, 
-        attachmentType: "", 
-        attachmentData: ""
-      });
-    } else {
-      // Select new type
-      setFormData({ 
-        ...formData, 
-        attachmentType: type, 
-        attachmentData: ""
-      });
-    }
   };
 
   if (!isOpen) {
@@ -205,53 +192,58 @@ const CreateMaterial = ({ roomId, onMaterialCreated }) => {
             </select>
           </div>
 
-                                {/* Attach Link (Optional) */}
-           <div className="form-control">
-             <label className="label">
-               <span className="label-text font-medium">Attach Link (optional)</span>
-             </label>
-             <button
-               type="button"
-               onClick={() => handleAttachmentTypeChange("link")}
-               className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-                 formData.attachmentType === "link" 
-                   ? "border-secondary bg-secondary/10" 
-                   : "border-base-300 hover:border-secondary/50"
-               }`}
-             >
-               <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
-                 <Link className="w-4 h-4 text-white" />
-               </div>
-               <span className="text-sm">Add a link to this material</span>
-             </button>
-           </div>
-
-                                 {/* Attachment Details - Only for Links */}
-            {formData.attachmentType === "link" && (
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">Link URL</span>
-                </label>
-                <input
-                  type="url"
-                  placeholder="Enter link URL..."
-                  className={`input input-bordered ${errors.attachmentData ? 'border-red-300 focus:border-red-500' : ''}`}
-                  value={formData.attachmentData}
-                  onChange={(e) => {
-                    setFormData({ ...formData, attachmentData: e.target.value });
-                    if (errors.attachmentData) setErrors({ ...errors, attachmentData: null });
-                  }}
-                  required
-                />
-                {errors.attachmentData && (
-                  <label className="label">
-                    <span className="label-text-alt text-red-500">{errors.attachmentData}</span>
-                  </label>
-                )}
+          {/* Attach Link and PDF (Optional) - Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Attach Link (Optional) */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Attach Link (optional)</span>
+              </label>
+              <div className="flex items-center gap-3 p-4 rounded-lg border-2 border-base-300">
+                <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
+                  <Link className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <span className="text-sm font-medium mb-2 block">Add a link to this material</span>
+                  <input
+                    type="url"
+                    placeholder="Enter link URL..."
+                    className="input input-bordered w-full"
+                    value={formData.linkUrl}
+                    onChange={(e) => {
+                      setFormData({ ...formData, linkUrl: e.target.value });
+                    }}
+                  />
+                </div>
               </div>
-            )}
+            </div>
 
-          
+            {/* Attach PDF (Optional) */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Attach PDF (optional)</span>
+              </label>
+              <div className="flex items-center gap-3 p-4 rounded-lg border-2 border-base-300">
+                <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center">
+                  <Paperclip className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <span className="text-sm font-medium mb-2 block">Add a pdf to this material</span>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    className="file-input file-input-bordered w-full"
+                    onChange={(e) => {
+                      setFormData({ ...formData, pdfFile: e.target.files[0] });
+                    }}
+                  />
+                  <div className="text-xs text-base-content/60 mt-1">
+                    Only PDF files are allowed (max 10MB)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>          
 
           <div className="flex gap-2 justify-end">
             <button

@@ -10,7 +10,8 @@ import {
   Download,
   Calendar,
   User,
-  X
+  X,
+  Paperclip
 } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
@@ -23,8 +24,8 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
     title: material.title,
     description: material.description,
     section: material.section,
-    attachmentType: material.fileType === 'link' ? 'link' : '',
-    attachmentData: material.fileUrl || ''
+    linkUrl: material.fileUrl || '',
+    pdfFile: null,
   });
   const [editLoading, setEditLoading] = useState(false);
   const [editErrors, setEditErrors] = useState({});
@@ -85,10 +86,6 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
     if (!editFormData.description.trim()) {
       newErrors.description = "Description is required";
     }
-
-    if (editFormData.attachmentType === "link" && !editFormData.attachmentData.trim()) {
-      newErrors.attachmentData = "Please provide a link URL";
-    }
     
     if (Object.keys(newErrors).length > 0) {
       setEditErrors(newErrors);
@@ -97,16 +94,27 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
 
     setEditLoading(true);
     try {
-      const backendData = {
-        title: editFormData.title,
-        description: editFormData.description || "",
-        section: editFormData.section,
-        fileType: editFormData.attachmentType || "text",
-        fileUrl: editFormData.attachmentData || "",
-        fileName: editFormData.title
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', editFormData.title);
+      formDataToSend.append('description', editFormData.description);
+      formDataToSend.append('section', editFormData.section);
+      formDataToSend.append('fileName', editFormData.title);
 
-      const response = await api.put(`/materials/${material._id}`, backendData);
+      // Add link if provided
+      if (editFormData.linkUrl.trim()) {
+        formDataToSend.append('fileUrl', editFormData.linkUrl);
+      }
+
+      // Add PDF if provided
+      if (editFormData.pdfFile) {
+        formDataToSend.append('pdfFile', editFormData.pdfFile);
+      }
+
+      const response = await api.put(`/materials/${material._id}`, formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       toast.success("Material updated successfully!");
       onUpdate(response.data);
       setIsEditModalOpen(false);
@@ -125,31 +133,24 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
       title: material.title,
       description: material.description,
       section: material.section,
-      attachmentType: material.fileType === 'link' ? 'link' : '',
-      attachmentData: material.fileUrl || ''
+      linkUrl: material.fileUrl || '',
+      pdfFile: null,
     });
-  };
-
-  const handleAttachmentTypeChange = (type) => {
-    if (editFormData.attachmentType === type) {
-      setEditFormData({ 
-        ...editFormData, 
-        attachmentType: "", 
-        attachmentData: ""
-      });
-    } else {
-      setEditFormData({ 
-        ...editFormData, 
-        attachmentType: type, 
-        attachmentData: ""
-      });
-    }
   };
 
   const getFileIcon = (fileType) => {
     switch (fileType) {
       case 'link':
         return <Link className="h-5 w-5 text-green-500" />;
+      case 'pdf':
+        return <File className="h-5 w-5 text-red-500" />;
+      case 'link_and_pdf':
+        return (
+          <div className="flex gap-1">
+            <Link className="h-4 w-4 text-green-500" />
+            <File className="h-4 w-4 text-red-500" />
+          </div>
+        );
       case 'text':
       default:
         return <FileText className="h-5 w-5 text-gray-500" />;
@@ -252,8 +253,8 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
                    })}
                  </div>
                 
-                {/* Link Preview - Only for link materials */}
-                {material.fileType === 'link' && material.fileUrl && (
+                {/* File Preview - For link and PDF materials in all sections */}
+                {(material.fileType === 'link' || material.fileType === 'pdf' || material.fileType === 'link_and_pdf') && (
                   <div className="bg-base-200 rounded-lg p-4">
                     <div className="flex items-center gap-3">
                       {getFileIcon(material.fileType)}
@@ -263,13 +264,47 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
                           {formatDate(material.createdAt)}
                         </p>
                       </div>
-                      <button
-                        onClick={() => window.open(material.fileUrl, '_blank')}
-                        className="btn btn-primary btn-sm"
-                      >
-                        <Link className="h-4 w-4 mr-1" />
-                        View Link
-                      </button>
+                      {/* Show buttons for all sections */}
+                      <div className="flex gap-2">
+                        {/* View Link button - only if link exists */}
+                        {(material.fileType === 'link' || material.fileType === 'link_and_pdf') && material.fileUrl && (
+                          <button
+                            onClick={() => window.open(material.fileUrl, '_blank')}
+                            className="btn btn-primary btn-sm"
+                          >
+                            <Link className="h-4 w-4 mr-1" />
+                            View Link
+                          </button>
+                        )}
+                        
+                        {/* View PDF button - only if PDF exists */}
+                        {(material.fileType === 'pdf' || material.fileType === 'link_and_pdf') && material.filePath && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const response = await api.get(`/materials/${material._id}/download`, {
+                                  responseType: 'blob',
+                                });
+                                const url = window.URL.createObjectURL(new Blob([response.data]));
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.setAttribute('download', material.originalFileName || material.fileName);
+                                document.body.appendChild(link);
+                                link.click();
+                                link.remove();
+                                window.URL.revokeObjectURL(url);
+                              } catch (error) {
+                                console.error('Download error:', error);
+                                toast.error('Failed to download PDF');
+                              }
+                            }}
+                            className="btn btn-secondary btn-sm"
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            View PDF
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -378,46 +413,53 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
                   <label className="label">
                     <span className="label-text font-medium">Attach Link (optional)</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => handleAttachmentTypeChange("link")}
-                    className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-                      editFormData.attachmentType === "link" 
-                        ? "border-secondary bg-secondary/10" 
-                        : "border-base-300 hover:border-secondary/50"
-                    }`}
-                  >
+                  <div className="flex items-center gap-3 p-4 rounded-lg border-2 border-base-300">
                     <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
                       <Link className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-sm">Add a link to this material</span>
-                  </button>
+                    <div className="flex-1">
+                      <span className="text-sm font-medium mb-2 block">Add a link to this material</span>
+                      <input
+                        type="url"
+                        placeholder="Enter link URL..."
+                        className="input input-bordered w-full"
+                        value={editFormData.linkUrl}
+                        onChange={(e) => {
+                          setEditFormData({ ...editFormData, linkUrl: e.target.value });
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                                 {/* Attachment Details - Only for Links */}
-                 {editFormData.attachmentType === "link" && (
-                   <div className="form-control">
-                     <label className="label">
-                       <span className="label-text font-medium">Link URL</span>
-                     </label>
-                     <input
-                       type="url"
-                       placeholder="Enter link URL..."
-                       className={`input input-bordered ${editErrors.attachmentData ? 'border-red-300 focus:border-red-500' : ''}`}
-                       value={editFormData.attachmentData}
-                       onChange={(e) => {
-                         setEditFormData({ ...editFormData, attachmentData: e.target.value });
-                         if (editErrors.attachmentData) setEditErrors({ ...editErrors, attachmentData: null });
-                       }}
-                       required
-                     />
-                     {editErrors.attachmentData && (
-                       <label className="label">
-                         <span className="label-text-alt text-red-500">{editErrors.attachmentData}</span>
-                       </label>
-                     )}
-                   </div>
-                 )}
+                {/* Attach PDF (Optional) */}
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Attach PDF (optional)</span>
+                  </label>
+                  <div className="flex items-center gap-3 p-4 rounded-lg border-2 border-base-300">
+                    <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center">
+                      <Paperclip className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm font-medium mb-2 block">Add a pdf to this material</span>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        className="file-input file-input-bordered w-full"
+                        onChange={(e) => {
+                          setEditFormData({ ...editFormData, pdfFile: e.target.files[0] });
+                        }}
+                      />
+                      <div className="text-xs text-base-content/60 mt-1">
+                        {(material.fileType === 'pdf' || material.fileType === 'link_and_pdf') ? 
+                          'Leave empty to keep current PDF, or select new file to replace' : 
+                          'Only PDF files are allowed (max 10MB)'
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="flex gap-2 justify-end">
                   <button

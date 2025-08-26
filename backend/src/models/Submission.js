@@ -28,6 +28,37 @@ const submissionSchema = new Schema(
     submittedAt: { 
       type: Date, 
       default: Date.now 
+    },
+    // Grading fields
+    marks: { 
+      type: Number, 
+      min: 0,
+      default: null 
+    },
+    maxMarks: { 
+      type: Number, 
+      min: 0,
+      default: function() {
+        // This will be set based on assessment type when grading
+        return null;
+      }
+    },
+    teacherFeedback: { 
+      type: String, 
+      default: "" 
+    },
+    isGraded: { 
+      type: Boolean, 
+      default: false 
+    },
+    gradedAt: { 
+      type: Date, 
+      default: null 
+    },
+    gradedBy: { 
+      type: Schema.Types.ObjectId, 
+      ref: "Instructor", 
+      default: null 
     }
   },
   { timestamps: true }
