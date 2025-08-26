@@ -14,7 +14,7 @@ const roomSchema = new Schema(
     },
     institution: {
       type: Schema.Types.ObjectId,
-      ref: "institutions",
+      ref: "Institution",
       required: false
     },
     maxCapacity: {
