@@ -1,39 +1,49 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RateLimitedUi from "../../components/RateLimitedUi";
+import InstitutionCard from "../../components/InstitutionCard";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import { Link } from "react-router";
-import { BookOpen, Users, Calendar } from "lucide-react";
+import { BookOpen, Users, Calendar, Building, FileText } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 const S_Dashboard = () => {
   const { user } = useAuth();
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [rooms, setRooms] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("courses");
 
   useEffect(() => {
-    const fetchRooms = async () => {
+    const fetchStudentData = async () => {
       if (!user?.id) return;
       
       try {
-        const res = await api.get(`/students/${user.id}/rooms`);
-        console.log(res.data);
-        setRooms(res.data);
+        // Fetch rooms
+        const roomsRes = await api.get(`/students/${user.id}/rooms`);
+        setRooms(roomsRes.data);
+
+        // Fetch student details with institutions
+        const studentRes = await api.get(`/students/${user.id}`);
+        if (studentRes.data.institutions) {
+          setInstitutions(studentRes.data.institutions);
+        }
+        
         setIsRateLimited(false);
       } catch (error) {
-        console.error("Error fetching rooms");
+        console.error("Error fetching student data");
         if (error.response?.status === 429) {
           setIsRateLimited(true);
         } else {
-          toast.error("Failed to load rooms");
+          toast.error("Failed to load dashboard data");
         }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRooms();
+    fetchStudentData();
   }, [user]);
 
   const formatDate = (dateString) => {
@@ -42,6 +52,10 @@ const S_Dashboard = () => {
       month: "short",
       day: "numeric"
     });
+  };
+
+  const handleDocumentRequestSuccess = () => {
+    toast.success("Document request submitted successfully!");
   };
 
   return (
@@ -55,7 +69,46 @@ const S_Dashboard = () => {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             Welcome, {user?.name || 'Student'}
           </h1>
-          <p className="text-gray-600">Here are your enrolled courses</p>
+          <p className="text-gray-600">Manage your courses and request documents from your institutions</p>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="mb-8">
+          <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
+            <button
+              onClick={() => setActiveTab("courses")}
+              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                activeTab === "courses"
+                  ? "bg-sky-500 text-white shadow-sm"
+                  : "text-gray-600 hover:bg-white hover:text-sky-600"
+              }`}
+            >
+              <BookOpen className="h-4 w-4 mr-2" />
+              My Rooms
+            </button>
+            <button
+              onClick={() => setActiveTab("institutions")}
+              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                activeTab === "institutions"
+                  ? "bg-sky-500 text-white shadow-sm"
+                  : "text-gray-600 hover:bg-white hover:text-sky-600"
+              }`}
+            >
+              <Building className="h-4 w-4 mr-2" />
+              My Institutions
+            </button>
+            <button
+              onClick={() => setActiveTab("documents")}
+              className={`flex items-center px-4 py-2 rounded-md transition-colors ${
+                activeTab === "documents"
+                  ? "bg-sky-500 text-white shadow-sm"
+                  : "text-gray-600 hover:bg-white hover:text-sky-600"
+              }`}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              My Documents
+            </button>
+          </div>
         </div>
 
         {loading && (
@@ -64,44 +117,102 @@ const S_Dashboard = () => {
 
         {!isRateLimited && (
           <>
-            {rooms.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {rooms.map((room) => (
-                  <Link
-                    key={room._id}
-                    to={`/student/room/${room._id}/forum`}
-                    className="bg-white hover:bg-sky-50 hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-sky-300 group"
-                  >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-sky-700">{room.room_name}</h3>
-                        <BookOpen className="h-5 w-5 text-sky-500 group-hover:text-sky-600" />
-                      </div>
-                      <p className="text-gray-600 line-clamp-3 mb-4">{room.description}</p>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          <span>{formatDate(room.createdAt)}</span>
+            {/* Courses Tab */}
+            {activeTab === "courses" && (
+              <>
+                {rooms.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {rooms.map((room) => (
+                      <Link
+                        key={room._id}
+                        to={`/student/room/${room._id}/forum`}
+                        className="bg-white hover:bg-sky-50 hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-sky-300 group"
+                      >
+                        <div className="p-6">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="text-lg font-semibold text-gray-800 group-hover:text-sky-700">{room.room_name}</h3>
+                            <BookOpen className="h-5 w-5 text-sky-500 group-hover:text-sky-600" />
+                          </div>
+                          <p className="text-gray-600 line-clamp-3 mb-4">{room.description}</p>
+                          
+                          <div className="flex items-center justify-between text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              <span>{formatDate(room.createdAt)}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              <span>Enrolled</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          <span>Enrolled</span>
-                        </div>
-                      </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-20">
+                    <BookOpen className="w-20 h-20 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-medium text-gray-600 mb-2">
+                      No enrolled courses yet
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                      You haven't been enrolled in any courses yet. Contact your instructor to get started.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Institutions Tab */}
+            {activeTab === "institutions" && (
+              <>
+                {institutions.length > 0 ? (
+                  <div>
+                    <div className="mb-6">
+                      <h2 className="text-xl font-semibold text-gray-800 mb-2">Your Institutions</h2>
+                      <p className="text-gray-600">Request documents from any of your associated institutions</p>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-20">
-                <BookOpen className="w-20 h-20 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-medium text-gray-600 mb-2">
-                  No enrolled courses yet
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {institutions.map((institution) => (
+                        <InstitutionCard
+                          key={institution._id}
+                          institution={institution}
+                          onRequestSuccess={handleDocumentRequestSuccess}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-20">
+                    <Building className="w-20 h-20 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-medium text-gray-600 mb-2">
+                      No institutions found
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                      You are not associated with any institutions yet. Contact your institution's admin to get enrolled.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Documents Tab */}
+            {activeTab === "documents" && (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-600 mb-4">
+                  View Your Document Requests
                 </h3>
                 <p className="text-gray-500 mb-6">
-                  You haven't been enrolled in any courses yet. Contact your instructor to get started.
+                  Track the status of your document requests and manage completed documents.
                 </p>
+                <Link
+                  to="/student/documents"
+                  className="inline-flex items-center px-6 py-3 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors font-medium"
+                >
+                  <FileText className="h-5 w-5 mr-2" />
+                  View All Documents
+                </Link>
               </div>
             )}
           </>

@@ -18,6 +18,7 @@ import materialRoutes from "./routes/materialRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
+import documentRoutes from "./routes/documentRoutes.js";
 
 dotenv.config();
 
@@ -100,6 +101,7 @@ app.get("/api/download/:submissionId", async (req, res) => {
 });
 
 app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
+app.use("/api/documents", documentRoutes);
 
 // connect to DB, then start the server
 connectDB().then(() => {

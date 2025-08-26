@@ -32,6 +32,13 @@ const studentSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Room"
       }
+    ],
+    // Document requests made by this student
+    documents: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "StudentDocument"
+      }
     ]
   },
   { timestamps: true }

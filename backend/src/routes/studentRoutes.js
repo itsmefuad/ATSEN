@@ -5,13 +5,17 @@ import {
   registerStudent,
   loginStudent,
   getAllStudents,
-  getStudentRooms
+  getStudentRooms,
+  getStudentById
 } from "../controllers/studentController.js";
 
 const router = Router();
 
 // GET  /api/students
 router.get("/", getAllStudents);
+
+// GET /api/students/:studentId
+router.get("/:studentId", getStudentById);
 
 // GET /api/students/:studentId/rooms
 router.get("/:studentId/rooms", getStudentRooms);

@@ -67,6 +67,14 @@ const institutionSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Room"
       }
+    ],
+    
+    // Document requests received by this institution
+    documents: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "StudentDocument"
+      }
     ]
   },
   {
