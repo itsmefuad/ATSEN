@@ -22,12 +22,12 @@ export default function InstitutionLayout() {
   }, [idOrName]);
 
   return (
-    <div style={{ fontFamily: "sans-serif" }}>
+    <div className="min-h-screen bg-gray-50">
       {/* Use unified navbar */}
       <Navbar />
 
       {/* Main content */}
-      <main style={{ padding: "2rem" }}>
+      <main className="px-8 py-8">
         <Outlet />
       </main>
     </div>

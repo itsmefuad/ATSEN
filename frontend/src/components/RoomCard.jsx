@@ -22,10 +22,12 @@ const RoomCard = ({ room, setRooms }) => {
   return (
     <Link
       to={`/teacher/room/${room._id}/forum`}
-      className="bg-white hover:bg-sky-50 hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-sky-300 group"
+      className="bg-white hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 rounded-lg border-x border-b border-gray-200 group border-t-4 border-solid border-t-[#00A2E8]"
     >
       <div className="p-6">
-        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-sky-700 mb-2">{room.room_name}</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+          {room.room_name}
+        </h3>
         <p className="text-gray-600 line-clamp-3 mb-4">{room.description}</p>
         <div className="flex justify-between items-center mt-4">
           <span className="text-sm text-gray-500">

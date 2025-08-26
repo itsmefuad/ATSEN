@@ -3,34 +3,49 @@ import { Plus, Calendar, X } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
-const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, defaultType, isPermanent }) => {
+const CreateAssessment = ({
+  roomId,
+  onAssessmentCreated,
+  existingAssessments,
+  defaultType,
+  isPermanent,
+}) => {
   const [isExpanded, setIsExpanded] = useState(isPermanent ? true : false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
-    title: defaultType === 'final_exam' ? 'Final Exam' : defaultType === 'mid_term_exam' ? 'Mid-term Exam' : "",
+    title:
+      defaultType === "final_exam"
+        ? "Final Exam"
+        : defaultType === "mid_term_exam"
+        ? "Mid-term Exam"
+        : "",
     description: "",
     topics: "",
     date: "",
-    assessmentType: defaultType || "quiz"
+    assessmentType: defaultType || "quiz",
   });
 
   // Check if description is required based on assessment type
-  const isDescriptionRequired = formData.assessmentType === 'final_exam' || formData.assessmentType === 'mid_term_exam';
+  const isDescriptionRequired =
+    formData.assessmentType === "final_exam" ||
+    formData.assessmentType === "mid_term_exam";
 
-  const assessmentTypes = isPermanent ? [
-    { value: "final_exam", label: "Final Exam" },
-    { value: "mid_term_exam", label: "Mid-term Exam" }
-  ] : [
-    { value: "quiz", label: "Quiz" },
-    { value: "assignment", label: "Assignment" },
-    { value: "project", label: "Project" }
-  ];
+  const assessmentTypes = isPermanent
+    ? [
+        { value: "final_exam", label: "Final Exam" },
+        { value: "mid_term_exam", label: "Mid-term Exam" },
+      ]
+    : [
+        { value: "quiz", label: "Quiz" },
+        { value: "assignment", label: "Assignment" },
+        { value: "project", label: "Project" },
+      ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Clear previous errors
     setErrors({});
 
@@ -56,32 +71,38 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
 
     try {
       const topicsArray = formData.topics
-        .split(',')
-        .map(topic => topic.trim())
-        .filter(topic => topic.length > 0);
+        .split(",")
+        .map((topic) => topic.trim())
+        .filter((topic) => topic.length > 0);
 
       const response = await api.post(`/assessments/room/${roomId}`, {
         ...formData,
-        topics: topicsArray
+        topics: topicsArray,
       });
 
       onAssessmentCreated(response.data);
-      
+
       // Reset form
       setFormData({
-        title: defaultType === 'final_exam' ? 'Final Exam' : defaultType === 'mid_term_exam' ? 'Mid-term Exam' : "",
+        title:
+          defaultType === "final_exam"
+            ? "Final Exam"
+            : defaultType === "mid_term_exam"
+            ? "Mid-term Exam"
+            : "",
         description: "",
         topics: "",
         date: "",
-        assessmentType: defaultType || "quiz"
+        assessmentType: defaultType || "quiz",
       });
-      
+
       if (!isPermanent) {
         setIsExpanded(false);
       }
     } catch (error) {
       console.error("Error creating assessment:", error);
-      const errorMessage = error.response?.data?.message || "Failed to create assessment";
+      const errorMessage =
+        error.response?.data?.message || "Failed to create assessment";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -89,9 +110,9 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }));
+      setErrors((prev) => ({ ...prev, [field]: null }));
     }
   };
 
@@ -100,29 +121,38 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
       setIsExpanded(false);
     }
     setFormData({
-      title: defaultType === 'final_exam' ? 'Final Exam' : defaultType === 'mid_term_exam' ? 'Mid-term Exam' : "",
+      title:
+        defaultType === "final_exam"
+          ? "Final Exam"
+          : defaultType === "mid_term_exam"
+          ? "Mid-term Exam"
+          : "",
       description: "",
       topics: "",
       date: "",
-      assessmentType: defaultType || "quiz"
+      assessmentType: defaultType || "quiz",
     });
     setErrors({});
   };
 
   if (!isExpanded && !isPermanent) {
     return (
-      <div 
-        className="card bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-dashed border-blue-300 hover:border-blue-400 hover:shadow-lg transition-all duration-300 cursor-pointer"
+      <div
         onClick={() => setIsExpanded(true)}
+        className="card bg-gradient-to-r from-[#00A2E8]/5 to-blue-500/5 border-2 border-dashed border-[#00A2E8]/30 hover:border-[#00A2E8]/50 hover:from-[#00A2E8]/10 hover:to-blue-500/10 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
       >
-        <div className="card-body text-center py-8">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Plus className="h-6 w-6 text-blue-600" />
+        <div className="card-body py-6">
+          <div className="flex items-center justify-center gap-3">
+            <div className="p-3 bg-[#00A2E8]/10 rounded-full group-hover:bg-[#00A2E8]/20 transition-colors duration-300">
+              <Plus className="h-6 w-6 text-[#00A2E8]" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-blue-800">Add Assessment</h3>
-              <p className="text-sm text-blue-600">Click to add a new quiz, assignment, or project</p>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-[#00A2E8]">
+                Add Assessment
+              </h3>
+              <p className="text-sm text-base-content/60">
+                Click to add a new quiz, assignment, or project
+              </p>
             </div>
           </div>
         </div>
@@ -131,38 +161,49 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
   }
 
   return (
-    <div className="card bg-base-100 shadow-lg border-2 border-blue-200">
+    <div className="card bg-gradient-to-br from-[#00A2E8]/5 via-base-100 to-blue-500/5 border-2 border-[#00A2E8]/20 shadow-lg animate-in slide-in-from-top-2 duration-300">
       <div className="card-body">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-blue-800">Create New Assessment</h3>
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-[#00A2E8]/10 rounded-full">
+              <Plus className="h-5 w-5 text-[#00A2E8]" />
+            </div>
+            <h3 className="text-lg font-semibold text-[#00A2E8]">
+              Create New Assessment
+            </h3>
+          </div>
           <button
             onClick={handleCancel}
-            className="btn btn-ghost btn-sm"
+            className="btn btn-ghost btn-sm btn-circle hover:bg-error/10 hover:text-error"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-                 <form onSubmit={handleSubmit} className="space-y-4">
-           {/* Assessment Type - Only show for non-permanent assessments */}
-           {!isPermanent && (
-             <div className="form-control">
-               <label className="label">
-                 <span className="label-text font-medium">Assessment Type *</span>
-               </label>
-               <select
-                 className="select select-bordered w-full"
-                 value={formData.assessmentType}
-                 onChange={(e) => handleInputChange('assessmentType', e.target.value)}
-               >
-                 {assessmentTypes.map(type => (
-                   <option key={type.value} value={type.value}>
-                     {type.label}
-                   </option>
-                 ))}
-               </select>
-             </div>
-           )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Assessment Type - Only show for non-permanent assessments */}
+          {!isPermanent && (
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">
+                  Assessment Type *
+                </span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={formData.assessmentType}
+                onChange={(e) =>
+                  handleInputChange("assessmentType", e.target.value)
+                }
+              >
+                {assessmentTypes.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Title */}
           <div className="form-control">
@@ -172,13 +213,17 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
             <input
               type="text"
               placeholder="Enter assessment title..."
-              className={`input input-bordered ${errors.title ? 'border-red-300 focus:border-red-500' : ''}`}
+              className={`input input-bordered ${
+                errors.title ? "border-red-300 focus:border-red-500" : ""
+              }`}
               value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
+              onChange={(e) => handleInputChange("title", e.target.value)}
             />
             {errors.title && (
               <label className="label">
-                <span className="label-text-alt text-red-500">{errors.title}</span>
+                <span className="label-text-alt text-red-500">
+                  {errors.title}
+                </span>
               </label>
             )}
           </div>
@@ -187,18 +232,26 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
           <div className="form-control">
             <label className="label">
               <span className="label-text font-medium">
-                Description {isDescriptionRequired ? '*' : '(Optional)'}
+                Description {isDescriptionRequired ? "*" : "(Optional)"}
               </span>
             </label>
             <textarea
-              placeholder={isDescriptionRequired ? "Describe this assessment..." : "Describe this assessment (optional)..."}
-              className={`textarea textarea-bordered h-24 ${errors.description ? 'border-red-300 focus:border-red-500' : ''}`}
+              placeholder={
+                isDescriptionRequired
+                  ? "Describe this assessment..."
+                  : "Describe this assessment (optional)..."
+              }
+              className={`textarea textarea-bordered h-24 ${
+                errors.description ? "border-red-300 focus:border-red-500" : ""
+              }`}
               value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
+              onChange={(e) => handleInputChange("description", e.target.value)}
             />
             {errors.description && (
               <label className="label">
-                <span className="label-text-alt text-red-500">{errors.description}</span>
+                <span className="label-text-alt text-red-500">
+                  {errors.description}
+                </span>
               </label>
             )}
           </div>
@@ -213,10 +266,12 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
               placeholder="Enter topics separated by commas..."
               className="input input-bordered"
               value={formData.topics}
-              onChange={(e) => handleInputChange('topics', e.target.value)}
+              onChange={(e) => handleInputChange("topics", e.target.value)}
             />
             <label className="label">
-              <span className="label-text-alt">e.g., Topic 1, Topic 2, Topic 3</span>
+              <span className="label-text-alt">
+                e.g., Topic 1, Topic 2, Topic 3
+              </span>
             </label>
           </div>
 
@@ -227,13 +282,17 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
             </label>
             <input
               type="datetime-local"
-              className={`input input-bordered ${errors.date ? 'border-red-300 focus:border-red-500' : ''}`}
+              className={`input input-bordered ${
+                errors.date ? "border-red-300 focus:border-red-500" : ""
+              }`}
               value={formData.date}
-              onChange={(e) => handleInputChange('date', e.target.value)}
+              onChange={(e) => handleInputChange("date", e.target.value)}
             />
             {errors.date && (
               <label className="label">
-                <span className="label-text-alt text-red-500">{errors.date}</span>
+                <span className="label-text-alt text-red-500">
+                  {errors.date}
+                </span>
               </label>
             )}
           </div>
@@ -250,7 +309,7 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
             </button>
             <button
               type="submit"
-              className="btn btn-primary flex-1"
+              className="btn bg-[#00A2E8] hover:bg-[#0082c4] text-white border-none flex-1"
               disabled={loading}
             >
               {loading ? (
@@ -261,7 +320,7 @@ const CreateAssessment = ({ roomId, onAssessmentCreated, existingAssessments, de
               ) : (
                 <>
                   <Plus className="h-4 w-4" />
-                  {isPermanent ? 'Create Exam' : 'Create Assessment'}
+                  {isPermanent ? "Create Exam" : "Create Assessment"}
                 </>
               )}
             </button>

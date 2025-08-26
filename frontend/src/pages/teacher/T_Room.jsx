@@ -12,7 +12,7 @@ import {
   MessageSquare,
   BookOpen,
   Calendar,
-  Video // ← added Video icon
+  Video, // ← added Video icon
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import DiscussionForum from "../../components/room/DiscussionForum";
@@ -124,7 +124,10 @@ const T_Room = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Back to Dashboard Button */}
         <div className="mb-6 flex justify-start">
-          <Link to="/teacher/dashboard" className="flex items-center text-gray-600 hover:text-sky-600 transition-colors">
+          <Link
+            to="/teacher/dashboard"
+            className="flex items-center text-gray-600 hover:text-sky-600 transition-colors"
+          >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Dashboard
           </Link>
@@ -139,7 +142,9 @@ const T_Room = () => {
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h1 className="text-2xl font-bold text-gray-800">{room.room_name}</h1>
+                      <h1 className="text-2xl font-bold text-gray-800">
+                        {room.room_name}
+                      </h1>
                       <p className="text-gray-600">{room.description}</p>
                     </div>
                     <div className="ml-4 flex space-x-2">
@@ -147,7 +152,7 @@ const T_Room = () => {
                       <button
                         onClick={handleMeeting}
                         disabled={meetingLoading}
-                        className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50"
+                        className="px-4 py-2 text-sm bg-[#00A2E8] hover:bg-[#0082c4] text-white rounded-md transition-colors disabled:opacity-50 flex items-center"
                       >
                         <Video className="h-4 w-4 mr-1" />
                         {meetingLoading ? "Starting…" : "Meeting"}
@@ -156,8 +161,8 @@ const T_Room = () => {
                       <Link
                         to={`/teacher/room/${id}/edit`}
                         className={`px-4 py-2 text-sm rounded-md transition-colors flex items-center ${
-                          activeTab === "settings" 
-                            ? "bg-sky-500 text-white" 
+                          activeTab === "settings"
+                            ? "bg-[#00A2E8] text-white"
                             : "text-gray-600 hover:bg-gray-100"
                         }`}
                       >
@@ -174,9 +179,9 @@ const T_Room = () => {
                 <Link
                   to={`/teacher/room/${id}/forum`}
                   className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                    activeTab === "forum" 
-                      ? "bg-sky-500 text-white shadow-sm" 
-                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                    activeTab === "forum"
+                      ? "bg-[#00A2E8] text-white shadow-sm"
+                      : "text-gray-600 hover:bg-white hover:text-[#00A2E8]"
                   }`}
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
@@ -185,9 +190,9 @@ const T_Room = () => {
                 <Link
                   to={`/teacher/room/${id}/materials`}
                   className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                    activeTab === "materials" 
-                      ? "bg-sky-500 text-white shadow-sm" 
-                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                    activeTab === "materials"
+                      ? "bg-[#00A2E8] text-white shadow-sm"
+                      : "text-gray-600 hover:bg-white hover:text-[#00A2E8]"
                   }`}
                 >
                   <BookOpen className="h-4 w-4 mr-2" />
@@ -196,9 +201,9 @@ const T_Room = () => {
                 <Link
                   to={`/teacher/room/${id}/assessment`}
                   className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                    activeTab === "assessment" 
-                      ? "bg-sky-500 text-white shadow-sm" 
-                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                    activeTab === "assessment"
+                      ? "bg-[#00A2E8] text-white shadow-sm"
+                      : "text-gray-600 hover:bg-white hover:text-[#00A2E8]"
                   }`}
                 >
                   <Calendar className="h-4 w-4 mr-2" />
@@ -217,7 +222,7 @@ const T_Room = () => {
                       <input
                         type="text"
                         placeholder="room name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00A2E8] focus:border-[#00A2E8]"
                         value={room.room_name}
                         onChange={(e) =>
                           setRoom({ ...room, room_name: e.target.value })
@@ -230,7 +235,7 @@ const T_Room = () => {
                       </label>
                       <textarea
                         placeholder="Write your description here..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 h-32 resize-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00A2E8] focus:border-[#00A2E8] h-32 resize-none"
                         value={room.description}
                         onChange={(e) =>
                           setRoom({ ...room, description: e.target.value })
@@ -248,7 +253,7 @@ const T_Room = () => {
                         Delete Room
                       </button>
                       <button
-                        className="px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-[#00A2E8] text-white rounded-md hover:bg-[#0082c4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={saving}
                         onClick={handleSave}
                       >

@@ -8,13 +8,13 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    tags: ""
+    tags: "",
   });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !formData.content.trim()) {
       toast.error("Title and content are required");
       return;
@@ -24,14 +24,14 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
     try {
       const tags = formData.tags
         .split(",")
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
 
       const response = await api.post(`/forum-content/room/${roomId}`, {
         title: formData.title,
         content: formData.content,
         tags,
-        contentType: 'discussion'
+        contentType: "discussion",
       });
 
       toast.success("Discussion created successfully!");
@@ -41,7 +41,11 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
     } catch (error) {
       console.error("Error creating discussion:", error);
       console.error("Error response:", error.response?.data);
-      toast.error(`Failed to create discussion: ${error.response?.data?.details || error.message}`);
+      toast.error(
+        `Failed to create discussion: ${
+          error.response?.data?.details || error.message
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -54,18 +58,22 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
 
   if (!isOpen) {
     return (
-      <div 
+      <div
         onClick={() => setIsOpen(true)}
-        className="card bg-gradient-to-r from-secondary/5 to-accent/5 border-2 border-dashed border-secondary/30 hover:border-secondary/50 hover:from-secondary/10 hover:to-accent/10 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
+        className="card bg-gradient-to-r from-[#00A2E8]/5 to-blue-500/5 border-2 border-dashed border-[#00A2E8]/30 hover:border-[#00A2E8]/50 hover:from-[#00A2E8]/10 hover:to-blue-500/10 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
       >
         <div className="card-body py-6">
           <div className="flex items-center justify-center gap-3">
-            <div className="p-3 bg-secondary/10 rounded-full group-hover:bg-secondary/20 transition-colors duration-300">
-              <Plus className="h-6 w-6 text-secondary" />
+            <div className="p-3 bg-[#00A2E8]/10 rounded-full group-hover:bg-[#00A2E8]/20 transition-colors duration-300">
+              <Plus className="h-6 w-6 text-[#00A2E8]" />
             </div>
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-secondary">Start a Discussion</h3>
-              <p className="text-sm text-base-content/60">Share your thoughts and questions with classmates</p>
+              <h3 className="text-lg font-semibold text-[#00A2E8]">
+                Start a Discussion
+              </h3>
+              <p className="text-sm text-base-content/60">
+                Share your thoughts and questions with classmates
+              </p>
             </div>
           </div>
         </div>
@@ -74,14 +82,16 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
   }
 
   return (
-    <div className="card bg-gradient-to-br from-secondary/5 via-base-100 to-accent/5 border-2 border-secondary/20 shadow-lg animate-in slide-in-from-top-2 duration-300">
+    <div className="card bg-gradient-to-br from-[#00A2E8]/5 via-base-100 to-blue-500/5 border-2 border-[#00A2E8]/20 shadow-lg animate-in slide-in-from-top-2 duration-300">
       <div className="card-body">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-secondary/10 rounded-full">
-              <Plus className="h-5 w-5 text-secondary" />
+            <div className="p-2 bg-[#00A2E8]/10 rounded-full">
+              <Plus className="h-5 w-5 text-[#00A2E8]" />
             </div>
-            <h3 className="text-lg font-semibold text-secondary">Start a Discussion</h3>
+            <h3 className="text-lg font-semibold text-[#00A2E8]">
+              Start a Discussion
+            </h3>
           </div>
           <button
             onClick={handleCancel}
@@ -101,7 +111,9 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
               placeholder="What would you like to discuss?"
               className="input input-bordered"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               required
             />
           </div>
@@ -114,7 +126,9 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
               placeholder="Share your thoughts, questions, or ideas..."
               className="textarea textarea-bordered h-32"
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, content: e.target.value })
+              }
               required
             />
           </div>
@@ -131,7 +145,9 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
               placeholder="e.g., question, homework, clarification"
               className="input input-bordered"
               value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, tags: e.target.value })
+              }
             />
           </div>
 
@@ -146,7 +162,7 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
             </button>
             <button
               type="submit"
-              className="btn btn-secondary"
+              className="btn bg-[#00A2E8] hover:bg-[#0082c4] text-white border-none"
               disabled={loading}
             >
               {loading ? "Creating..." : "Start Discussion"}
