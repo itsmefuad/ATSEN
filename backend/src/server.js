@@ -17,6 +17,7 @@ import forumContentRoutes from "./routes/forumContentRoutes.js";
 import materialRoutes from "./routes/materialRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
 
 dotenv.config();
@@ -75,6 +76,7 @@ app.use("/api/forum-content", forumContentRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/assessments", assessmentRoutes);
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Direct download route
 app.get("/api/download/:submissionId", async (req, res) => {

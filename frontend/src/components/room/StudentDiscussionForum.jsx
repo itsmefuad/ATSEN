@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, Loader, Megaphone, MessageCircle } from "lucide-react";
+import { MessageSquare, Loader, Megaphone, MessageCircle, Users } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import ForumContentCard from "./ForumContentCard";
 import CreateDiscussion from "./CreateDiscussion";
+import RoomChat from "./RoomChat";
 
 const StudentDiscussionForum = ({ roomId }) => {
   const [forumContent, setForumContent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [animatingContent, setAnimatingContent] = useState(new Set());
+  const [activeTab, setActiveTab] = useState("forum"); // "forum" or "chat"
 
   const fetchForumContent = async () => {
     try {
@@ -109,108 +111,138 @@ const StudentDiscussionForum = ({ roomId }) => {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center gap-2">
-        <MessageSquare className="h-6 w-6 text-primary" />
-        <h2 className="text-2xl font-bold">Discussion Forum</h2>
-      </div>
-
-      {/* Teacher Announcements Section */}
-      <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Tab Navigation */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Megaphone className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold">Announcements</h3>
+          <MessageSquare className="h-6 w-6 text-primary" />
+          <h2 className="text-2xl font-bold">Communication Hub</h2>
         </div>
         
-        {announcements.length === 0 ? (
-          <div className="text-center py-8">
-            <Megaphone className="h-10 w-10 text-base-content/30 mx-auto mb-3" />
-            <h4 className="text-md font-medium text-base-content/70 mb-1">
-              No announcements yet
-            </h4>
-            <p className="text-sm text-base-content/50">
-              Check back later for announcements from your instructor!
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {announcements.map((announcement, index) => (
-              <div
-                key={announcement._id}
-                className={`transition-all duration-700 ease-in-out ${
-                  animatingContent.has(announcement._id) 
-                    ? 'animate-pulse shadow-xl scale-105' 
-                    : ''
-                }`}
-                style={{
-                  transform: `translateY(0px)`,
-                  transitionDelay: `${index * 30}ms`,
-                  order: index,
-                  zIndex: animatingContent.has(announcement._id) ? 10 : 1
-                }}
-              >
-                <ForumContentCard
-                  announcement={announcement}
-                  onUpdate={handleContentUpdated}
-                  onDelete={handleContentDeleted}
-                  isStudent={true}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Student Discussions Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5 text-secondary" />
-          <h3 className="text-lg font-semibold">Class Discussions</h3>
+        <div className="tabs tabs-boxed">
+          <button 
+            className={`tab ${activeTab === 'forum' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('forum')}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Discussion Forum
+          </button>
+          <button 
+            className={`tab ${activeTab === 'chat' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('chat')}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Room Chat
+          </button>
         </div>
-        
-        <CreateDiscussion 
-          roomId={roomId} 
-          onDiscussionCreated={handleDiscussionCreated}
-        />
-
-        {discussions.length === 0 ? (
-          <div className="text-center py-8">
-            <MessageCircle className="h-10 w-10 text-base-content/30 mx-auto mb-3" />
-            <h4 className="text-md font-medium text-base-content/70 mb-1">
-              No discussions yet
-            </h4>
-            <p className="text-sm text-base-content/50">
-              Be the first to start a discussion!
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {discussions.map((discussion, index) => (
-              <div
-                key={discussion._id}
-                className={`transition-all duration-700 ease-in-out ${
-                  animatingContent.has(discussion._id) 
-                    ? 'animate-pulse shadow-xl scale-105' 
-                    : ''
-                }`}
-                style={{
-                  transform: `translateY(0px)`,
-                  transitionDelay: `${index * 30}ms`,
-                  order: index,
-                  zIndex: animatingContent.has(discussion._id) ? 10 : 1
-                }}
-              >
-                <ForumContentCard
-                  announcement={discussion}
-                  onUpdate={handleContentUpdated}
-                  onDelete={handleContentDeleted}
-                  isStudent={true}
-                />
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* Tab Content */}
+      {activeTab === 'forum' ? (
+        <div className="space-y-8">
+          {/* Teacher Announcements Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Megaphone className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-semibold">Announcements</h3>
+            </div>
+            
+            {announcements.length === 0 ? (
+              <div className="text-center py-8">
+                <Megaphone className="h-10 w-10 text-base-content/30 mx-auto mb-3" />
+                <h4 className="text-md font-medium text-base-content/70 mb-1">
+                  No announcements yet
+                </h4>
+                <p className="text-sm text-base-content/50">
+                  Check back later for announcements from your instructor!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {announcements.map((announcement, index) => (
+                  <div
+                    key={announcement._id}
+                    className={`transition-all duration-700 ease-in-out ${
+                      animatingContent.has(announcement._id) 
+                        ? 'animate-pulse shadow-xl scale-105' 
+                        : ''
+                    }`}
+                    style={{
+                      transform: `translateY(0px)`,
+                      transitionDelay: `${index * 30}ms`,
+                      order: index,
+                      zIndex: animatingContent.has(announcement._id) ? 10 : 1
+                    }}
+                  >
+                    <ForumContentCard
+                      announcement={announcement}
+                      onUpdate={handleContentUpdated}
+                      onDelete={handleContentDeleted}
+                      isStudent={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Student Discussions Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-secondary" />
+              <h3 className="text-lg font-semibold">Class Discussions</h3>
+            </div>
+            
+            <CreateDiscussion 
+              roomId={roomId} 
+              onDiscussionCreated={handleDiscussionCreated}
+            />
+
+            {discussions.length === 0 ? (
+              <div className="text-center py-8">
+                <MessageCircle className="h-10 w-10 text-base-content/30 mx-auto mb-3" />
+                <h4 className="text-md font-medium text-base-content/70 mb-1">
+                  No discussions yet
+                </h4>
+                <p className="text-sm text-base-content/50">
+                  Be the first to start a discussion!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {discussions.map((discussion, index) => (
+                  <div
+                    key={discussion._id}
+                    className={`transition-all duration-700 ease-in-out ${
+                      animatingContent.has(discussion._id) 
+                        ? 'animate-pulse shadow-xl scale-105' 
+                        : ''
+                    }`}
+                    style={{
+                      transform: `translateY(0px)`,
+                      transitionDelay: `${index * 30}ms`,
+                      order: index,
+                      zIndex: animatingContent.has(discussion._id) ? 10 : 1
+                    }}
+                  >
+                    <ForumContentCard
+                      announcement={discussion}
+                      onUpdate={handleContentUpdated}
+                      onDelete={handleContentDeleted}
+                      isStudent={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* Room Chat Tab */
+        <div className="bg-base-100 rounded-lg p-6 shadow-lg">
+          <RoomChat roomId={roomId} />
+        </div>
+      )}
     </div>
   );
 };
