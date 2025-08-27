@@ -18,8 +18,10 @@ import CreateInstitutionAnnouncement from "../../components/institution/CreateIn
 import InstitutionAnnouncementCard from "../../components/institution/InstitutionAnnouncementCard";
 import api from "../../lib/axios";
 import { sortInstitutionAnnouncements } from "../../utils/announcementUtils";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function I_Dashboard() {
+  const { user, loading: authLoading } = useAuth();
   const { idOrName } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -105,11 +107,13 @@ export default function I_Dashboard() {
     setAnnouncements(announcements.filter((ann) => ann._id !== announcementId));
   };
 
-  if (loading)
+  // Show loading if auth is still loading
+  if (authLoading || loading)
     return (
       <div className="max-w-7xl mx-auto p-4 mt-6">
-        <div className="text-center text-primary py-10">
-          Loading dashboard...
+        <div className="text-center py-10">
+          <div className="loading loading-spinner loading-lg"></div>
+          <p className="mt-2 text-base-content/70">Loading dashboard...</p>
         </div>
       </div>
     );

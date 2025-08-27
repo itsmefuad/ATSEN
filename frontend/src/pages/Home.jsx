@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar.jsx";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const handleLogin = () => {
     navigate("/auth/login");
@@ -15,6 +15,38 @@ export default function Home() {
   const handleSignup = () => {
     navigate("/auth/signup");
   };
+
+  // Show loading while auth is being determined
+  if (loading) {
+    return (
+      <div className="min-h-screen relative">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-no-repeat bg-center"
+          style={{
+            backgroundImage: "url(/BlueHomeAbstract.jpg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center 40%",
+          }}
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-40" />
+        {/* Content */}
+        <div className="relative z-10">
+          <Navbar />
+          <div
+            className="flex items-center justify-center px-4"
+            style={{ minHeight: "calc(100vh - 64px)" }}
+          >
+            <div className="text-center">
+              <div className="loading loading-spinner loading-lg text-white"></div>
+              <p className="mt-2 text-white">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative">

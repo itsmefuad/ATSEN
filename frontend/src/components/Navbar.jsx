@@ -106,74 +106,74 @@ const Navbar = () => {
                 />
               </button>
 
-            {/* Dropdown Menu */}
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
-                <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
-                  {user.email || 'User Account'}
+              {/* Dropdown Menu */}
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                  <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+                    {user.email || "User Account"}
+                  </div>
+
+                  {/* Profile option for students */}
+                  {user.role === "student" && (
+                    <>
+                      <Link
+                        to="/student/profile"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                      >
+                        <User className="h-4 w-4" />
+                        <span>Profile</span>
+                      </Link>
+
+                      <Link
+                        to="/my-progress"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                      >
+                        <Trophy className="h-4 w-4" />
+                        <span>My Progress</span>
+                      </Link>
+                    </>
+                  )}
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Logout</span>
+                  </button>
                 </div>
-                
-                {/* Profile option for students */}
-                {user.role === "student" && (
-                  <>
-                    <Link
-                      to="/student/profile"
-                      onClick={() => setIsDropdownOpen(false)}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                    >
-                      <User className="h-4 w-4" />
-                      <span>Profile</span>
-                    </Link>
-                    
-                    <Link
-                      to="/my-progress"
-                      onClick={() => setIsDropdownOpen(false)}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                    >
-                      <Trophy className="h-4 w-4" />
-                      <span>My Progress</span>
-                    </Link>
-                  </>
-                )}
-                
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          // Not logged in - show login/signup buttons
-          <div className="flex items-center space-x-3">
-            <Link
-              to="/auth/login"
-              className="text-gray-700 hover:text-sky-600 font-medium transition-colors duration-200"
-            >
-              Login
-            </Link>
-            <Link
-              to="/auth/signup"
-              className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200"
-            >
-              Sign Up
-            </Link>
-          </div>
+              )}
+            </div>
+          ) : (
+            // Not logged in - show login/signup buttons
+            <div className="flex items-center space-x-3">
+              <Link
+                to="/auth/login"
+                className="text-gray-700 hover:text-sky-600 font-medium transition-colors duration-200"
+              >
+                Login
+              </Link>
+              <Link
+                to="/auth/signup"
+                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
+        {/* End of flex container */}
+
+        {/* Click outside to close dropdown */}
+        {isDropdownOpen && (
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsDropdownOpen(false)}
+          />
         )}
       </div>
-      {/* End of flex container */}
-
-      {/* Click outside to close dropdown */}
-      {isDropdownOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsDropdownOpen(false)}
-        />
-      )}
-    </div>
     </nav>
   );
 };

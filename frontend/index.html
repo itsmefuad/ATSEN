@@ -1,10 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/AtsenIconTransparent.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ATSEN</title>
+    <script>
+      // Set theme immediately to prevent flash
+      (function () {
+        const savedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const isDark = savedTheme ? savedTheme === "dark" : prefersDark;
+        const theme = isDark ? "dim" : "nord";
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,21 +1,47 @@
 // src/pages/auth/Login.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useAuthNavigation } from "../../hooks/useAuthNavigation.js";
 import api from "../../lib/axios";
 import Navbar from "../../components/Navbar.jsx";
 
 export default function Login() {
-  const [role, setRole] = useState("institution");
+  // Get the last user role from localStorage, fallback to "institution"
+  const getInitialRole = () => {
+    const lastRole = localStorage.getItem("lastUserRole");
+    return lastRole &&
+      ["institution", "instructor", "student"].includes(lastRole)
+      ? lastRole
+      : "institution";
+  };
+
+  const [role, setRole] = useState(getInitialRole);
   const [form, setForm] = useState({});
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
+  const { navigateAfterAuth } = useAuthNavigation();
 
   // If ProtectedRoute redirected us here, it will stash the original path in `location.state.from`
   const fromPath = location.state?.from;
+
+  // Redirect already authenticated users
+  useEffect(() => {
+    if (!loading && user) {
+      let defaultPath;
+      if (user.role === "institution") {
+        defaultPath = `/${user.slug}/dashboard`;
+      } else if (user.role === "instructor") {
+        defaultPath = "/teacher/dashboard";
+      } else {
+        defaultPath = "/student/dashboard";
+      }
+      navigate(defaultPath, { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -47,8 +73,11 @@ export default function Login() {
           : data.student),
       };
 
-      // Use AuthContext login
-      login(data.token, userData);
+      // Use AuthContext login and wait for it to complete
+      await login(data.token, userData);
+
+      // Clear the stored role since login was successful
+      localStorage.removeItem("lastUserRole");
 
       // Determine default path after login
       let defaultPath;
@@ -62,7 +91,17 @@ export default function Login() {
 
       // If someone was trying to hit a protected URL, use that; otherwise use our default
       const redirectTo = fromPath || defaultPath;
-      navigate(redirectTo, { replace: true });
+
+      // Use our auth-aware navigation with a fallback
+      navigateAfterAuth(redirectTo);
+
+      // Additional fallback: force navigation after a short delay if first attempt fails
+      setTimeout(() => {
+        const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+        if (currentUser && window.location.pathname === "/auth/login") {
+          window.location.href = redirectTo;
+        }
+      }, 300);
     } catch (err) {
       setError(err.response?.data?.message || "Login failed.");
     }
@@ -91,6 +130,8 @@ export default function Login() {
                 setRole(e.target.value);
                 setForm({});
                 setError("");
+                // Clear stored role when user manually changes it
+                localStorage.removeItem("lastUserRole");
               }}
               className="select select-bordered bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary"
             >
@@ -111,12 +152,14 @@ export default function Login() {
               name="email"
               label="Email"
               type="email"
+              value={form.email || ""}
               onChange={handleChange}
             />
             <Input
               name="password"
               label="Password"
               type="password"
+              value={form.password || ""}
               onChange={handleChange}
             />
 
@@ -155,7 +198,7 @@ export default function Login() {
 }
 
 // Extracted Input component
-function Input({ name, label, type = "text", onChange }) {
+function Input({ name, label, type = "text", onChange, value = "" }) {
   return (
     <div className="form-control">
       <label className="label">
@@ -164,6 +207,7 @@ function Input({ name, label, type = "text", onChange }) {
       <input
         name={name}
         type={type}
+        value={value}
         onChange={onChange}
         required
         className="input input-bordered bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary"

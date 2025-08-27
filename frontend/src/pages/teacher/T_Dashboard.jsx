@@ -9,7 +9,7 @@ import { Link } from "react-router";
 import { Plus } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 const T_Dashboard = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +37,21 @@ const T_Dashboard = () => {
 
     fetchRooms();
   }, [user]);
+
+  // Show loading spinner if auth is still loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-base-200">
+        <Navbar />
+        <div className="max-w-7xl mx-auto p-4 mt-6 flex items-center justify-center">
+          <div className="text-center">
+            <div className="loading loading-spinner loading-lg"></div>
+            <p className="mt-2 text-base-content/70">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-base-200">

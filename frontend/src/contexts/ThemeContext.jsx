@@ -12,24 +12,19 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    // Check for existing theme preference on mount
+  // Initialize theme synchronously to avoid flash
+  const getInitialTheme = () => {
     const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-
     if (savedTheme) {
-      setIsDarkMode(savedTheme === "dark");
-    } else {
-      setIsDarkMode(prefersDark);
+      return savedTheme === "dark";
     }
-  }, []);
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  };
+
+  const [isDarkMode, setIsDarkMode] = useState(getInitialTheme);
 
   useEffect(() => {
-    // Apply theme to document
+    // Apply theme to document on mount and changes
     const theme = isDarkMode ? "dim" : "nord";
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");

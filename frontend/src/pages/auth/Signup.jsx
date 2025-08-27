@@ -5,7 +5,16 @@ import api from "../../lib/axios";
 import Navbar from "../../components/Navbar.jsx";
 
 export default function Signup() {
-  const [role, setRole] = useState("institution");
+  // Get the last user role from localStorage, fallback to "institution"
+  const getInitialRole = () => {
+    const lastRole = localStorage.getItem("lastUserRole");
+    return lastRole &&
+      ["institution", "instructor", "student"].includes(lastRole)
+      ? lastRole
+      : "institution";
+  };
+
+  const [role, setRole] = useState(getInitialRole);
   const [form, setForm] = useState({});
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -33,9 +42,14 @@ export default function Signup() {
       const endpoint = `${base}/register`;
       await api.post(endpoint, form);
 
-      setSuccess("🎉 Registration successful! Please log in with your credentials.");
+      // Clear the stored role since signup was successful
+      localStorage.removeItem("lastUserRole");
+
+      setSuccess(
+        "🎉 Registration successful! Please log in with your credentials."
+      );
       setForm({});
-      
+
       // Redirect to login after 2 seconds
       setTimeout(() => {
         navigate("/auth/login");
@@ -46,119 +60,183 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-base-200">
       <Navbar />
-      <div className="flex items-center justify-center px-4" style={{ minHeight: 'calc(100vh - 64px)' }}>
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-            {role.charAt(0).toUpperCase() + role.slice(1)} Registration
-          </h2>
-          <p className="text-gray-600">Create your new account</p>
-        </div>
-
-        <div className="mb-4 text-center">
-          <label className="text-sm mr-2 text-gray-700">Role:</label>
-          <select
-            value={role}
-            onChange={(e) => {
-              setRole(e.target.value);
-              setForm({});
-              setError("");
-              setSuccess("");
-            }}
-            className="border border-gray-300 p-2 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-          >
-            <option value="institution">Institution</option>
-            <option value="instructor">Instructor</option>
-            <option value="student">Student</option>
-          </select>
-        </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-700 text-sm">{error}</p>
+      <div
+        className="flex items-center justify-center px-4"
+        style={{ minHeight: "calc(100vh - 64px)" }}
+      >
+        <div className="max-w-md w-full bg-base-100 shadow-lg rounded-lg p-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-semibold text-base-content mb-2">
+              {role.charAt(0).toUpperCase() + role.slice(1)} Registration
+            </h2>
+            <p className="text-base-content/70">Create your new account</p>
           </div>
-        )}
 
-        {success && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-            <p className="text-green-700 text-sm">{success}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Registration fields based on role */}
-          {role === "institution" && (
-            <>
-              <Input name="name" label="Institution Name" onChange={handleChange} />
-              <Input name="eiin" label="EIIN" onChange={handleChange} />
-              <Input name="email" label="Email" type="email" onChange={handleChange} />
-              <Input name="password" label="Password" type="password" onChange={handleChange} />
-            </>
-          )}
-          
-          {role === "instructor" && (
-            <>
-              <Input name="name" label="Full Name" onChange={handleChange} />
-              <Input name="email" label="Email" type="email" onChange={handleChange} />
-              <Input name="password" label="Password" type="password" onChange={handleChange} />
-            </>
-          )}
-          
-          {role === "student" && (
-            <>
-              <Input name="name" label="Full Name" onChange={handleChange} />
-              <Input name="email" label="Email" type="email" onChange={handleChange} />
-              <Input name="password" label="Password" type="password" onChange={handleChange} />
-            </>
-          )}
-
-          <button
-            type="submit"
-            className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 rounded-md font-medium transition-colors duration-200 shadow-md hover:shadow-lg"
-          >
-            Register
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link
-              to="/auth/login"
-              className="text-sky-500 hover:text-sky-600 font-medium hover:underline"
+          <div className="mb-4 text-center">
+            <label className="text-sm mr-2 text-base-content">Role:</label>
+            <select
+              value={role}
+              onChange={(e) => {
+                setRole(e.target.value);
+                setForm({});
+                setError("");
+                setSuccess("");
+                // Clear stored role when user manually changes it
+                localStorage.removeItem("lastUserRole");
+              }}
+              className="select select-bordered bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              Login here
-            </Link>
-          </p>
-        </div>
+              <option value="institution">Institution</option>
+              <option value="instructor">Instructor</option>
+              <option value="student">Student</option>
+            </select>
+          </div>
 
-        <div className="mt-4 text-center">
-          <Link
-            to="/"
-            className="text-sm text-gray-500 hover:text-gray-700 hover:underline"
-          >
-            ← Back to Home
-          </Link>
+          {error && (
+            <div className="alert alert-error mb-4">
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="alert alert-success mb-4">
+              <p className="text-sm">{success}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Registration fields based on role */}
+            {role === "institution" && (
+              <>
+                <Input
+                  name="name"
+                  label="Institution Name"
+                  value={form.name || ""}
+                  onChange={handleChange}
+                />
+                <Input
+                  name="eiin"
+                  label="EIIN"
+                  value={form.eiin || ""}
+                  onChange={handleChange}
+                />
+                <Input
+                  name="email"
+                  label="Email"
+                  type="email"
+                  value={form.email || ""}
+                  onChange={handleChange}
+                />
+                <Input
+                  name="password"
+                  label="Password"
+                  type="password"
+                  value={form.password || ""}
+                  onChange={handleChange}
+                />
+              </>
+            )}
+
+            {role === "instructor" && (
+              <>
+                <Input
+                  name="name"
+                  label="Full Name"
+                  value={form.name || ""}
+                  onChange={handleChange}
+                />
+                <Input
+                  name="email"
+                  label="Email"
+                  type="email"
+                  value={form.email || ""}
+                  onChange={handleChange}
+                />
+                <Input
+                  name="password"
+                  label="Password"
+                  type="password"
+                  value={form.password || ""}
+                  onChange={handleChange}
+                />
+              </>
+            )}
+
+            {role === "student" && (
+              <>
+                <Input
+                  name="name"
+                  label="Full Name"
+                  value={form.name || ""}
+                  onChange={handleChange}
+                />
+                <Input
+                  name="email"
+                  label="Email"
+                  type="email"
+                  value={form.email || ""}
+                  onChange={handleChange}
+                />
+                <Input
+                  name="password"
+                  label="Password"
+                  type="password"
+                  value={form.password || ""}
+                  onChange={handleChange}
+                />
+              </>
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-primary w-full py-3 font-medium shadow-md hover:shadow-lg"
+            >
+              Register
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-base-content/70">
+              Already have an account?{" "}
+              <Link
+                to="/auth/login"
+                className="text-primary hover:text-primary/80 font-medium hover:underline"
+              >
+                Login here
+              </Link>
+            </p>
+          </div>
+
+          <div className="mt-4 text-center">
+            <Link
+              to="/"
+              className="text-sm text-gray-500 hover:text-gray-700 hover:underline"
+            >
+              ← Back to Home
+            </Link>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );
 }
 
 // Extracted Input component
-function Input({ name, label, type = "text", onChange }) {
+function Input({ name, label, type = "text", onChange, value = "" }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+    <div className="form-control">
+      <label className="label">
+        <span className="label-text text-base-content">{label}</span>
+      </label>
       <input
         name={name}
         type={type}
+        value={value}
         onChange={onChange}
         required
-        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+        className="input input-bordered bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary"
       />
     </div>
   );
