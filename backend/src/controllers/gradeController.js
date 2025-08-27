@@ -10,11 +10,9 @@ import { calculateAchievements } from "./achievementController.js";
 // Get comprehensive grade sheet for all students in a room (teacher view)
 export const getRoomGrades = async (req, res) => {
   try {
-    console.log("getRoomGrades called with roomId:", req.params.roomId);
     const { roomId } = req.params;
     
     const room = await Room.findById(roomId).populate('students', 'name email');
-    console.log("Room found:", room ? `Room: ${room.name}, Students: ${room.students?.length}` : "No room found");
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
     }
@@ -147,7 +145,6 @@ export const getRoomGrades = async (req, res) => {
       };
     });
 
-    console.log("Returning studentGrades:", studentGrades.length, "students");
     res.json(studentGrades);
   } catch (error) {
     console.error("Error fetching room grades:", error);
@@ -291,16 +288,13 @@ export const getStudentGrades = async (req, res) => {
 // Update mid-term and final marks (teacher only)
 export const updateExamMarks = async (req, res) => {
   try {
-    console.log("updateExamMarks called with:", { roomId: req.params.roomId, studentId: req.params.studentId, body: req.body });
     const { roomId, studentId } = req.params;
     const { midTermMarks, finalMarks } = req.body;
     
     // User is already authenticated via authMiddleware (or temp without auth)
     const userId = req.user?.id || "temp-user-id";
-    console.log("User ID from token:", userId);
 
     // Validate marks
-    console.log("Validating marks:", { midTermMarks, finalMarks });
     if (midTermMarks !== null && (midTermMarks < 0 || midTermMarks > 25)) {
       return res.status(400).json({ message: "Mid-term marks must be between 0 and 25" });
     }
@@ -310,13 +304,10 @@ export const updateExamMarks = async (req, res) => {
     }
 
     // Check if room exists and student is enrolled
-    console.log("Checking room and student enrollment...");
     const room = await Room.findById(roomId);
     if (!room || !room.students.includes(studentId)) {
       return res.status(400).json({ message: "Student not enrolled in this room" });
     }
-
-    console.log("Fetching assessments and grades...");
 
     // Calculate average assessment marks for this student
     const assessments = await Assessment.find({ room: roomId });
@@ -337,12 +328,9 @@ export const updateExamMarks = async (req, res) => {
       ...quizGrades.map(q => (q.marks / q.maxMarks) * 100)
     ];
     
-    console.log("Calculating averages...");
     const averageAssessmentMarks = allGrades.length > 0 
       ? allGrades.reduce((sum, grade) => sum + grade, 0) / allGrades.length 
       : 0;
-
-    console.log("Assessment average:", averageAssessmentMarks);
 
     // Calculate total marks out of 100
     // Assessment average: 40% of total score (40 marks)
@@ -350,8 +338,6 @@ export const updateExamMarks = async (req, res) => {
     // Final: 35 marks (35% of total score)
     const assessmentWeight = (averageAssessmentMarks * 40) / 100; // Convert percentage to marks out of 40
     const totalMarks = assessmentWeight + (midTermMarks || 0) + (finalMarks || 0);
-
-    console.log("Total marks calculated:", totalMarks);
 
     // Update or create grade record
     const gradeData = {
@@ -362,24 +348,7 @@ export const updateExamMarks = async (req, res) => {
       averageAssessmentMarks: parseFloat(averageAssessmentMarks.toFixed(2)),
       totalMarks: parseFloat(totalMarks.toFixed(2)),
       lastUpdated: new Date()
-      // Temporarily removing updatedBy to test without auth
     };
-
-    console.log("About to save gradeData:", gradeData);
-
-    // One-time fix: Drop the problematic index if it exists
-    try {
-      const indexes = await Grade.collection.getIndexes();
-      console.log("Current indexes:", Object.keys(indexes));
-      
-      if (indexes['student_1_assessment_1']) {
-        console.log("Dropping problematic student_1_assessment_1 index...");
-        await Grade.collection.dropIndex('student_1_assessment_1');
-        console.log("Index dropped successfully");
-      }
-    } catch (indexError) {
-      console.log("Index handling:", indexError.message);
-    }
 
     const grade = await Grade.findOneAndUpdate(
       { student: studentId, room: roomId },
@@ -396,8 +365,6 @@ export const updateExamMarks = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating exam marks:", error);
-    console.error("Error stack:", error.stack);
-    console.error("Error message:", error.message);
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
