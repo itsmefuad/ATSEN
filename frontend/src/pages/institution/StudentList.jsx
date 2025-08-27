@@ -92,16 +92,16 @@ export default function StudentList() {
         <div className="flex items-center gap-4">
           <Link
             to={`/${encodeURIComponent(idOrName)}`}
-            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
               <GraduationCap className="h-8 w-8 text-green-500" />
               Students
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-base-content/70 mt-1">
               Manage your institution's students
             </p>
           </div>
@@ -119,11 +119,11 @@ export default function StudentList() {
       {/* Students List */}
       {students.length === 0 ? (
         <div className="text-center py-20">
-          <GraduationCap className="w-20 h-20 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-medium text-gray-600 mb-2">
+          <GraduationCap className="w-20 h-20 text-base-content/40 mx-auto mb-4" />
+          <h3 className="text-xl font-medium text-base-content/70 mb-2">
             No students found
           </h3>
-          <p className="text-gray-500 mb-6">
+          <p className="text-base-content/60 mb-6">
             Start by adding students to your institution.
           </p>
           <Link
@@ -139,30 +139,30 @@ export default function StudentList() {
           {students.map((student) => (
             <div
               key={student._id}
-              className="bg-white hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-green-300 group p-6"
+              className="card bg-base-100 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-green-300 group p-6"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-green-700 mb-2">
+                  <h3 className="text-lg font-semibold text-base-content group-hover:text-green-700 mb-2">
                     {student.name}
                   </h3>
 
                   {student.email && (
-                    <div className="flex items-center text-sm text-gray-600 mb-2">
-                      <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                    <div className="flex items-center text-sm text-base-content/70 mb-2">
+                      <Mail className="h-4 w-4 mr-2 text-base-content/40" />
                       <span>{student.email}</span>
                     </div>
                   )}
 
                   {student.phone && (
-                    <div className="flex items-center text-sm text-gray-600 mb-2">
-                      <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                    <div className="flex items-center text-sm text-base-content/70 mb-2">
+                      <Phone className="h-4 w-4 mr-2 text-base-content/40" />
                       <span>{student.phone}</span>
                     </div>
                   )}
 
                   {student.studentId && (
-                    <div className="text-sm text-gray-600 mb-2">
+                    <div className="text-sm text-base-content/70 mb-2">
                       <span className="font-medium">Student ID:</span>{" "}
                       {student.studentId}
                     </div>
@@ -178,9 +178,9 @@ export default function StudentList() {
                 </button>
               </div>
 
-              <div className="pt-3 border-t border-gray-100">
+              <div className="pt-3 border-t border-base-300">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Student</span>
+                  <span className="text-base-content/60">Student</span>
                   <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                     Active
                   </span>

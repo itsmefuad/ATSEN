@@ -210,7 +210,7 @@ const InstitutionAnnouncementCard = ({
     <div
       className={`card bg-base-100 border shadow-md transition-all duration-300 ease-in-out ${
         announcement.isPinned
-          ? "border-yellow-300 bg-yellow-50/30 border-l-4 border-l-yellow-500 scale-[1.02]"
+          ? "border-[#00A2E8]/30 bg-[#00A2E8]/5 border-l-4 border-l-[#00A2E8] scale-[1.02]"
           : "border-base-300"
       }`}
     >
@@ -221,7 +221,7 @@ const InstitutionAnnouncementCard = ({
               {announcement.title}
             </h3>
             {announcement.isPinned && (
-              <Pin className="h-4 w-4 text-yellow-600" />
+              <Pin className="h-4 w-4 text-[#00A2E8]" />
             )}
           </div>
 
@@ -231,7 +231,7 @@ const InstitutionAnnouncementCard = ({
                 onClick={handleTogglePin}
                 className={`btn btn-ghost btn-sm transition-all duration-200 ${
                   announcement.isPinned
-                    ? "text-yellow-600 hover:bg-yellow-100"
+                    ? "text-[#00A2E8] hover:bg-[#00A2E8]/10"
                     : "hover:bg-base-200"
                 }`}
                 title={announcement.isPinned ? "Unpin" : "Pin"}

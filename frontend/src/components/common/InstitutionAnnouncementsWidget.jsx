@@ -92,7 +92,7 @@ const InstitutionAnnouncementsWidget = ({ userType, userId }) => {
               key={announcement._id}
               className={`p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${
                 announcement.isPinned
-                  ? "border-yellow-300 bg-yellow-50/30"
+                  ? "border-[#00A2E8]/30 bg-[#00A2E8]/5"
                   : "border-base-300 bg-base-50"
               }`}
             >
@@ -100,7 +100,7 @@ const InstitutionAnnouncementsWidget = ({ userType, userId }) => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     {announcement.isPinned && (
-                      <Pin className="h-4 w-4 text-yellow-600" />
+                      <Pin className="h-4 w-4 text-[#00A2E8]" />
                     )}
                     <h4 className="font-semibold text-base-content">
                       {announcement.title}

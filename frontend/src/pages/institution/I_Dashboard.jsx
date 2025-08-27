@@ -296,14 +296,14 @@ export default function I_Dashboard() {
         </div>
 
         {/* Support Desk */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="card bg-base-100 border border-base-300 p-6">
           <div className="flex items-center mb-4">
             <HelpCircle className="h-6 w-6 text-green-500 mr-3" />
-            <h3 className="text-lg font-semibold text-gray-800">
+            <h3 className="text-lg font-semibold text-base-content">
               Support Desk
             </h3>
           </div>
-          <p className="text-gray-600 mb-4">
+          <p className="text-base-content/70 mb-4">
             Handle student support queries and provide assistance efficiently.
           </p>
           <Link

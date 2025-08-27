@@ -202,10 +202,8 @@ const T_Room = () => {
                 </Link>
                 <Link
                   to={`/teacher/room/${id}/grades`}
-                  className={`flex items-center px-4 py-2 rounded-md transition-colors ${
-                    activeTab === "grades" 
-                      ? "bg-sky-500 text-white shadow-sm" 
-                      : "text-gray-600 hover:bg-white hover:text-sky-600"
+                  className={`tab ${
+                    activeTab === "grades" ? "tab-active" : ""
                   }`}
                 >
                   <TrendingUp className="h-4 w-4 mr-2" />

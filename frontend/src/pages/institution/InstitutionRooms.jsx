@@ -1,15 +1,24 @@
 // frontend/src/pages/institution/InstitutionRooms.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  BookOpen,
+  Plus,
+  Users,
+  GraduationCap,
+  Edit,
+  Trash2,
+  Calendar,
+} from "lucide-react";
 
 export default function InstitutionRooms() {
-  const { idOrName }         = useParams();
-  const [rooms, setRooms]     = useState([]);
+  const { idOrName } = useParams();
+  const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errMsg, setErrMsg]   = useState("");
+  const [errMsg, setErrMsg] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(null); // { roomId, roomName }
   const [deleting, setDeleting] = useState(false);
-  const BAR_COLOR = "hsla(193, 47%, 76%, 1.00)";
 
   useEffect(() => {
     if (!idOrName) return;
@@ -30,7 +39,7 @@ export default function InstitutionRooms() {
           console.log(`Room ${index}:`, {
             id: room._id,
             name: room.room_name,
-            idLength: room._id?.length
+            idLength: room._id?.length,
           });
         });
         setRooms(json);
@@ -46,8 +55,6 @@ export default function InstitutionRooms() {
         setErrMsg(msg);
         setLoading(false);
       });
-
-
   }, [idOrName]);
 
   const handleDeleteClick = (roomId, roomName) => {
@@ -56,13 +63,15 @@ export default function InstitutionRooms() {
 
   const handleDeleteConfirm = async () => {
     if (!deleteConfirm) return;
-    
+
     setDeleting(true);
     try {
       const response = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(idOrName)}/rooms/${deleteConfirm.roomId}`,
+        `http://localhost:5001/api/institutions/${encodeURIComponent(
+          idOrName
+        )}/rooms/${deleteConfirm.roomId}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
         }
       );
 
@@ -72,11 +81,12 @@ export default function InstitutionRooms() {
       }
 
       // Remove the deleted room from the rooms state
-      setRooms(prevRooms => prevRooms.filter(room => room._id !== deleteConfirm.roomId));
-      
+      setRooms((prevRooms) =>
+        prevRooms.filter((room) => room._id !== deleteConfirm.roomId)
+      );
+
       // Close confirmation dialog
       setDeleteConfirm(null);
-      
     } catch (error) {
       console.error("Error deleting room:", error);
       setErrMsg(error.message);
@@ -89,19 +99,72 @@ export default function InstitutionRooms() {
     setDeleteConfirm(null);
   };
 
-  if (loading) return <p>Loading rooms…</p>;
-  if (errMsg)  return <p>{errMsg}</p>;
+  if (loading)
+    return (
+      <div className="max-w-7xl mx-auto p-4 mt-6">
+        <div className="text-center text-sky-600 py-10">Loading rooms...</div>
+      </div>
+    );
+  if (errMsg)
+    return (
+      <div className="max-w-7xl mx-auto p-4 mt-6">
+        <div className="text-center text-red-600 py-10">{errMsg}</div>
+      </div>
+    );
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1 style={{ fontSize: "2rem", marginBottom: "1rem" }}>Rooms</h1>
+    <div className="max-w-7xl mx-auto p-4 mt-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Link
+            to={`/${encodeURIComponent(idOrName)}`}
+            className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
+              <BookOpen className="h-8 w-8 text-blue-500" />
+              Rooms
+            </h1>
+            <p className="text-base-content/70 mt-1">
+              Manage your institution's rooms and courses
+            </p>
+          </div>
+        </div>
 
+        <Link
+          to={`/${encodeURIComponent(idOrName)}/add-room`}
+          className="flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium group"
+        >
+          <Plus className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+          Add Room
+        </Link>
+      </div>
+
+      {/* Rooms List */}
       {rooms.length === 0 ? (
-        <p>No rooms found.</p>
+        <div className="text-center py-20">
+          <BookOpen className="w-20 h-20 text-base-content/40 mx-auto mb-4" />
+          <h3 className="text-xl font-medium text-base-content/70 mb-2">
+            No rooms found
+          </h3>
+          <p className="text-base-content/60 mb-6">
+            Start by creating rooms for your institution.
+          </p>
+          <Link
+            to={`/${encodeURIComponent(idOrName)}/add-room`}
+            className="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Create First Room
+          </Link>
+        </div>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {rooms.map((room) => {
-            const studentCount    = Array.isArray(room.students)
+            const studentCount = Array.isArray(room.students)
               ? room.students.length
               : 0;
             const instructorCount = Array.isArray(room.instructors)
@@ -109,158 +172,101 @@ export default function InstitutionRooms() {
               : 0;
 
             const formattedTime = room.createdAt
-              ? new Date(room.createdAt).toLocaleString()
+              ? new Date(room.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
               : "N/A";
 
             return (
-              <li
+              <div
                 key={room._id}
-                style={{
-                  display:        "flex",
-                  flexDirection:  "column",
-                  padding:        "0.75rem 1rem",
-                  marginBottom:   "0.75rem",
-                  borderRadius:   "0.5rem",
-                  background:     BAR_COLOR,
-                  color:          "#0b1220",
-                }}
+                className="card bg-base-100 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-blue-300 group p-6"
               >
-                <div
-                  style={{
-                    display:        "flex",
-                    alignItems:     "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div>
-                    <strong style={{ fontSize: "1.1rem" }}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-base-content group-hover:text-blue-700 mb-2">
                       {room.room_name}
-                    </strong>
-                    <div
-                      style={{
-                        fontSize:  "0.9rem",
-                        color:     "#333",
-                        marginTop: "0.25rem",
-                      }}
-                    >
-                      {studentCount} student
-                      {studentCount !== 1 ? "s" : ""} &bull;{" "}
-                      {instructorCount} instructor
-                      {instructorCount !== 1 ? "s" : ""}
+                    </h3>
+
+                    {room.description && (
+                      <p className="text-sm text-base-content/70 mb-3 line-clamp-2">
+                        {room.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center gap-4 text-sm text-base-content/70 mb-2">
+                      <div className="flex items-center gap-1">
+                        <GraduationCap className="h-4 w-4 text-base-content/40" />
+                        <span>
+                          {studentCount} student{studentCount !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4 text-base-content/40" />
+                        <span>
+                          {instructorCount} instructor
+                          {instructorCount !== 1 ? "s" : ""}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <Link
-                      to={`/${encodeURIComponent(idOrName)}/rooms/${room._id}/edit`}
-                      style={{
-                        fontSize:       "0.9rem",
-                        textDecoration: "none",
-                        color:          "#fff",
-                        fontWeight:     600,
-                        padding:        "0.4rem 0.8rem",
-                        background:     "#10b981",
-                        border:         "1px solid #10b981",
-                        borderRadius:   "4px",
-                      }}
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => handleDeleteClick(room._id, room.room_name)}
-                      style={{
-                        fontSize:       "0.9rem",
-                        color:          "#fff",
-                        fontWeight:     600,
-                        padding:        "0.4rem 0.8rem",
-                        background:     "#ef4444",
-                        border:         "1px solid #ef4444",
-                        borderRadius:   "4px",
-                        cursor:         "pointer",
-                      }}
-                    >
-                      Delete
-                    </button>
+
+                    <div className="flex items-center text-sm text-base-content/60">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      <span>Created: {formattedTime}</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* createdTime display */}
-                <div
-                  style={{
-                    fontSize:  "0.8rem",
-                    color:     "#555",
-                    marginTop: "0.5rem",
-                  }}
-                >
-                  Created: {formattedTime}
+                <div className="flex gap-2 pt-3 border-t border-base-300">
+                  <Link
+                    to={`/${encodeURIComponent(idOrName)}/rooms/${
+                      room._id
+                    }/edit`}
+                    className="flex-1 flex items-center justify-center px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteClick(room._id, room.room_name)}
+                    className="flex-1 flex items-center justify-center px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </button>
                 </div>
-              </li>
+              </div>
             );
           })}
-        </ul>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "2rem",
-              borderRadius: "0.5rem",
-              maxWidth: "400px",
-              width: "90%",
-              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <h2 style={{ marginBottom: "1rem", color: "#ef4444" }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="card bg-base-100 p-6 max-w-md w-full mx-4 shadow-xl">
+            <h2 className="text-xl font-bold text-error mb-4">
               Confirm Delete
             </h2>
-            <p style={{ marginBottom: "1.5rem", color: "#374151" }}>
-              Are you sure you want to delete the room "{deleteConfirm.roomName}"? 
-              This action will remove the room from all students and instructors, 
-              and cannot be undone.
+            <p className="text-base-content/70 mb-6">
+              Are you sure you want to delete the room "{deleteConfirm.roomName}
+              "? This action will remove the room from all students and
+              instructors, and cannot be undone.
             </p>
-            <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+            <div className="flex gap-3 justify-end">
               <button
                 onClick={handleDeleteCancel}
                 disabled={deleting}
-                style={{
-                  padding: "0.5rem 1rem",
-                  backgroundColor: "#f3f4f6",
-                  color: "#374151",
-                  border: "1px solid #d1d5db",
-                  borderRadius: "0.25rem",
-                  cursor: deleting ? "not-allowed" : "pointer",
-                  opacity: deleting ? 0.5 : 1,
-                }}
+                className="btn btn-ghost"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
                 disabled={deleting}
-                style={{
-                  padding: "0.5rem 1rem",
-                  backgroundColor: "#ef4444",
-                  color: "white",
-                  border: "1px solid #ef4444",
-                  borderRadius: "0.25rem",
-                  cursor: deleting ? "not-allowed" : "pointer",
-                  opacity: deleting ? 0.5 : 1,
-                }}
+                className="btn btn-error"
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>
