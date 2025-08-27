@@ -47,10 +47,6 @@ import InstitutionSupportDesk from "./pages/institution/InstitutionSupportDesk.j
 import S_AssignmentDetail from "./pages/student/S_AssignmentDetail.jsx";
 import S_QuizDetail from "./pages/student/S_QuizDetail.jsx";
 
-// Yuvraj Announcements
-import Yuvraj_Announcements from "./pages/yuvraj_Announcements.jsx";
-import Yuvraj_AnnouncementDetail from "./pages/yuvraj_AnnouncementDetail.jsx";
-import Yuvraj_AnnouncementEditor from "./pages/yuvraj_AnnouncementEditor.jsx";
 import TimelineDemo from "./components/room/TimelineDemo.jsx";
 import { useTheme } from "./contexts/ThemeContext.jsx";
 
@@ -110,7 +106,7 @@ export default function App() {
 
           {/* Document Desk */}
           <Route path="document-desk" element={<DocumentDesk />} />
-          
+
           {/* Support Desk */}
           <Route path="support-desk" element={<InstitutionSupportDesk />} />
         </Route>
@@ -159,16 +155,19 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-                <Route path="/student/support-tickets" element={
-                  <ProtectedRoute requiredRole="student">
-                    <S_SupportTickets />
-                  </ProtectedRoute>
-                } />
+        <Route
+          path="/student/support-tickets"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <S_SupportTickets />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/student/room/:id/forum" element={<S_Room />} />
         <Route path="/student/room/:id/materials" element={<S_Room />} />
         <Route path="/student/room/:id/assessment" element={<S_Room />} />
         <Route path="/student/room/:id/grades" element={<S_Room />} />
-                <Route path="/student/room/:id/standings" element={<S_Room />} />
+        <Route path="/student/room/:id/standings" element={<S_Room />} />
         <Route
           path="/student/room/:id/assessment/:assessmentId"
           element={<S_AssignmentDetail />}
@@ -179,26 +178,17 @@ export default function App() {
         />
         {/* Redirect old URL to new forum URL for backward compatibility */}
         <Route path="/student/room/:id" element={<S_Room />} />
-              
-              {/* My Progress Route */}
-              <Route path="/my-progress" element={
-                <ProtectedRoute>
-                  <MyProgress />
-                </ProtectedRoute>
-              } />
+
+        {/* My Progress Route */}
+        <Route
+          path="/my-progress"
+          element={
+            <ProtectedRoute>
+              <MyProgress />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/teacher/edit/room/:id" element={<T_Room />} />
-        <Route
-          path="/yuvraj/announcements"
-          element={<Yuvraj_Announcements />}
-        />
-        <Route
-          path="/yuvraj/announcements/:id"
-          element={<Yuvraj_AnnouncementDetail />}
-        />
-        <Route
-          path="/yuvraj/admin/announcements/:id"
-          element={<Yuvraj_AnnouncementEditor />}
-        />
 
         {/* Demo route for timeline testing */}
         <Route path="/demo/timeline" element={<TimelineDemo />} />

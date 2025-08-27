@@ -2,10 +2,18 @@ import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RateLimitedUi from "../../components/RateLimitedUi";
 import InstitutionCard from "../../components/InstitutionCard";
+import InstitutionAnnouncementsWidget from "../../components/common/InstitutionAnnouncementsWidget";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import { Link } from "react-router";
-import { BookOpen, Users, Calendar, Building, FileText, MessageCircle } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  Calendar,
+  Building,
+  FileText,
+  MessageCircle,
+} from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 const S_Dashboard = () => {
   const { user } = useAuth();
@@ -177,20 +185,20 @@ const S_Dashboard = () => {
                               <Link
                                 key={room._id}
                                 to={`/student/room/${room._id}/forum`}
-                                className="bg-white hover:bg-sky-50 hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-200 hover:border-sky-300 group"
+                                className="card bg-base-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 border border-base-300 group border-t-4 border-solid border-t-[#00A2E8]"
                               >
                                 <div className="p-6">
                                   <div className="flex items-start justify-between mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-800 group-hover:text-sky-700">
+                                    <h3 className="text-lg font-semibold text-base-content group-hover:text-primary">
                                       {room.room_name}
                                     </h3>
-                                    <BookOpen className="h-5 w-5 text-sky-500 group-hover:text-sky-600" />
+                                    <BookOpen className="h-5 w-5 text-primary group-hover:text-primary" />
                                   </div>
-                                  <p className="text-gray-600 line-clamp-3 mb-4">
+                                  <p className="text-base-content/70 line-clamp-3 mb-4">
                                     {room.description}
                                   </p>
 
-                                  <div className="flex items-center justify-between text-sm text-gray-500">
+                                  <div className="flex items-center justify-between text-sm text-base-content/60">
                                     <div className="flex items-center gap-1">
                                       <Calendar className="h-3 w-3" />
                                       <span>{formatDate(room.createdAt)}</span>
@@ -207,17 +215,33 @@ const S_Dashboard = () => {
                         </div>
                       )
                     )}
+
+                    {/* Institution Announcements Widget */}
+                    <div className="mt-8">
+                      <InstitutionAnnouncementsWidget
+                        userType="student"
+                        userId={user?.id}
+                      />
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-center py-20">
-                    <BookOpen className="w-20 h-20 text-base-content/40 mx-auto mb-4" />
-                    <h3 className="text-xl font-medium text-base-content/70 mb-2">
-                      No enrolled rooms yet
-                    </h3>
-                    <p className="text-base-content/60 mb-6">
-                      You haven't been enrolled in any rooms yet. Contact your
-                      instructor to get started.
-                    </p>
+                  <div className="space-y-8">
+                    <div className="text-center py-20">
+                      <BookOpen className="w-20 h-20 text-base-content/40 mx-auto mb-4" />
+                      <h3 className="text-xl font-medium text-base-content/70 mb-2">
+                        No enrolled rooms yet
+                      </h3>
+                      <p className="text-base-content/60 mb-6">
+                        You haven't been enrolled in any rooms yet. Contact your
+                        instructor to get started.
+                      </p>
+                    </div>
+
+                    {/* Show announcements even if no rooms */}
+                    <InstitutionAnnouncementsWidget
+                      userType="student"
+                      userId={user?.id}
+                    />
                   </div>
                 )}
               </>
@@ -291,7 +315,8 @@ const S_Dashboard = () => {
                   Your Support Tickets
                 </h3>
                 <p className="text-gray-500 mb-6">
-                  View and manage your support requests to institutions. Track responses and resolve issues.
+                  View and manage your support requests to institutions. Track
+                  responses and resolve issues.
                 </p>
                 <Link
                   to="/student/support-tickets"

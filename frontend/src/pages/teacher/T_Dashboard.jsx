@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RateLimitedUi from "../../components/RateLimitedUi";
+import InstitutionAnnouncementsWidget from "../../components/common/InstitutionAnnouncementsWidget";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import RoomCard from "../../components/RoomCard";
@@ -62,33 +63,49 @@ const T_Dashboard = () => {
         {!isRateLimited && (
           <>
             {rooms.length > 0 ? (
-              // Normal grid with rooms + create card
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {rooms.map((room) => (
-                  <RoomCard key={room._id} room={room} setRooms={setRooms} />
-                ))}
-                <Link
-                  to={"/teacher/create/room"}
-                  className="flex flex-col items-center justify-center border-2 border-dashed border-primary/40 rounded-lg p-6 hover:bg-primary/10 transition bg-base-100"
-                >
-                  <Plus className="w-16 h-16 text-primary" />
-                  <span className="mt-4 text-primary font-medium text-lg">
-                    Create a Course
-                  </span>
-                </Link>
+              <div className="space-y-8">
+                {/* Normal grid with rooms + create card */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {rooms.map((room) => (
+                    <RoomCard key={room._id} room={room} setRooms={setRooms} />
+                  ))}
+                  <Link
+                    to={"/teacher/create/room"}
+                    className="flex flex-col items-center justify-center border-2 border-dashed border-primary/40 rounded-lg p-6 hover:bg-primary/10 transition bg-base-100"
+                  >
+                    <Plus className="w-16 h-16 text-primary" />
+                    <span className="mt-4 text-primary font-medium text-lg">
+                      Create a Course
+                    </span>
+                  </Link>
+                </div>
+
+                {/* Institution Announcements Widget */}
+                <InstitutionAnnouncementsWidget
+                  userType="instructor"
+                  userId={user?.id}
+                />
               </div>
             ) : (
-              // Centered create card when no rooms exist
-              <div className="flex justify-center mt-20">
-                <Link
-                  to={"/teacher/create/room"}
-                  className="flex flex-col items-center justify-center border-2 border-dashed border-primary/40 rounded-lg p-12 hover:bg-primary/10 transition w-80 h-64 bg-base-100"
-                >
-                  <Plus className="w-20 h-20 text-primary" />
-                  <span className="mt-4 text-primary font-medium text-xl">
-                    Create a Course
-                  </span>
-                </Link>
+              <div className="space-y-8">
+                {/* Centered create card when no rooms exist */}
+                <div className="flex justify-center mt-20">
+                  <Link
+                    to={"/teacher/create/room"}
+                    className="flex flex-col items-center justify-center border-2 border-dashed border-primary/40 rounded-lg p-12 hover:bg-primary/10 transition w-80 h-64 bg-base-100"
+                  >
+                    <Plus className="w-20 h-20 text-primary" />
+                    <span className="mt-4 text-primary font-medium text-xl">
+                      Create a Course
+                    </span>
+                  </Link>
+                </div>
+
+                {/* Show announcements even if no rooms */}
+                <InstitutionAnnouncementsWidget
+                  userType="instructor"
+                  userId={user?.id}
+                />
               </div>
             )}
           </>

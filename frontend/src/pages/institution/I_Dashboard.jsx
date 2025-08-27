@@ -12,13 +12,20 @@ import {
   Settings,
   HelpCircle,
   MessageCircle,
+  Megaphone,
 } from "lucide-react";
+import CreateInstitutionAnnouncement from "../../components/institution/CreateInstitutionAnnouncement";
+import InstitutionAnnouncementCard from "../../components/institution/InstitutionAnnouncementCard";
+import api from "../../lib/axios";
+import { sortInstitutionAnnouncements } from "../../utils/announcementUtils";
 
 export default function I_Dashboard() {
   const { idOrName } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
+  const [announcements, setAnnouncements] = useState([]);
+  const [announcementsLoading, setAnnouncementsLoading] = useState(true);
 
   useEffect(() => {
     if (!idOrName) return;
@@ -44,6 +51,59 @@ export default function I_Dashboard() {
         setLoading(false);
       });
   }, [idOrName]);
+
+  useEffect(() => {
+    if (!idOrName) return;
+    fetchAnnouncements();
+  }, [idOrName]);
+
+  const fetchAnnouncements = async () => {
+    try {
+      setAnnouncementsLoading(true);
+      const response = await api.get(
+        `/institution-announcements/${encodeURIComponent(idOrName)}`
+      );
+
+      // Sort announcements using utility function
+      const sortedAnnouncements = sortInstitutionAnnouncements([
+        ...response.data,
+      ]);
+
+      setAnnouncements(sortedAnnouncements);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+    } finally {
+      setAnnouncementsLoading(false);
+    }
+  };
+
+  const handleAnnouncementCreated = (newAnnouncement) => {
+    const newAnnouncements = [newAnnouncement, ...announcements];
+
+    // Sort announcements using utility function
+    const sortedAnnouncements = sortInstitutionAnnouncements([
+      ...newAnnouncements,
+    ]);
+
+    setAnnouncements(sortedAnnouncements);
+  };
+
+  const handleAnnouncementUpdated = (updatedAnnouncement) => {
+    const updatedAnnouncements = announcements.map((ann) =>
+      ann._id === updatedAnnouncement._id ? updatedAnnouncement : ann
+    );
+
+    // Sort announcements using utility function
+    const sortedAnnouncements = sortInstitutionAnnouncements([
+      ...updatedAnnouncements,
+    ]);
+
+    setAnnouncements(sortedAnnouncements);
+  };
+
+  const handleAnnouncementDeleted = (announcementId) => {
+    setAnnouncements(announcements.filter((ann) => ann._id !== announcementId));
+  };
 
   if (loading)
     return (
@@ -161,6 +221,57 @@ export default function I_Dashboard() {
             Add Instructor
           </Link>
         </div>
+      </div>
+
+      {/* Institution Announcements */}
+      <div className="card bg-base-100 border border-base-300 p-6 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <Megaphone className="h-6 w-6 text-[#00A2E8] mr-3" />
+            <h2 className="text-xl font-semibold text-base-content">
+              Institution Announcements
+            </h2>
+          </div>
+        </div>
+
+        {/* Create Announcement Component */}
+        <div className="mb-6">
+          <CreateInstitutionAnnouncement
+            institutionId={idOrName}
+            onAnnouncementCreated={handleAnnouncementCreated}
+          />
+        </div>
+
+        {/* Announcements List */}
+        {announcementsLoading ? (
+          <div className="text-center py-8">
+            <div className="loading loading-spinner loading-md text-primary"></div>
+            <p className="text-base-content/60 mt-2">
+              Loading announcements...
+            </p>
+          </div>
+        ) : announcements.length > 0 ? (
+          <div className="space-y-4">
+            {announcements.map((announcement) => (
+              <InstitutionAnnouncementCard
+                key={announcement._id}
+                announcement={announcement}
+                onUpdate={handleAnnouncementUpdated}
+                onDelete={handleAnnouncementDeleted}
+                canEdit={true}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Megaphone className="h-12 w-12 text-base-content/30 mx-auto mb-4" />
+            <p className="text-base-content/60">No announcements yet</p>
+            <p className="text-sm text-base-content/40">
+              Create your first announcement to share important information with
+              your students and instructors
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Additional Features */}

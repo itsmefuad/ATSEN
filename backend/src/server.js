@@ -20,10 +20,10 @@ import submissionRoutes from "./routes/submissionRoutes.js";
 import quizGradeRoutes from "./routes/quizGradeRoutes.js";
 import gradeRoutes from "./routes/gradeRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
-import yuvrajAnnouncementRoutes from "./routes/yuvraj_announcementRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import supportRoutes from "./routes/supportRoutes.js";
 import achievementRoutes from "./routes/achievementRoutes.js";
+import institutionAnnouncementRoutes from "./routes/institutionAnnouncementRoutes.js";
 
 dotenv.config();
 
@@ -55,11 +55,11 @@ app.get("/api/db-status", (req, res) => {
   const conn = mongoose.connection;
   res.json({
     readyState: conn.readyState,
-    host:       conn.host,
-    name:       conn.name,
-    port:       conn.port,
-    isAtlas:    conn.host?.includes("mongodb.net"),
-    message:    conn.readyState === 1 ? "Connected" : "Disconnected",
+    host: conn.host,
+    name: conn.name,
+    port: conn.port,
+    isAtlas: conn.host?.includes("mongodb.net"),
+    message: conn.readyState === 1 ? "Connected" : "Disconnected",
   });
 });
 
@@ -75,10 +75,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/institutions", institutionRoutes);
 
 // → Nested “rooms” under an institution
-app.use(
-  "/api/institutions/:idOrName/rooms",
-  institutionRoomRoutes
-);
+app.use("/api/institutions/:idOrName/rooms", institutionRoomRoutes);
 
 app.use("/api/instructors", instructorRoutes);
 app.use("/api/students", studentRoutes);
@@ -97,7 +94,7 @@ app.get("/api/download/:submissionId", async (req, res) => {
     const { submissionId } = req.params;
     const { default: Submission } = await import("./models/Submission.js");
     const fs = await import("fs");
-    
+
     const submission = await Submission.findById(submissionId);
     if (!submission) {
       return res.status(404).json({ message: "Submission not found" });
@@ -114,10 +111,10 @@ app.get("/api/download/:submissionId", async (req, res) => {
   }
 });
 
-app.use("/api/yuvraj/announcements", yuvrajAnnouncementRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/achievements", achievementRoutes);
+app.use("/api/institution-announcements", institutionAnnouncementRoutes);
 
 // connect to DB, then start the server
 connectDB().then(() => {
