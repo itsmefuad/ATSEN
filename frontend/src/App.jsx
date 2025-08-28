@@ -13,6 +13,10 @@ import AdminProtectedRoute from "./pages/admin/ProtectedRoute";
 // Auth
 import AuthLogin from "./pages/auth/Login.jsx";
 import AuthSignup from "./pages/auth/Signup.jsx";
+import RoleSelection from "./pages/auth/RoleSelection.jsx";
+import StudentSignup from "./pages/auth/StudentSignup.jsx";
+import InstructorSignup from "./pages/auth/InstructorSignup.jsx";
+import InstitutionRegistration from "./pages/auth/InstitutionRegistration.jsx";
 
 // Institution
 import InstitutionLayout from "./pages/institution/InstitutionLayout.jsx";
@@ -64,6 +68,10 @@ export default function App() {
           {/* 2. Auth (login/signup) */}
           <Route path="/auth/login" element={<AuthLogin />} />
           <Route path="/auth/signup" element={<AuthSignup />} />
+          <Route path="/auth/signup/role-selection" element={<RoleSelection />} />
+          <Route path="/auth/signup/student" element={<StudentSignup />} />
+          <Route path="/auth/signup/instructor" element={<InstructorSignup />} />
+          <Route path="/auth/institution-register" element={<InstitutionRegistration />} />
 
           {/* 3. Legacy redirect for old login path */}
           <Route

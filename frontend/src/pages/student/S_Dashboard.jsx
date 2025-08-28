@@ -26,11 +26,11 @@ const S_Dashboard = () => {
 
   useEffect(() => {
     const fetchStudentData = async () => {
-      if (!user?.id) return;
+      if (!user?._id) return;
 
       try {
         // Fetch rooms grouped by institution
-        const roomsRes = await api.get(`/students/${user.id}/rooms`);
+        const roomsRes = await api.get(`/students/${user._id}/rooms`);
         setRoomsByInstitution(roomsRes.data);
 
         // Extract all rooms for backwards compatibility (if needed)
@@ -41,7 +41,7 @@ const S_Dashboard = () => {
         setRooms(allRooms);
 
         // Fetch student details with institutions
-        const studentRes = await api.get(`/students/${user.id}`);
+        const studentRes = await api.get(`/students/${user._id}`);
         if (studentRes.data.institutions) {
           setInstitutions(studentRes.data.institutions);
         }
@@ -235,7 +235,7 @@ const S_Dashboard = () => {
                     <div className="mt-8">
                       <InstitutionAnnouncementsWidget
                         userType="student"
-                        userId={user?.id}
+                        userId={user?._id}
                       />
                     </div>
                   </div>
@@ -255,7 +255,7 @@ const S_Dashboard = () => {
                     {/* Show announcements even if no rooms */}
                     <InstitutionAnnouncementsWidget
                       userType="student"
-                      userId={user?.id}
+                      userId={user?._id}
                     />
                   </div>
                 )}
