@@ -33,8 +33,8 @@ export default function RoleSelection() {
               className="w-full bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-lg p-6 text-left transition-all duration-200 group"
             >
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl font-semibold mr-4">
-                  📚
+                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white text-sm font-semibold mr-4">
+                  ST
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700">
@@ -52,8 +52,8 @@ export default function RoleSelection() {
               className="w-full bg-green-50 hover:bg-green-100 border-2 border-green-200 hover:border-green-300 rounded-lg p-6 text-left transition-all duration-200 group"
             >
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl font-semibold mr-4">
-                  👨‍🏫
+                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white text-sm font-semibold mr-4">
+                  IN
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 group-hover:text-green-700">

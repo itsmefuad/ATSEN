@@ -23,7 +23,7 @@ export default function InstructorSignup() {
     try {
       await api.post("/instructors/register", form);
       setSuccess(
-        "🎉 Instructor registration successful! Please log in with your credentials."
+        "Instructor registration successful! Please log in with your credentials."
       );
       setForm({});
 
@@ -45,9 +45,6 @@ export default function InstructorSignup() {
       >
         <div className="max-w-md w-full bg-base-100 shadow-lg rounded-lg p-8">
           <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl font-semibold mx-auto mb-4">
-              👨‍🏫
-            </div>
             <h2 className="text-2xl font-semibold text-base-content mb-2">
               Instructor Registration
             </h2>

@@ -32,7 +32,7 @@ export default function InstitutionRegistration() {
     try {
       await api.post("/institutions/register", formData);
       setSuccess(
-        "🎉 Institution registration successful! Please log in with your credentials."
+        "Institution registration successful! Please log in with your credentials."
       );
       setForm({});
 
@@ -54,9 +54,6 @@ export default function InstitutionRegistration() {
       >
         <div className="max-w-md w-full bg-base-100 shadow-lg rounded-lg p-8">
           <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-semibold mx-auto mb-4">
-              🏫
-            </div>
             <h2 className="text-2xl font-semibold text-base-content mb-2">
               Institution Registration
             </h2>
