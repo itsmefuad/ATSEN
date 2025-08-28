@@ -32,18 +32,13 @@ export default function RoleSelection() {
               onClick={() => handleRoleSelect("student")}
               className="w-full bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-lg p-6 text-left transition-all duration-200 group"
             >
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white text-sm font-semibold mr-4">
-                  ST
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700">
-                    Sign up as a Student
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Access courses, submit assignments, and track your progress
-                  </p>
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700">
+                  Sign up as a Student
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Access courses, submit assignments, and track your progress
+                </p>
               </div>
             </button>
 
@@ -51,18 +46,13 @@ export default function RoleSelection() {
               onClick={() => handleRoleSelect("instructor")}
               className="w-full bg-green-50 hover:bg-green-100 border-2 border-green-200 hover:border-green-300 rounded-lg p-6 text-left transition-all duration-200 group"
             >
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white text-sm font-semibold mr-4">
-                  IN
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-green-700">
-                    Sign up as an Instructor
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Create courses, manage students, and evaluate submissions
-                  </p>
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 group-hover:text-green-700">
+                  Sign up as an Instructor
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Create courses, manage students, and evaluate submissions
+                </p>
               </div>
             </button>
           </div>

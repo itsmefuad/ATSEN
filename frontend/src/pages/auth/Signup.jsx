@@ -1,15 +1,90 @@
 // src/pages/auth/Signup.jsx
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import Navbar from "../../components/Navbar.jsx";
 
 export default function Signup() {
+  const [showRoleModal, setShowRoleModal] = useState(true);
   const navigate = useNavigate();
 
-  // Redirect to role selection page
-  React.useEffect(() => {
-    navigate("/auth/signup/role-selection", { replace: true });
-  }, [navigate]);
+  const handleRoleSelect = (role) => {
+    setShowRoleModal(false);
+    navigate(`/auth/signup/${role}`);
+  };
 
-  
-  return null; // This component just redirects, no UI needed
+  const handleClose = () => {
+    navigate("/");
+  };
+
+  return (
+    <div className="min-h-screen bg-base-200">
+      <Navbar />
+      
+      {/* Modal */}
+      {showRoleModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-base-100 rounded-lg shadow-xl max-w-md w-full p-6">
+            {/* Close button */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold text-base-content">
+                Choose Your Role
+              </h2>
+              <button
+                onClick={handleClose}
+                className="btn btn-sm btn-circle btn-ghost"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <p className="text-base-content/70 mb-6">
+              Select how you want to register on Atsen
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => handleRoleSelect("student")}
+                className="w-full bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-lg p-4 text-left transition-all duration-200 group"
+              >
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-700">
+                    Sign up as a Student
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Access courses, submit assignments, and track your progress
+                  </p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleRoleSelect("instructor")}
+                className="w-full bg-green-50 hover:bg-green-100 border-2 border-green-200 hover:border-green-300 rounded-lg p-4 text-left transition-all duration-200 group"
+              >
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 group-hover:text-green-700">
+                    Sign up as an Instructor
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Create courses, manage students, and evaluate submissions
+                  </p>
+                </div>
+              </button>
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-base-content/70">
+                Already have an account?{" "}
+                <Link
+                  to="/auth/login"
+                  className="text-primary hover:text-primary/80 font-medium hover:underline"
+                >
+                  Login here
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
