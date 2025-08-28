@@ -50,6 +50,7 @@ import S_QuizDetail from "./pages/student/S_QuizDetail.jsx";
 import TimelineDemo from "./components/room/TimelineDemo.jsx";
 import PostLoginRedirect from "./components/PostLoginRedirect.jsx";
 import { useTheme } from "./contexts/ThemeContext.jsx";
+import YuvrajForms from "./pages/yuvraj_Forms.jsx";
 
 export default function App() {
   const { theme } = useTheme();
@@ -193,6 +194,17 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Forms Route - accessible to all authenticated users */}
+          <Route
+            path="/forms"
+            element={
+              <ProtectedRoute>
+                <YuvrajForms />
+              </ProtectedRoute>
+            }
+          />
+          
           <Route path="/teacher/edit/room/:id" element={<T_Room />} />
 
           {/* Demo route for timeline testing */}

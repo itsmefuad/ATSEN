@@ -7,6 +7,9 @@ import mongoose from "mongoose";
 import { connectDB } from "./config/db.js";
 import rateLimiter from "./middlewares/rateLimiter.js";
 
+// Import all models to ensure they are registered
+import "./models/index.js";
+
 import adminRoutes from "./routes/adminRoutes.js";
 import institutionRoutes from "./routes/institutionRoutes.js";
 import institutionRoomRoutes from "./routes/institution/InstitutionRoomRoutes.js";
@@ -24,6 +27,8 @@ import documentRoutes from "./routes/documentRoutes.js";
 import supportRoutes from "./routes/supportRoutes.js";
 import achievementRoutes from "./routes/achievementRoutes.js";
 import institutionAnnouncementRoutes from "./routes/institutionAnnouncementRoutes.js";
+import yuvrajPollsRoutes from "./routes/yuvraj_pollsRoutes.js";
+import yuvrajResourcesRoutes from "./routes/yuvraj_resourcesRoutes.js";
 
 dotenv.config();
 
@@ -115,6 +120,8 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/achievements", achievementRoutes);
 app.use("/api/institution-announcements", institutionAnnouncementRoutes);
+app.use("/api/yuvraj-polls", yuvrajPollsRoutes);
+app.use("/api/yuvraj-resources", yuvrajResourcesRoutes);
 
 // connect to DB, then start the server
 connectDB().then(() => {

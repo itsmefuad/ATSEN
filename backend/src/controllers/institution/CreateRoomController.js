@@ -174,6 +174,23 @@ export async function deleteRoom(req, res) {
       { $pull: { rooms: roomId } }
     );
 
+    // Clean up related room data
+    // Import the models at the top if not already imported
+    const { default: Material } = await import("../../models/Material.js");
+    const { default: YuvrajResourceItem } = await import("../../models/yuvraj_Resource.js");
+    const { default: Assessment } = await import("../../models/Assessment.js");
+    const { default: ForumContent } = await import("../../models/ForumContent.js");
+    const { default: YuvrajPoll } = await import("../../models/yuvraj_Poll.js");
+
+    // Delete all room-related data
+    await Promise.all([
+      Material.deleteMany({ room: roomId }),
+      YuvrajResourceItem.deleteMany({ room: roomId }),
+      Assessment.deleteMany({ room: roomId }),
+      ForumContent.deleteMany({ room: roomId }),
+      YuvrajPoll.deleteMany({ targetRoomId: roomId })
+    ]);
+
     // Delete the room itself
     await Room.findByIdAndDelete(roomId);
 
