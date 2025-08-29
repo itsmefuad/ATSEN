@@ -12,10 +12,10 @@ export async function getRoomDetails(req, res) {
   console.log("Full URL:", req.originalUrl);
   console.log("Method:", req.method);
   console.log("Params:", req.params);
-  
+
   try {
     const { idOrName, roomId } = req.params;
-    
+
     console.log("Extracted params - idOrName:", idOrName, "roomId:", roomId);
 
     // Validate roomId format
@@ -27,21 +27,24 @@ export async function getRoomDetails(req, res) {
     console.log("About to call findInstitutionByIdOrName");
     const inst = await findInstitutionByIdOrName(idOrName);
     console.log("findInstitutionByIdOrName result:", inst);
-    
+
     if (!inst) {
       console.log("Institution not found:", idOrName);
       return res.status(404).json({ message: "Institution not found." });
     }
-    
+
     console.log("Found institution:", inst.name);
 
     console.log("About to query room with ID:", roomId);
     const room = await Room.findById(roomId)
-      .populate('students', 'name email')
-      .populate('instructors', 'name email');
-    
-    console.log("Room query result:", room ? "Found room: " + room.room_name : "Not found");
-    
+      .populate("students", "name email")
+      .populate("instructors", "name email");
+
+    console.log(
+      "Room query result:",
+      room ? "Found room: " + room.room_name : "Not found"
+    );
+
     if (!room) {
       return res.status(404).json({ message: "Room not found." });
     }
@@ -71,7 +74,7 @@ export async function removeStudentFromRoom(req, res) {
       return res.status(404).json({ message: "Room not found." });
     }
 
-    room.students = room.students.filter(id => id.toString() !== studentId);
+    room.students = room.students.filter((id) => id.toString() !== studentId);
     await room.save();
 
     res.json({ message: "Student removed from room successfully." });
@@ -96,7 +99,9 @@ export async function removeInstructorFromRoom(req, res) {
       return res.status(404).json({ message: "Room not found." });
     }
 
-    room.instructors = room.instructors.filter(id => id.toString() !== instructorId);
+    room.instructors = room.instructors.filter(
+      (id) => id.toString() !== instructorId
+    );
     await room.save();
 
     res.json({ message: "Instructor removed from room successfully." });
@@ -186,6 +191,67 @@ export async function addInstructorToRoom(req, res) {
     res.json({ message: "Instructor added to room successfully." });
   } catch (err) {
     console.error("Add instructor to room error:", err);
+    return res.status(500).json({ message: "Server error." });
+  }
+}
+
+// Update room information (name and description)
+export async function updateRoomInfo(req, res) {
+  try {
+    const { idOrName, roomId } = req.params;
+    const { room_name, description } = req.body;
+
+    console.log("=== UPDATE ROOM INFO ===");
+    console.log("idOrName:", idOrName, "roomId:", roomId);
+    console.log("Data:", { room_name, description });
+
+    // Validate input
+    if (!room_name?.trim() || !description?.trim()) {
+      return res
+        .status(400)
+        .json({ message: "Room name and description are required." });
+    }
+
+    // Validate roomId format
+    if (!roomId || !mongoose.isValidObjectId(roomId)) {
+      return res.status(400).json({ message: "Invalid room ID format." });
+    }
+
+    // Find institution
+    const inst = await findInstitutionByIdOrName(idOrName);
+    if (!inst) {
+      return res.status(404).json({ message: "Institution not found." });
+    }
+
+    // Find and update room
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ message: "Room not found." });
+    }
+
+    // Verify room belongs to institution
+    if (
+      room.institution &&
+      room.institution.toString() !== inst._id.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Room doesn't belong to this institution." });
+    }
+
+    // Update room
+    room.room_name = room_name.trim();
+    room.description = description.trim();
+    const updatedRoom = await room.save();
+
+    // Populate for response
+    await updatedRoom.populate("students", "name email");
+    await updatedRoom.populate("instructors", "name email");
+
+    console.log("Room updated successfully:", updatedRoom.room_name);
+    res.json(updatedRoom);
+  } catch (err) {
+    console.error("Update room info error:", err);
     return res.status(500).json({ message: "Server error." });
   }
 }

@@ -24,6 +24,12 @@ export default function EditRoom() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
 
+  // Room editing states
+  const [editedRoomName, setEditedRoomName] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
+  const [isEditingRoom, setIsEditingRoom] = useState(false);
+  const [savingRoom, setSavingRoom] = useState(false);
+
   useEffect(() => {
     if (!idOrName || !roomId) return;
 
@@ -49,6 +55,8 @@ export default function EditRoom() {
       .then((json) => {
         console.log("Room data received:", json);
         setRoom(json);
+        setEditedRoomName(json.room_name || "");
+        setEditedDescription(json.description || "");
         setLoading(false);
       })
       .catch((err) => {
@@ -218,6 +226,52 @@ export default function EditRoom() {
     }
   };
 
+  // Room editing functions
+  const handleSaveRoomInfo = async () => {
+    if (!editedRoomName.trim() || !editedDescription.trim()) {
+      alert("Room name and description are required");
+      return;
+    }
+
+    setSavingRoom(true);
+    try {
+      const res = await fetch(
+        `http://localhost:5001/api/institutions/${encodeURIComponent(
+          idOrName
+        )}/rooms/${roomId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            room_name: editedRoomName,
+            description: editedDescription,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || `Status ${res.status}`);
+      }
+
+      const updatedRoom = await res.json();
+      setRoom(updatedRoom);
+      setIsEditingRoom(false);
+      alert("Room information updated successfully!");
+    } catch (err) {
+      console.error("Update room failed:", err);
+      alert("Could not update room information.");
+    } finally {
+      setSavingRoom(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedRoomName(room.room_name || "");
+    setEditedDescription(room.description || "");
+    setIsEditingRoom(false);
+  };
+
   if (loading)
     return (
       <div className="max-w-7xl mx-auto p-4 mt-6">
@@ -256,9 +310,106 @@ export default function EditRoom() {
             Edit Room: {room.room_name}
           </h1>
           <p className="text-base-content/70 mt-1">
-            Manage students and instructors for this room
+            Manage room information, students and instructors
           </p>
         </div>
+      </div>
+
+      {/* Room Information Section */}
+      <div className="card bg-base-100 border border-base-300 p-6 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-base-content flex items-center gap-2">
+            <Users className="h-5 w-5 text-blue-500" />
+            Room Information
+          </h2>
+          {!isEditingRoom && (
+            <button
+              onClick={() => setIsEditingRoom(true)}
+              className="btn btn-primary btn-sm"
+            >
+              Edit Info
+            </button>
+          )}
+        </div>
+
+        {isEditingRoom ? (
+          <div className="space-y-4">
+            <div>
+              <label className="label">
+                <span className="label-text font-medium">Room Name</span>
+              </label>
+              <input
+                type="text"
+                value={editedRoomName}
+                onChange={(e) => setEditedRoomName(e.target.value)}
+                className="input input-bordered w-full"
+                placeholder="Enter room name"
+              />
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text font-medium">Description</span>
+              </label>
+              <textarea
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                className="textarea textarea-bordered w-full h-24"
+                placeholder="Enter room description"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={handleCancelEdit}
+                className="btn btn-ghost"
+                disabled={savingRoom}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveRoomInfo}
+                className="btn btn-primary"
+                disabled={savingRoom}
+              >
+                {savingRoom ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="label">
+                <span className="label-text font-medium">Room Name</span>
+              </label>
+              <div className="bg-base-200 p-3 rounded-lg">
+                <p className="text-base-content">{room.room_name}</p>
+              </div>
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text font-medium">Created Date</span>
+              </label>
+              <div className="bg-base-200 p-3 rounded-lg">
+                <p className="text-base-content">
+                  {new Date(room.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <label className="label">
+                <span className="label-text font-medium">Description</span>
+              </label>
+              <div className="bg-base-200 p-3 rounded-lg">
+                <p className="text-base-content whitespace-pre-wrap">
+                  {room.description}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

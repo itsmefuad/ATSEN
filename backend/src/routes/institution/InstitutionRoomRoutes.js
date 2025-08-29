@@ -4,7 +4,7 @@ import express from "express";
 import {
   createRoom,
   listRooms,
-  deleteRoom
+  deleteRoom,
 } from "../../controllers/institution/CreateRoomController.js";
 
 import {
@@ -12,7 +12,8 @@ import {
   removeStudentFromRoom,
   removeInstructorFromRoom,
   addStudentToRoom,
-  addInstructorToRoom
+  addInstructorToRoom,
+  updateRoomInfo,
 } from "../../controllers/institution/roomController.js";
 
 const router = express.Router({ mergeParams: true });
@@ -26,12 +27,11 @@ router.post("/add-room", createRoom);
 
 // Room details and management
 router.get("/:roomId", getRoomDetails);
+router.put("/:roomId", updateRoomInfo);
 router.delete("/:roomId", deleteRoom);
 router.post("/:roomId/add-student", addStudentToRoom);
 router.post("/:roomId/add-instructor", addInstructorToRoom);
 router.post("/:roomId/remove-student", removeStudentFromRoom);
 router.post("/:roomId/remove-instructor", removeInstructorFromRoom);
-
-
 
 export default router;
