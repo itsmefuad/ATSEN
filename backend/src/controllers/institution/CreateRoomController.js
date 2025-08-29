@@ -152,11 +152,9 @@ export async function deleteRoom(req, res) {
     // Find room and verify it belongs to this institution
     const room = await Room.findOne({ _id: roomId, institution: inst._id });
     if (!room) {
-      return res
-        .status(404)
-        .json({
-          message: "Room not found or doesn't belong to this institution",
-        });
+      return res.status(404).json({
+        message: "Room not found or doesn't belong to this institution",
+      });
     }
 
     // CASCADING DELETES - Delete all room-related data

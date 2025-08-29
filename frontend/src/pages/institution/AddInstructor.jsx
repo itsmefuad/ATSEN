@@ -112,7 +112,7 @@ export default function AddInstructor() {
 
         <form onSubmit={handleAdd}>
           {/* Search Input */}
-          <div className="mb-6 relative">
+          <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Search for Instructor
             </label>
@@ -132,39 +132,39 @@ export default function AddInstructor() {
                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 autoComplete="off"
               />
-            </div>
 
-            {/* Search Results Dropdown */}
-            {searchQuery && (
-              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {filtered.length > 0 ? (
-                  filtered.map((ins) => (
-                    <div
-                      key={ins._id}
-                      onClick={() => {
-                        setSelectedInstructor(ins);
-                        setSearchQuery("");
-                        setError("");
-                      }}
-                      className={`p-4 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                        selectedInstructor?._id === ins._id
-                          ? "bg-purple-50"
-                          : ""
-                      }`}
-                    >
-                      <div className="font-medium text-gray-900">
-                        {ins.name}
+              {/* Search Results Dropdown */}
+              {searchQuery && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {filtered.length > 0 ? (
+                    filtered.map((ins) => (
+                      <div
+                        key={ins._id}
+                        onClick={() => {
+                          setSelectedInstructor(ins);
+                          setSearchQuery("");
+                          setError("");
+                        }}
+                        className={`p-4 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
+                          selectedInstructor?._id === ins._id
+                            ? "bg-purple-50"
+                            : ""
+                        }`}
+                      >
+                        <div className="font-medium text-gray-900">
+                          {ins.name}
+                        </div>
+                        <div className="text-sm text-gray-500">{ins.email}</div>
                       </div>
-                      <div className="text-sm text-gray-500">{ins.email}</div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">
+                      No instructors found
                     </div>
-                  ))
-                ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    No instructors found
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Selected Instructor Display */}

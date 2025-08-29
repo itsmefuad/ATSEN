@@ -137,7 +137,11 @@ export default function EditRoom() {
     }
 
     try {
-      const res = await fetch(`http://localhost:5001/api/students`);
+      const res = await fetch(
+        `http://localhost:5001/api/institutions/${encodeURIComponent(
+          idOrName
+        )}/students?search=${encodeURIComponent(query)}`
+      );
       const students = await res.json();
       const filtered = students
         .filter((s) => s.email.toLowerCase().includes(query.toLowerCase()))
@@ -155,7 +159,11 @@ export default function EditRoom() {
     }
 
     try {
-      const res = await fetch(`http://localhost:5001/api/instructors`);
+      const res = await fetch(
+        `http://localhost:5001/api/institutions/${encodeURIComponent(
+          idOrName
+        )}/instructors?search=${encodeURIComponent(query)}`
+      );
       const instructors = await res.json();
       const filtered = instructors
         .filter((i) => i.email.toLowerCase().includes(query.toLowerCase()))
@@ -421,9 +429,8 @@ export default function EditRoom() {
               Students ({room.students?.length || 0})
             </h2>
           </div>
-
           {/* Add Student */}
-          <div className="card bg-base-200 p-4 mb-6 relative">
+          <div className="card bg-base-200 p-4 mb-6">
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Search student by email</span>
@@ -443,6 +450,34 @@ export default function EditRoom() {
                   }}
                   className="input input-bordered w-full pl-10 bg-base-100"
                 />
+
+                {/* Search Results */}
+                {studentResults.length > 0 && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {studentResults.map((student) => (
+                      <div
+                        key={student._id}
+                        onClick={() => {
+                          setSelectedStudent(student);
+                          setStudentEmail(student.email);
+                          setStudentResults([]);
+                        }}
+                        className={`p-3 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
+                          selectedStudent?._id === student._id
+                            ? "bg-green-50"
+                            : ""
+                        }`}
+                      >
+                        <div className="font-medium text-base-content">
+                          {student.name}
+                        </div>
+                        <div className="text-sm text-base-content/70">
+                          {student.email}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <button
@@ -454,32 +489,6 @@ export default function EditRoom() {
               Add to Room
             </button>
 
-            {/* Search Results */}
-            {studentResults.length > 0 && (
-              <div className="absolute z-10 mt-2 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {studentResults.map((student) => (
-                  <div
-                    key={student._id}
-                    onClick={() => {
-                      setSelectedStudent(student);
-                      setStudentEmail(student.email);
-                      setStudentResults([]);
-                    }}
-                    className={`p-3 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
-                      selectedStudent?._id === student._id ? "bg-green-50" : ""
-                    }`}
-                  >
-                    <div className="font-medium text-base-content">
-                      {student.name}
-                    </div>
-                    <div className="text-sm text-base-content/70">
-                      {student.email}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
             {/* Selected Student */}
             {selectedStudent && (
               <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -489,8 +498,7 @@ export default function EditRoom() {
                 </span>
               </div>
             )}
-          </div>
-
+          </div>{" "}
           {room.students?.length === 0 ? (
             <div className="text-center py-8">
               <GraduationCap className="h-12 w-12 text-base-content/30 mx-auto mb-4" />
@@ -546,9 +554,8 @@ export default function EditRoom() {
               Instructors ({room.instructors?.length || 0})
             </h2>
           </div>
-
           {/* Add Instructor */}
-          <div className="card bg-base-200 p-4 mb-6 relative">
+          <div className="card bg-base-200 p-4 mb-6">
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Search instructor by email</span>
@@ -568,6 +575,34 @@ export default function EditRoom() {
                   }}
                   className="input input-bordered w-full pl-10 bg-base-100"
                 />
+
+                {/* Search Results */}
+                {instructorResults.length > 0 && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {instructorResults.map((instructor) => (
+                      <div
+                        key={instructor._id}
+                        onClick={() => {
+                          setSelectedInstructor(instructor);
+                          setInstructorEmail(instructor.email);
+                          setInstructorResults([]);
+                        }}
+                        className={`p-3 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
+                          selectedInstructor?._id === instructor._id
+                            ? "bg-blue-50"
+                            : ""
+                        }`}
+                      >
+                        <div className="font-medium text-base-content">
+                          {instructor.name}
+                        </div>
+                        <div className="text-sm text-base-content/70">
+                          {instructor.email}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <button
@@ -579,34 +614,6 @@ export default function EditRoom() {
               Add to Room
             </button>
 
-            {/* Search Results */}
-            {instructorResults.length > 0 && (
-              <div className="absolute z-10 mt-2 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {instructorResults.map((instructor) => (
-                  <div
-                    key={instructor._id}
-                    onClick={() => {
-                      setSelectedInstructor(instructor);
-                      setInstructorEmail(instructor.email);
-                      setInstructorResults([]);
-                    }}
-                    className={`p-3 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
-                      selectedInstructor?._id === instructor._id
-                        ? "bg-blue-50"
-                        : ""
-                    }`}
-                  >
-                    <div className="font-medium text-base-content">
-                      {instructor.name}
-                    </div>
-                    <div className="text-sm text-base-content/70">
-                      {instructor.email}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
             {/* Selected Instructor */}
             {selectedInstructor && (
               <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -616,8 +623,7 @@ export default function EditRoom() {
                 </span>
               </div>
             )}
-          </div>
-
+          </div>{" "}
           {room.instructors?.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-base-content/30 mx-auto mb-4" />

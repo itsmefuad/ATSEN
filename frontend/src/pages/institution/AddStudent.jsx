@@ -122,7 +122,7 @@ export default function AddStudent() {
 
         <form onSubmit={handleAdd}>
           {/* Search Input */}
-          <div className="mb-6 relative">
+          <div className="mb-6">
             <label className="block text-sm font-medium text-base-content/70 mb-2">
               Search for Student
             </label>
@@ -142,44 +142,44 @@ export default function AddStudent() {
                 className="block w-full pl-10 pr-3 py-3 border border-base-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-base-100 text-base-content"
                 autoComplete="off"
               />
-            </div>
 
-            {/* Search Results Dropdown */}
-            {searchQuery && (
-              <div className="absolute z-10 mt-1 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {filtered.length > 0 ? (
-                  filtered.map((stu) => (
-                    <div
-                      key={stu._id}
-                      onClick={() => {
-                        setSelectedStudent(stu);
-                        setSearchQuery("");
-                        setError("");
-                      }}
-                      className={`p-4 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
-                        selectedStudent?._id === stu._id ? "bg-green-50" : ""
-                      }`}
-                    >
-                      <div className="font-medium text-base-content">
-                        {stu.name}
-                      </div>
-                      <div className="text-sm text-base-content/70">
-                        {stu.email}
-                      </div>
-                      {stu.studentId && (
-                        <div className="text-xs text-base-content/60">
-                          ID: {stu.studentId}
+              {/* Search Results Dropdown */}
+              {searchQuery && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {filtered.length > 0 ? (
+                    filtered.map((stu) => (
+                      <div
+                        key={stu._id}
+                        onClick={() => {
+                          setSelectedStudent(stu);
+                          setSearchQuery("");
+                          setError("");
+                        }}
+                        className={`p-4 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
+                          selectedStudent?._id === stu._id ? "bg-green-50" : ""
+                        }`}
+                      >
+                        <div className="font-medium text-base-content">
+                          {stu.name}
                         </div>
-                      )}
+                        <div className="text-sm text-base-content/70">
+                          {stu.email}
+                        </div>
+                        {stu.studentId && (
+                          <div className="text-xs text-base-content/60">
+                            ID: {stu.studentId}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-base-content/60">
+                      No students found
                     </div>
-                  ))
-                ) : (
-                  <div className="p-4 text-center text-base-content/60">
-                    No students found
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Selected Student Display */}
