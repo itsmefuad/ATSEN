@@ -63,23 +63,11 @@ export async function updateRoom(req, res) {
   }
 }
 
-export async function deleteRoom(req, res) {
-  try {
-    const deletedRoom = await Room.findByIdAndDelete(req.params.id);
-
-    if (!deletedRoom)
-      return res.status(404).json({ message: "Room not found" });
-
-    res.status(200).json({ message: "Room deleted successfully!" });
-  } catch (error) {
-    console.error("Error in deleteRoom controller", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-}
+// Room deletion is now handled exclusively by institutions
+// See: backend/src/controllers/institution/CreateRoomController.js
 
 async function getZoomAccessToken() {
   const tokenUrl = "https://zoom.us/oauth/token";
-
 
   const basicAuth = Buffer.from(
     `${process.env.ZOOM_CLIENT_ID}:${process.env.ZOOM_CLIENT_SECRET}`
@@ -110,30 +98,27 @@ export async function createMeeting(req, res) {
         type: 1, // instant meeting
         settings: {
           host_video: true,
-          participant_video: true
-        }
+          participant_video: true,
+        },
       },
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
 
     res.status(201).json({
       meetingId: data.id,
-      join_url: data.join_url
+      join_url: data.join_url,
     });
-
   } catch (err) {
     console.error("Zoom API error status:", err.response?.status);
     console.error("Zoom API error body:", err.response?.data);
     res.status(500).json({
       message: "Failed to create Zoom meeting",
-      zoomError: err.response?.data || err.message
+      zoomError: err.response?.data || err.message,
     });
   }
 }
-
-

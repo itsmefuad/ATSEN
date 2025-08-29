@@ -1,7 +1,6 @@
 import express from "express";
 import {
   createRoom,
-  deleteRoom,
   getAllRooms,
   getRoomById,
   updateRoom,
@@ -15,7 +14,7 @@ router.get("/", getAllRooms);
 router.get("/:id", getRoomById);
 router.post("/", createRoom);
 router.put("/:id", updateRoom);
-router.delete("/:id", deleteRoom);
+// DELETE route removed - rooms should only be deleted by institutions
 
 router.post("/:id/meeting", createMeeting);
 

@@ -7,7 +7,6 @@ import api from "../../lib/axios";
 import {
   ArrowLeft,
   Loader,
-  Trash2,
   Settings,
   MessageSquare,
   BookOpen,
@@ -64,19 +63,6 @@ const T_Room = () => {
 
     fetchRoom();
   }, [id]);
-
-  // Delete room handler
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this room?")) return;
-    try {
-      await api.delete(`/rooms/${id}`);
-      toast.success("Room deleted successfully");
-      navigate("/teacher/dashboard");
-    } catch (error) {
-      console.log("Error in deleting room", error);
-      toast.error("Failed to delete room");
-    }
-  };
 
   // Save room settings handler
   const handleSave = async () => {
@@ -243,15 +229,10 @@ const T_Room = () => {
                       />
                     </div>
 
-                    <div className="flex justify-between items-center">
-                      <button
-                        type="button"
-                        onClick={handleDelete}
-                        className="btn btn-error"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Room
-                      </button>
+                    <div className="flex justify-end items-center">
+                      <div className="text-sm text-base-content/60 mr-4">
+                        Room management is handled by your institution
+                      </div>
                       <button
                         className="btn btn-primary"
                         disabled={saving}

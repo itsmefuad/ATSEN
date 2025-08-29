@@ -1,24 +1,8 @@
-import { PenSquareIcon, Trash2Icon } from "lucide-react";
+import { PenSquareIcon } from "lucide-react";
 import { Link } from "react-router";
 import { formatDate } from "../lib/utils";
-import api from "../lib/axios";
-import toast from "react-hot-toast";
 
-const RoomCard = ({ room, setRooms }) => {
-  const handleDelete = async (e, id) => {
-    e.preventDefault(); // get rid of the navigation behaviour
-
-    if (!window.confirm("Are you sure you want to delete this room?")) return;
-
-    try {
-      await api.delete(`/rooms/${id}`);
-      setRooms((prev) => prev.filter((room) => room._id !== id)); // get rid of the deleted one
-      toast.success("Room deleted successfully");
-    } catch (error) {
-      console.log("Error in handleDelete", error);
-      toast.error("Failed to delete room");
-    }
-  };
+const RoomCard = ({ room }) => {
   return (
     <Link
       to={`/teacher/room/${room._id}/forum`}
@@ -37,12 +21,9 @@ const RoomCard = ({ room, setRooms }) => {
           </span>
           <div className="flex items-center gap-2">
             <PenSquareIcon className="h-4 w-4 text-primary" />
-            <button
-              className="p-1 hover:bg-error/10 rounded text-error hover:text-error/80 transition-colors"
-              onClick={(e) => handleDelete(e, room._id)}
-            >
-              <Trash2Icon className="h-4 w-4" />
-            </button>
+            <span className="text-xs text-base-content/50">
+              Managed by Institution
+            </span>
           </div>
         </div>
       </div>
