@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 
 import { json } from "express";
 import Room from "../models/Room.js";
+import Student from "../models/student.js";
+import Instructor from "../models/instructor.js";
 
 dotenv.config();
 
@@ -33,11 +35,82 @@ export async function getRoomById(req, res) {
   }
 }
 
+export async function getRoomWithUserSections(req, res) {
+  try {
+    const room = await Room.findById(req.params.id)
+      .populate("students", "name email")
+      .populate("instructors", "name email")
+      .populate("sections.students", "name email")
+      .populate("sections.instructors", "name email");
+
+    if (!room) return res.status(404).json({ message: "Room not found!" });
+
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    let userSections = [];
+
+    if (userRole === "student") {
+      // Find student's section in this room
+      const student = await Student.findById(userId);
+      if (student) {
+        const roomSection = student.roomSections.find(
+          (rs) => rs.roomId.toString() === req.params.id
+        );
+        if (roomSection) {
+          userSections = [roomSection.sectionNumber];
+        }
+      }
+    } else if (userRole === "instructor") {
+      // Find instructor's sections in this room
+      const instructor = await Instructor.findById(userId);
+      if (instructor) {
+        const roomSection = instructor.roomSections.find(
+          (rs) => rs.roomId.toString() === req.params.id
+        );
+        if (roomSection) {
+          userSections = roomSection.sectionNumbers;
+        }
+      }
+    }
+
+    // Add user sections to the response
+    const roomWithSections = {
+      ...room.toObject(),
+      userSections,
+    };
+
+    res.status(200).json(roomWithSections);
+  } catch (error) {
+    console.error("Error in getRoomWithUserSections controller", error);
+    res.status(500).json({ message: "Internal Server error" });
+  }
+}
+
 export async function createRoom(req, res) {
   try {
-    const { room_name, description } = req.body;
-    const room = new Room({ room_name, description });
+    const { room_name, description, sections } = req.body;
 
+    // Validate that sections are provided and contain class timings
+    if (!sections || sections.length !== 5) {
+      return res.status(400).json({
+        message: "Room must have exactly 5 sections with class timings",
+      });
+    }
+
+    // Validate that each section has exactly 2 class timings
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      if (!section.classTimings || section.classTimings.length !== 2) {
+        return res.status(400).json({
+          message: `Section ${i + 1} must have exactly 2 class timings`,
+        });
+      }
+      // Ensure section number is correct
+      section.sectionNumber = i + 1;
+    }
+
+    const room = new Room({ room_name, description, sections });
     const savedRoom = await room.save();
     res.status(201).json(savedRoom);
   } catch (error) {
@@ -48,10 +121,37 @@ export async function createRoom(req, res) {
 
 export async function updateRoom(req, res) {
   try {
-    const { room_name, description } = req.body;
+    const { room_name, description, sections } = req.body;
+
+    const updateData = {};
+    if (room_name) updateData.room_name = room_name;
+    if (description) updateData.description = description;
+
+    // If sections are provided, validate them
+    if (sections) {
+      if (sections.length !== 5) {
+        return res.status(400).json({
+          message: "Room must have exactly 5 sections",
+        });
+      }
+
+      // Validate each section
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i];
+        if (!section.classTimings || section.classTimings.length !== 2) {
+          return res.status(400).json({
+            message: `Section ${i + 1} must have exactly 2 class timings`,
+          });
+        }
+        // Ensure section number is correct
+        section.sectionNumber = i + 1;
+      }
+      updateData.sections = sections;
+    }
+
     const updatedRoom = await Room.findByIdAndUpdate(
       req.params.id,
-      { room_name, description },
+      updateData,
       { new: true }
     );
 
@@ -122,5 +222,104 @@ export async function createMeeting(req, res) {
       message: "Failed to create Zoom meeting",
       zoomError: err.response?.data || err.message,
     });
+  }
+}
+
+// Get available time slots for sections
+export async function getAvailableTimeSlots(req, res) {
+  try {
+    const timeSlots = [
+      { startTime: "8:00 AM", endTime: "9:20 AM" },
+      { startTime: "9:30 AM", endTime: "10:50 AM" },
+      { startTime: "11:00 AM", endTime: "12:20 PM" },
+      { startTime: "12:30 PM", endTime: "1:50 PM" },
+      { startTime: "2:00 PM", endTime: "3:20 PM" },
+      { startTime: "3:30 PM", endTime: "4:50 PM" },
+    ];
+
+    const availableDays = [
+      "Saturday",
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+    ];
+
+    res.status(200).json({
+      timeSlots,
+      availableDays,
+      message: "Each section requires exactly 2 class timings",
+    });
+  } catch (error) {
+    console.error("Error in getAvailableTimeSlots controller", error);
+    res.status(500).json({ message: "Internal Server error" });
+  }
+}
+
+// Get room sections by room ID
+export async function getRoomSections(req, res) {
+  try {
+    const room = await Room.findById(req.params.id).select(
+      "sections room_name"
+    );
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    res.status(200).json({
+      roomId: room._id,
+      roomName: room.room_name,
+      sections: room.sections,
+    });
+  } catch (error) {
+    console.error("Error in getRoomSections controller", error);
+    res.status(500).json({ message: "Internal Server error" });
+  }
+}
+
+// Update room sections specifically
+export async function updateRoomSections(req, res) {
+  try {
+    const { sections } = req.body;
+
+    // Validate sections
+    if (!sections || sections.length !== 5) {
+      return res.status(400).json({
+        message: "Room must have exactly 5 sections with class timings",
+      });
+    }
+
+    // Validate that each section has exactly 2 class timings
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      if (!section.classTimings || section.classTimings.length !== 2) {
+        return res.status(400).json({
+          message: `Section ${i + 1} must have exactly 2 class timings`,
+        });
+      }
+      // Ensure section number is correct
+      section.sectionNumber = i + 1;
+    }
+
+    const updatedRoom = await Room.findByIdAndUpdate(
+      req.params.id,
+      { sections },
+      { new: true }
+    ).select("sections room_name");
+
+    if (!updatedRoom) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    res.status(200).json({
+      roomId: updatedRoom._id,
+      roomName: updatedRoom.room_name,
+      sections: updatedRoom.sections,
+    });
+  } catch (error) {
+    console.error("Error in updateRoomSections controller", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 }

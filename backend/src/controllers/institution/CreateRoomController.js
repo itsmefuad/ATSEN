@@ -32,7 +32,13 @@ async function findInstitution(idOrName) {
 export async function createRoom(req, res) {
   try {
     const { idOrName } = req.params;
-    const { room_name, description, maxCapacity, instructors = [] } = req.body;
+    const {
+      room_name,
+      description,
+      maxCapacity,
+      instructors = [],
+      sections,
+    } = req.body;
 
     // validate required fields
     if (!room_name) {
@@ -40,6 +46,25 @@ export async function createRoom(req, res) {
     }
     if (description == null) {
       return res.status(400).json({ message: "description is required" });
+    }
+
+    // Validate sections
+    if (!sections || sections.length !== 5) {
+      return res.status(400).json({
+        message: "Room must have exactly 5 sections with class timings",
+      });
+    }
+
+    // Validate that each section has exactly 2 class timings
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      if (!section.classTimings || section.classTimings.length !== 2) {
+        return res.status(400).json({
+          message: `Section ${i + 1} must have exactly 2 class timings`,
+        });
+      }
+      // Ensure section number is correct
+      section.sectionNumber = i + 1;
     }
 
     // lookup institution
@@ -55,6 +80,7 @@ export async function createRoom(req, res) {
       maxCapacity,
       instructors: Array.isArray(instructors) ? instructors : [],
       institution: inst._id,
+      sections,
     });
 
     // Add the room to the institution's rooms array

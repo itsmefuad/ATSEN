@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RateLimitedUi from "../../components/RateLimitedUi";
 import InstitutionAnnouncementsWidget from "../../components/common/InstitutionAnnouncementsWidget";
+import ClassRoutine from "../../components/ClassRoutine";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import RoomCard from "../../components/RoomCard";
@@ -41,7 +42,7 @@ const T_Dashboard = () => {
     return (
       <div className="min-h-screen bg-base-200">
         <Navbar />
-        <div className="max-w-7xl mx-auto p-4 mt-6 flex items-center justify-center">
+        <div className="max-w-[95vw] mx-auto px-2 py-4 mt-6 flex items-center justify-center">
           <div className="text-center">
             <div className="loading loading-spinner loading-lg"></div>
             <p className="mt-2 text-base-content/70">Loading dashboard...</p>
@@ -57,7 +58,7 @@ const T_Dashboard = () => {
 
       {isRateLimited && <RateLimitedUi />}
 
-      <div className="max-w-7xl mx-auto p-4 mt-6">
+      <div className="max-w-[95vw] mx-auto px-2 py-4 mt-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-base-content mb-2">
             Welcome, {user?.name || "Instructor"}
@@ -77,11 +78,25 @@ const T_Dashboard = () => {
           <>
             {rooms.length > 0 ? (
               <div className="space-y-8">
-                {/* Grid with rooms only */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {rooms.map((room) => (
-                    <RoomCard key={room._id} room={room} />
-                  ))}
+                {/* Grid with rooms and routine */}
+                <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+                  {/* Rooms Grid */}
+                  <div className="lg:col-span-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      {rooms.map((room) => (
+                        <RoomCard key={room._id} room={room} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Class Routine */}
+                  <div className="lg:col-span-3">
+                    <ClassRoutine
+                      rooms={rooms}
+                      userType="instructor"
+                      userId={user?._id}
+                    />
+                  </div>
                 </div>
 
                 {/* Institution Announcements Widget */}

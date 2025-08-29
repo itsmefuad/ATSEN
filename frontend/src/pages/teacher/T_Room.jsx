@@ -68,7 +68,7 @@ const T_Room = () => {
   useEffect(() => {
     const fetchRoom = async () => {
       try {
-        const res = await api.get(`/rooms/${id}`);
+        const res = await api.get(`/rooms/${id}/with-sections`);
         setRoom(res.data);
       } catch (error) {
         console.log("Error in fetching room details", error);
@@ -262,6 +262,29 @@ const T_Room = () => {
                           </p>
                         </div>
                       </div>
+
+                      {/* My Assigned Sections */}
+                      {room.userSections && room.userSections.length > 0 && (
+                        <div className="mt-4">
+                          <label className="label">
+                            <span className="label-text font-medium">
+                              My Assigned Sections
+                            </span>
+                          </label>
+                          <div className="bg-base-200 p-3 rounded-lg">
+                            <div className="flex flex-wrap gap-2">
+                              {room.userSections.map((sectionNum) => (
+                                <span
+                                  key={sectionNum}
+                                  className="badge badge-primary badge-lg"
+                                >
+                                  Section {sectionNum}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 

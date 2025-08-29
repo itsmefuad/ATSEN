@@ -182,6 +182,7 @@ export default function App() {
           <Route path="/student/room/:id/assessment" element={<S_Room />} />
           <Route path="/student/room/:id/grades" element={<S_Room />} />
           <Route path="/student/room/:id/standings" element={<S_Room />} />
+          <Route path="/student/room/:id/details" element={<S_Room />} />
           <Route
             path="/student/room/:id/assessment/:assessmentId"
             element={<S_AssignmentDetail />}

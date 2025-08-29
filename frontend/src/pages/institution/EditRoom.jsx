@@ -10,7 +10,9 @@ import {
   Search,
   User,
   Mail,
+  Calendar,
 } from "lucide-react";
+import SectionAssignment from "../../components/SectionAssignment.jsx";
 
 export default function EditRoom() {
   const { idOrName, roomId } = useParams();
@@ -29,6 +31,34 @@ export default function EditRoom() {
   const [editedDescription, setEditedDescription] = useState("");
   const [isEditingRoom, setIsEditingRoom] = useState(false);
   const [savingRoom, setSavingRoom] = useState(false);
+
+  // Function to refresh room data
+  const refreshRoomData = () => {
+    if (!idOrName || !roomId) return;
+
+    const url = `http://localhost:5001/api/institutions/${encodeURIComponent(
+      idOrName
+    )}/rooms/${roomId}`;
+
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) {
+          return res.text().then((text) => {
+            throw new Error(`Status ${res.status}: ${text}`);
+          });
+        }
+        return res.json();
+      })
+      .then((json) => {
+        setRoom(json);
+        setEditedRoomName(json.room_name || "");
+        setEditedDescription(json.description || "");
+      })
+      .catch((err) => {
+        console.error("Refresh room failed:", err);
+        setError("Could not refresh room details.");
+      });
+  };
 
   useEffect(() => {
     if (!idOrName || !roomId) return;
@@ -669,6 +699,25 @@ export default function EditRoom() {
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Section Assignments */}
+      <div className="card bg-base-100 shadow-md">
+        <div className="card-body">
+          <h2 className="card-title text-xl flex items-center gap-2">
+            <Calendar className="h-6 w-6 text-primary" />
+            Section Assignments
+          </h2>
+          <p className="text-base-content/70 mb-4">
+            Assign students to sections (1 section per student) and instructors
+            to sections (1-2 sections per instructor).
+          </p>
+
+          <SectionAssignment
+            room={room}
+            onUserSectionUpdate={refreshRoomData}
+          />
         </div>
       </div>
     </div>

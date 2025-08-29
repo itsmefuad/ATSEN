@@ -38,7 +38,9 @@ export async function getRoomDetails(req, res) {
     console.log("About to query room with ID:", roomId);
     const room = await Room.findById(roomId)
       .populate("students", "name email")
-      .populate("instructors", "name email");
+      .populate("instructors", "name email")
+      .populate("sections.students", "name email")
+      .populate("sections.instructors", "name email");
 
     console.log(
       "Room query result:",
@@ -49,8 +51,51 @@ export async function getRoomDetails(req, res) {
       return res.status(404).json({ message: "Room not found." });
     }
 
+    // Add section assignments to student and instructor data
+    const studentsWithSections = room.students.map((student) => {
+      const studentSections = room.sections
+        .filter((section) =>
+          section.students.some(
+            (s) => s._id.toString() === student._id.toString()
+          )
+        )
+        .map((section) => ({
+          sectionNumber: section.sectionNumber,
+          classTimings: section.classTimings,
+        }));
+
+      return {
+        ...student.toObject(),
+        assignedSections: studentSections,
+      };
+    });
+
+    const instructorsWithSections = room.instructors.map((instructor) => {
+      const instructorSections = room.sections
+        .filter((section) =>
+          section.instructors.some(
+            (i) => i._id.toString() === instructor._id.toString()
+          )
+        )
+        .map((section) => ({
+          sectionNumber: section.sectionNumber,
+          classTimings: section.classTimings,
+        }));
+
+      return {
+        ...instructor.toObject(),
+        assignedSections: instructorSections,
+      };
+    });
+
+    const roomWithSectionInfo = {
+      ...room.toObject(),
+      students: studentsWithSections,
+      instructors: instructorsWithSections,
+    };
+
     console.log("Sending room data successfully");
-    res.json(room);
+    res.json(roomWithSectionInfo);
   } catch (err) {
     console.error("Get room details error:", err);
     console.error("Error message:", err.message);
@@ -195,21 +240,42 @@ export async function addInstructorToRoom(req, res) {
   }
 }
 
-// Update room information (name and description)
+// Update room information (name, description, and sections)
 export async function updateRoomInfo(req, res) {
   try {
     const { idOrName, roomId } = req.params;
-    const { room_name, description } = req.body;
+    const { room_name, description, sections } = req.body;
 
     console.log("=== UPDATE ROOM INFO ===");
     console.log("idOrName:", idOrName, "roomId:", roomId);
-    console.log("Data:", { room_name, description });
+    console.log("Data:", { room_name, description, sections });
 
     // Validate input
     if (!room_name?.trim() || !description?.trim()) {
       return res
         .status(400)
         .json({ message: "Room name and description are required." });
+    }
+
+    // Validate sections if provided
+    if (sections) {
+      if (sections.length !== 5) {
+        return res.status(400).json({
+          message: "Room must have exactly 5 sections",
+        });
+      }
+
+      // Validate each section
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i];
+        if (!section.classTimings || section.classTimings.length !== 2) {
+          return res.status(400).json({
+            message: `Section ${i + 1} must have exactly 2 class timings`,
+          });
+        }
+        // Ensure section number is correct
+        section.sectionNumber = i + 1;
+      }
     }
 
     // Validate roomId format
@@ -242,6 +308,9 @@ export async function updateRoomInfo(req, res) {
     // Update room
     room.room_name = room_name.trim();
     room.description = description.trim();
+    if (sections) {
+      room.sections = sections;
+    }
     const updatedRoom = await room.save();
 
     // Populate for response
