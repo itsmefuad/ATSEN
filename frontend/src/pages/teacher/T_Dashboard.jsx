@@ -16,10 +16,10 @@ const T_Dashboard = () => {
 
   useEffect(() => {
     const fetchRooms = async () => {
-      if (!user?.id) return;
+      if (!user?._id) return;
 
       try {
-        const res = await api.get(`/instructors/${user.id}/rooms`);
+        const res = await api.get(`/instructors/${user._id}/rooms`);
         console.log(res.data);
         setRooms(res.data);
         setIsRateLimited(false);
@@ -98,7 +98,7 @@ const T_Dashboard = () => {
                 {/* Institution Announcements Widget */}
                 <InstitutionAnnouncementsWidget
                   userType="instructor"
-                  userId={user?.id}
+                  userId={user?._id}
                 />
               </div>
             ) : (
@@ -119,7 +119,7 @@ const T_Dashboard = () => {
                 {/* Show announcements even if no rooms */}
                 <InstitutionAnnouncementsWidget
                   userType="instructor"
-                  userId={user?.id}
+                  userId={user?._id}
                 />
               </div>
             )}

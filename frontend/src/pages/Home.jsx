@@ -16,6 +16,10 @@ export default function Home() {
     navigate("/auth/signup");
   };
 
+  const handleInstitutionRegister = () => {
+    navigate("/auth/institution-register");
+  };
+
   // Show loading while auth is being determined
   if (loading) {
     return (
@@ -126,6 +130,15 @@ export default function Home() {
                       className="btn btn-outline btn-primary w-full py-3 px-4 rounded-lg font-medium"
                     >
                       Sign Up
+                    </button>
+
+                    <div className="divider text-xs text-base-content/60">OR</div>
+
+                    <button
+                      onClick={handleInstitutionRegister}
+                      className="btn btn-outline btn-secondary w-full py-3 px-4 rounded-lg font-medium border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400"
+                    >
+                      Register as Institution
                     </button>
                   </div>
 

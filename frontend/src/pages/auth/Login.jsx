@@ -7,22 +7,13 @@ import api from "../../lib/axios";
 import Navbar from "../../components/Navbar.jsx";
 
 export default function Login() {
-  // Get the last user role from localStorage, fallback to "institution"
-  const getInitialRole = () => {
-    const lastRole = localStorage.getItem("lastUserRole");
-    return lastRole &&
-      ["institution", "instructor", "student"].includes(lastRole)
-      ? lastRole
-      : "institution";
-  };
-
-  const [role, setRole] = useState(getInitialRole);
   const [form, setForm] = useState({});
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, user, loading } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const { navigateAfterAuth } = useAuthNavigation();
 
   // If ProtectedRoute redirected us here, it will stash the original path in `location.state.from`
@@ -30,7 +21,7 @@ export default function Login() {
 
   // Redirect already authenticated users
   useEffect(() => {
-    if (!loading && user) {
+    if (!authLoading && user) {
       let defaultPath;
       if (user.role === "institution") {
         defaultPath = `/${user.slug}/dashboard`;
@@ -41,7 +32,7 @@ export default function Login() {
       }
       navigate(defaultPath, { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, authLoading, navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -50,34 +41,32 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    // Build the base path for API calls
-    const base =
-      role === "instructor"
-        ? "/instructors"
-        : role === "student"
-        ? "/students"
-        : "/institutions";
+    const { email, password } = form;
 
     try {
-      const endpoint = `${base}/login`;
-      const { data } = await api.post(endpoint, form);
-
-      // Create user object with role and data
-      const userData = {
-        role,
-        ...(role === "institution"
-          ? data.institution
-          : role === "instructor"
-          ? data.instructor
-          : data.student),
-      };
+      // Use the universal login endpoint
+      const { data } = await api.post("/auth/login", { email, password });
+      
+      // Extract the role and user data from response
+      let role, userData;
+      
+      if (data.institution) {
+        role = "institution";
+        userData = { role, ...data.institution };
+      } else if (data.instructor) {
+        role = "instructor"; 
+        userData = { role, ...data.instructor };
+      } else if (data.student) {
+        role = "student";
+        userData = { role, ...data.student };
+      } else {
+        throw new Error("Invalid response format");
+      }
 
       // Use AuthContext login and wait for it to complete
       await login(data.token, userData);
-
-      // Clear the stored role since login was successful
-      localStorage.removeItem("lastUserRole");
 
       // Determine default path after login
       let defaultPath;
@@ -103,7 +92,9 @@ export default function Login() {
         }
       }, 300);
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed.");
+      setError(err.response?.data?.message || "Invalid email or password. Please check your credentials.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,28 +108,9 @@ export default function Login() {
         <div className="max-w-md w-full bg-base-100 shadow-lg rounded-lg p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-base-content mb-2">
-              {role.charAt(0).toUpperCase() + role.slice(1)} Login
+              Welcome Back
             </h2>
             <p className="text-base-content/70">Sign in to your account</p>
-          </div>
-
-          <div className="mb-4 text-center">
-            <label className="text-sm mr-2 text-base-content">Role:</label>
-            <select
-              value={role}
-              onChange={(e) => {
-                setRole(e.target.value);
-                setForm({});
-                setError("");
-                // Clear stored role when user manually changes it
-                localStorage.removeItem("lastUserRole");
-              }}
-              className="select select-bordered bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="institution">Institution</option>
-              <option value="instructor">Instructor</option>
-              <option value="student">Student</option>
-            </select>
           </div>
 
           {error && (
@@ -165,9 +137,10 @@ export default function Login() {
 
             <button
               type="submit"
-              className="btn btn-primary w-full py-3 font-medium shadow-md hover:shadow-lg"
+              disabled={loading}
+              className="btn btn-primary w-full py-3 font-medium shadow-md hover:shadow-lg disabled:loading"
             >
-              Login
+              {loading ? "Signing in..." : "Login"}
             </button>
           </form>
 

@@ -217,7 +217,7 @@ const RoomChat = ({ roomId }) => {
   };
 
   const MessageItem = ({ message }) => {
-    const isOwnMessage = user && message.sender?._id === user.id;
+    const isOwnMessage = user && message.sender?._id === user._id;
     
     return (
       <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`}>

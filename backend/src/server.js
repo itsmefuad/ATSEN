@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import { connectDB } from "./config/db.js";
 import rateLimiter from "./middlewares/rateLimiter.js";
 
+import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import institutionRoutes from "./routes/institutionRoutes.js";
 import institutionRoomRoutes from "./routes/institution/InstitutionRoomRoutes.js";
@@ -69,6 +70,7 @@ app.get("/api/test-download", (req, res) => {
 });
 
 // mount your routers
+app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
 // → Institutions (plural)
