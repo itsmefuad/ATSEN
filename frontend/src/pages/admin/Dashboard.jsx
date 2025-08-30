@@ -73,7 +73,7 @@ export default function Dashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="card bg-base-100 hover:bg-orange-50 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-orange-300 group p-6">
+          <div className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-orange-300 group p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-base-content/70 group-hover:text-orange-600">
@@ -87,7 +87,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="card bg-base-100 hover:bg-blue-50 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-blue-300 group p-6">
+          <div className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-blue-300 group p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-base-content/70 group-hover:text-blue-600">
@@ -101,7 +101,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="card bg-base-100 hover:bg-green-50 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-green-300 group p-6">
+          <div className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-green-300 group p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-base-content/70 group-hover:text-green-600">
@@ -115,7 +115,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="card bg-base-100 hover:bg-purple-50 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-purple-300 group p-6">
+          <div className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-purple-300 group p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-base-content/70 group-hover:text-purple-600">
@@ -182,7 +182,7 @@ export default function Dashboard() {
                   {pendingInstitutions.map((pending) => (
                     <div
                       key={pending._id}
-                      className="card bg-base-100 border border-orange-200 shadow-sm hover:shadow-md transition-all duration-200 hover:bg-orange-50"
+                      className="card bg-base-100 border border-orange-200 shadow-sm hover:shadow-md transition-all duration-200 hover:bg-base-200"
                     >
                       <div className="card-body p-6">
                         <div className="flex justify-between items-start">
@@ -231,17 +231,17 @@ export default function Dashboard() {
                             )}
                           </div>
 
-                          <div className="flex flex-col space-y-2 ml-4">
+                          <div className="flex flex-col space-y-3 ml-4">
                             <button
                               onClick={() => handleApprove(pending._id)}
-                              className="btn btn-success btn-sm text-white"
+                              className="btn btn-success hover:btn-success text-white font-medium shadow-md hover:shadow-lg min-w-[100px]"
                             >
                               <CheckCircle className="h-4 w-4 mr-1" />
                               Approve
                             </button>
                             <button
                               onClick={() => handleReject(pending._id)}
-                              className="btn btn-error btn-sm text-white"
+                              className="btn btn-error hover:btn-error text-white font-medium shadow-md hover:shadow-lg min-w-[100px]"
                             >
                               <XCircle className="h-4 w-4 mr-1" />
                               Reject
@@ -286,7 +286,7 @@ export default function Dashboard() {
                   {institutions.map((institution) => (
                     <div
                       key={institution._id}
-                      className="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all duration-200 hover:bg-blue-50 hover:border-blue-300 group"
+                      className="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all duration-200 hover:bg-base-200 hover:border-blue-300 group"
                     >
                       <div className="card-body p-6">
                         <div className="flex justify-between items-start mb-3">

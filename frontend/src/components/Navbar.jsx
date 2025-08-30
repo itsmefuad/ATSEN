@@ -63,7 +63,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-base-100 border-b border-base-300 px-4 py-3">
+    <nav className="sticky top-0 z-50 bg-neutral border-b border-neutral-content/20 px-4 py-3 shadow-md">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Left side - Logo and User Info */}
         <div className="flex items-center space-x-4">
@@ -79,10 +79,10 @@ const Navbar = () => {
           {/* Divider and User Info - only show when logged in */}
           {currentUser && (
             <>
-              <div className="text-base-content/40 text-xl font-light">|</div>
+              <div className="text-neutral-content/40 text-xl font-light">|</div>
               <Link
                 to={getDashboardLink()}
-                className="text-base-content hover:text-primary font-medium transition-colors duration-200"
+                className="text-neutral-content hover:text-primary font-medium transition-colors duration-200"
               >
                 {getUserDisplayText()}
               </Link>
@@ -95,7 +95,7 @@ const Navbar = () => {
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="p-2 text-base-content hover:text-primary transition-colors duration-200 rounded-md hover:bg-base-200"
+            className="p-2 text-neutral-content hover:text-primary transition-colors duration-200 rounded-md hover:bg-neutral-focus"
             title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
             {isDarkMode ? (
@@ -110,7 +110,7 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-2 text-base-content hover:text-primary transition-colors duration-200 p-2 rounded-md hover:bg-base-200"
+                className="flex items-center space-x-2 text-neutral-content hover:text-primary transition-colors duration-200 p-2 rounded-md hover:bg-neutral-focus"
               >
                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-content font-medium text-sm">
                   {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : "U"}
@@ -124,8 +124,8 @@ const Navbar = () => {
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
-                  <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+                <div className="absolute right-0 mt-2 w-48 bg-base-100 rounded-md shadow-lg border border-base-300 py-1 z-50">
+                  <div className="px-4 py-2 text-sm text-base-content/60 border-b border-base-300">
                     {currentUser.email || "User Account"}
                   </div>
 
@@ -135,7 +135,7 @@ const Navbar = () => {
                       <Link
                         to="/student/profile"
                         onClick={() => setIsDropdownOpen(false)}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                        className="w-full text-left px-4 py-2 text-sm text-base-content hover:bg-base-200 flex items-center space-x-2"
                       >
                         <User className="h-4 w-4" />
                         <span>Profile</span>
@@ -144,7 +144,7 @@ const Navbar = () => {
                       <Link
                         to="/my-progress"
                         onClick={() => setIsDropdownOpen(false)}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                        className="w-full text-left px-4 py-2 text-sm text-base-content hover:bg-base-200 flex items-center space-x-2"
                       >
                         <Trophy className="h-4 w-4" />
                         <span>My Progress</span>
@@ -154,7 +154,7 @@ const Navbar = () => {
 
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                    className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error/10 flex items-center space-x-2"
                   >
                     <LogOut className="h-4 w-4" />
                     <span>Logout</span>
@@ -167,13 +167,13 @@ const Navbar = () => {
             <div className="flex items-center space-x-3">
               <Link
                 to="/auth/login"
-                className="text-gray-700 hover:text-sky-600 font-medium transition-colors duration-200"
+                className="text-neutral-content hover:text-primary font-medium transition-colors duration-200"
               >
                 Login
               </Link>
               <Link
                 to="/auth/signup"
-                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-md font-medium transition-colors duration-200"
+                className="bg-primary hover:bg-primary/90 text-primary-content px-4 py-2 rounded-md font-medium transition-colors duration-200"
               >
                 Sign Up
               </Link>
