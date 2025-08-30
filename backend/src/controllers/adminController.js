@@ -1,22 +1,10 @@
 // controllers/adminController.js
 
 import jwt from "jsonwebtoken";
-import InstitutionPass from "../models/passkeys/I_Pass.js";
+import slugify from "slugify";
 import Admin from "../models/Admin.js";
 import Institution from "../models/institution.js";
-
-// In-memory list of pending institution requests
-let pendingInstitutions = [
-  { id: "1", name: "AlphaAcademy", eiin: "1001" },
-  { id: "2", name: "BetaInstitute", eiin: "2002" }
-];
-
-// Helper to generate an 8-char passkey
-function makePasskey(name) {
-  const namePart = name.slice(0, 4);
-  const randomNum = Math.floor(100 + Math.random() * 900); // 3 digits
-  return `${namePart}_${randomNum}`;
-}
+import PendingInstitute from "../models/PendingInstitute.js";
 
 // POST /api/admin/login
 export async function loginAdmin(req, res) {
@@ -70,41 +58,104 @@ export async function loginAdmin(req, res) {
   }
 }
 
-// GET /api/admin/institutions/pending
-export function getPendingInstitutions(req, res) {
-  res.json(pendingInstitutions);
+// GET /api/admin/institutions/pending - Get pending institution requests
+export async function getPendingInstitutions(req, res) {
+  try {
+    const pendingInstitutes = await PendingInstitute.find({ status: 'pending' })
+      .select('name eiin email phone address description createdAt')
+      .sort({ createdAt: -1 });
+    
+    res.json(pendingInstitutes);
+  } catch (error) {
+    console.error("Error fetching pending institutions:", error);
+    res.status(500).json({ message: "Failed to fetch pending institutions" });
+  }
 }
 
-// POST /api/admin/institutions/:id/approve
+// POST /api/admin/institutions/:id/approve - Approve a pending institution
 export async function approveInstitution(req, res) {
   const { id } = req.params;
-  const instIndex = pendingInstitutions.findIndex(i => i.id === id);
 
-  if (instIndex === -1) {
-    return res.status(404).json({ message: "Institution request not found" });
-  }
-
-  const inst = pendingInstitutions[instIndex];
-  const passkey = makePasskey(inst.name);
-
-  // Persist passkey & institution metadata to MongoDB
   try {
-    await InstitutionPass.create({
-      passkey,
-      name: inst.name,
-      eiin: inst.eiin
+    // Find the pending institution
+    const pendingInstitute = await PendingInstitute.findById(id);
+    if (!pendingInstitute) {
+      return res.status(404).json({ message: "Pending institution not found" });
+    }
+
+    if (pendingInstitute.status !== 'pending') {
+      return res.status(400).json({ message: "Institution has already been processed" });
+    }
+
+    // Create the approved institution
+    const institutionData = {
+      name: pendingInstitute.name,
+      eiin: pendingInstitute.eiin,
+      email: pendingInstitute.email,
+      password: pendingInstitute.password, // Already hashed
+      phone: pendingInstitute.phone,
+      address: pendingInstitute.address,
+      description: pendingInstitute.description,
+      active: true
+    };
+
+    // Create the institution
+    const institution = new Institution(institutionData);
+    await institution.save();
+
+    // Update pending institute status
+    pendingInstitute.status = 'approved';
+    await pendingInstitute.save();
+
+    res.json({ 
+      message: "Institution approved successfully",
+      institution: {
+        id: institution._id,
+        name: institution.name,
+        eiin: institution.eiin,
+        email: institution.email
+      }
     });
+
   } catch (error) {
-    console.error("Error saving passkey:", error);
-    return res
-      .status(500)
-      .json({ message: "Could not save passkey", error: error.message });
+    console.error("Error approving institution:", error);
+    res.status(500).json({ message: "Failed to approve institution" });
   }
+}
 
-  // Remove from in-memory pending list
-  pendingInstitutions.splice(instIndex, 1);
+// POST /api/admin/institutions/:id/reject - Reject a pending institution
+export async function rejectInstitution(req, res) {
+  const { id } = req.params;
+  const { reason } = req.body;
 
-  res.json({ passkey, institution: inst });
+  try {
+    const pendingInstitute = await PendingInstitute.findById(id);
+    if (!pendingInstitute) {
+      return res.status(404).json({ message: "Pending institution not found" });
+    }
+
+    if (pendingInstitute.status !== 'pending') {
+      return res.status(400).json({ message: "Institution has already been processed" });
+    }
+
+    // Update status and add admin notes
+    pendingInstitute.status = 'rejected';
+    pendingInstitute.adminNotes = reason || 'No reason provided';
+    await pendingInstitute.save();
+
+    res.json({ 
+      message: "Institution rejected successfully",
+      institution: {
+        id: pendingInstitute._id,
+        name: pendingInstitute.name,
+        eiin: pendingInstitute.eiin
+      }
+    });
+
+  } catch (error) {
+    console.error("Error rejecting institution:", error);
+    res.status(500).json({ message: "Failed to reject institution" });
+  }
 }
 
 // GET /api/admin/institutions - Get all institutions

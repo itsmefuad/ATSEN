@@ -3,6 +3,7 @@ import {
   loginAdmin,
   getPendingInstitutions,
   approveInstitution,
+  rejectInstitution,
   getAllInstitutions
 } from "../controllers/adminController.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
@@ -29,6 +30,12 @@ router.post(
   "/institutions/:id/approve",
   verifyToken,
   approveInstitution
+);
+
+router.post(
+  "/institutions/:id/reject",
+  verifyToken,
+  rejectInstitution
 );
 
 export default router;
