@@ -6,40 +6,59 @@ const forumContentSchema = new Schema(
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     content: {
       type: String,
-      required: true
+      required: true,
     },
     room: {
       type: Schema.Types.ObjectId,
       ref: "Room",
-      required: true
+      required: true,
     },
     contentType: {
       type: String,
-      enum: ['announcement', 'discussion'],
-      default: 'announcement'
+      enum: ["announcement", "discussion"],
+      default: "announcement",
     },
     author: {
       type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true
+      required: true,
     },
     isPinned: {
       type: Boolean,
-      default: false
+      default: false,
     },
-    tags: [{
-      type: String,
-      trim: true
-    }]
+    tags: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    isApproved: {
+      type: Boolean,
+      default: function () {
+        // Auto-approve announcements from teachers, require approval for student discussions
+        return this.contentType === "announcement";
+      },
+    },
+    approvedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "Instructor",
+      default: null,
+    },
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
-const ForumContent = mongoose.models.ForumContent || mongoose.model("ForumContent", forumContentSchema);
+const ForumContent =
+  mongoose.models.ForumContent ||
+  mongoose.model("ForumContent", forumContentSchema);
 export default ForumContent;

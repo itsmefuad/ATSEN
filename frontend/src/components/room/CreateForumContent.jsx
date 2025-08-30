@@ -33,6 +33,8 @@ const CreateForumContent = ({ roomId, onAnnouncementCreated }) => {
         content: formData.content,
         tags,
         isPinned: formData.isPinned,
+        contentType: "announcement",
+        userRole: "instructor", // Announcements created by instructors
       });
 
       toast.success("Announcement created successfully!");

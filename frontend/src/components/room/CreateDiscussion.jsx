@@ -32,9 +32,12 @@ const CreateDiscussion = ({ roomId, onDiscussionCreated }) => {
         content: formData.content,
         tags,
         contentType: "discussion",
+        userRole: "student", // Discussions created by students
       });
 
-      toast.success("Discussion created successfully!");
+      toast.success(
+        "Discussion created successfully! It will be visible to others once approved by an instructor."
+      );
       setFormData({ title: "", content: "", tags: "" });
       setIsOpen(false);
       onDiscussionCreated(response.data);

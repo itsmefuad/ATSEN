@@ -21,7 +21,11 @@ const StudentDiscussionForum = ({ roomId }) => {
   const fetchForumContent = async () => {
     try {
       console.log("Fetching forum content for room:", roomId);
-      const response = await api.get(`/forum-content/room/${roomId}`);
+      // For now, using a mock student ID. In a real app, this would come from authentication
+      const mockStudentId = "507f1f77bcf86cd799439011";
+      const response = await api.get(
+        `/forum-content/room/${roomId}?userRole=student&userId=${mockStudentId}`
+      );
       console.log("Fetched forum content:", response.data);
 
       // Sort content: pinned first (by pin time), then by creation date

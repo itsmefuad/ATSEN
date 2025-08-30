@@ -77,14 +77,74 @@ export async function createRoom(req, res) {
       return res.status(404).json({ message: "Institution not found" });
     }
 
+    // Extract all unique instructors from sections
+    const sectionInstructors = new Set();
+    sections.forEach((section) => {
+      if (section.instructors && Array.isArray(section.instructors)) {
+        section.instructors.forEach((instructorId) => {
+          if (instructorId) {
+            sectionInstructors.add(instructorId.toString());
+          }
+        });
+      }
+    });
+
+    // Combine instructors from request and sections
+    const allInstructors = Array.isArray(instructors) ? [...instructors] : [];
+    sectionInstructors.forEach((instructorId) => {
+      if (!allInstructors.includes(instructorId)) {
+        allInstructors.push(instructorId);
+      }
+    });
+
+    console.log("Section instructors found:", Array.from(sectionInstructors));
+    console.log("All instructors for room:", allInstructors);
+
     // create new room
     const room = await Room.create({
       room_name,
       description,
-      instructors: Array.isArray(instructors) ? instructors : [],
+      instructors: allInstructors,
       institution: inst._id,
       sections,
     });
+
+    // Update instructor records to include this room and section assignments
+    if (allInstructors.length > 0) {
+      // Add room to instructors' rooms array
+      await Instructor.updateMany(
+        { _id: { $in: allInstructors } },
+        { $addToSet: { rooms: room._id } }
+      );
+
+      // Update instructor section assignments
+      for (const instructorId of allInstructors) {
+        const instructorSections = [];
+        sections.forEach((section) => {
+          if (
+            section.instructors &&
+            section.instructors.includes(instructorId)
+          ) {
+            instructorSections.push(section.sectionNumber);
+          }
+        });
+
+        if (instructorSections.length > 0) {
+          await Instructor.findByIdAndUpdate(instructorId, {
+            $addToSet: {
+              roomSections: {
+                roomId: room._id,
+                sectionNumbers: instructorSections,
+              },
+            },
+          });
+        }
+      }
+
+      console.log(
+        "Updated instructor records with room ID and section assignments"
+      );
+    }
 
     // Add the room to the institution's rooms array
     await Institution.findByIdAndUpdate(
