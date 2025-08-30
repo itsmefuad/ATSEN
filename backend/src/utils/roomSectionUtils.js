@@ -21,42 +21,20 @@ export const availableDays = [
 
 // Generate default sections with empty class timings
 export function generateDefaultSections() {
-  return [
-    { sectionNumber: 1, classTimings: [] },
-    { sectionNumber: 2, classTimings: [] },
-    { sectionNumber: 3, classTimings: [] },
-    { sectionNumber: 4, classTimings: [] },
-    { sectionNumber: 5, classTimings: [] },
-  ];
+  return [{ sectionNumber: 1, classTimings: [] }];
 }
 
 // Generate sample sections with distributed class timings
 export function generateSampleSections() {
   const sampleTimings = [
-    // Section 1
-    [
-      { day: "Saturday", startTime: "8:00 AM", endTime: "9:20 AM" },
-      { day: "Monday", startTime: "11:00 AM", endTime: "12:20 PM" },
-    ],
-    // Section 2
-    [
-      { day: "Sunday", startTime: "9:30 AM", endTime: "10:50 AM" },
-      { day: "Tuesday", startTime: "2:00 PM", endTime: "3:20 PM" },
-    ],
-    // Section 3
+    // Section 1 - Start with 1 class, can add more
+    [{ day: "Saturday", startTime: "8:00 AM", endTime: "9:20 AM" }],
+    // Section 2 - Start with 1 class, can add more
+    [{ day: "Sunday", startTime: "9:30 AM", endTime: "10:50 AM" }],
+    // Section 3 - Example with multiple classes
     [
       { day: "Monday", startTime: "8:00 AM", endTime: "9:20 AM" },
       { day: "Wednesday", startTime: "12:30 PM", endTime: "1:50 PM" },
-    ],
-    // Section 4
-    [
-      { day: "Tuesday", startTime: "11:00 AM", endTime: "12:20 PM" },
-      { day: "Thursday", startTime: "3:30 PM", endTime: "4:50 PM" },
-    ],
-    // Section 5
-    [
-      { day: "Wednesday", startTime: "9:30 AM", endTime: "10:50 AM" },
-      { day: "Thursday", startTime: "8:00 AM", endTime: "9:20 AM" },
     ],
   ];
 
@@ -75,8 +53,8 @@ export function validateSections(sections) {
     return { isValid: false, errors };
   }
 
-  if (sections.length !== 5) {
-    errors.push("Room must have exactly 5 sections");
+  if (sections.length < 1) {
+    errors.push("Room must have at least 1 section");
   }
 
   sections.forEach((section, index) => {
@@ -86,8 +64,8 @@ export function validateSections(sections) {
 
     if (!section.classTimings || !Array.isArray(section.classTimings)) {
       errors.push(`Section ${index + 1} must have classTimings array`);
-    } else if (section.classTimings.length !== 2) {
-      errors.push(`Section ${index + 1} must have exactly 2 class timings`);
+    } else if (section.classTimings.length < 1) {
+      errors.push(`Section ${index + 1} must have at least 1 class timing`);
     } else {
       section.classTimings.forEach((timing, timingIndex) => {
         if (!timing.day || !availableDays.includes(timing.day)) {

@@ -52,16 +52,15 @@ const sectionSchema = new Schema(
       type: Number,
       required: true,
       min: 1,
-      max: 5,
     },
     classTimings: {
       type: [classTimingSchema],
       required: true,
       validate: {
         validator: function (timings) {
-          return timings.length === 2; // Each section must have exactly 2 class timings
+          return timings.length >= 1; // Each section must have at least 1 class timing
         },
-        message: "Each section must have exactly 2 class timings",
+        message: "Each section must have at least 1 class timing",
       },
     },
     // Students assigned to this specific section
@@ -120,19 +119,13 @@ const roomSchema = new Schema(
       required: true,
       validate: {
         validator: function (sections) {
-          return sections.length === 5; // Must have exactly 5 sections
+          return sections.length >= 1; // Must have at least 1 section
         },
-        message: "Room must have exactly 5 sections",
+        message: "Room must have at least 1 section",
       },
       default: function () {
-        // Default 5 sections with empty class timings (to be set during room creation)
-        return [
-          { sectionNumber: 1, classTimings: [] },
-          { sectionNumber: 2, classTimings: [] },
-          { sectionNumber: 3, classTimings: [] },
-          { sectionNumber: 4, classTimings: [] },
-          { sectionNumber: 5, classTimings: [] },
-        ];
+        // Default 1 section with empty class timings (to be set during room creation)
+        return [{ sectionNumber: 1, classTimings: [] }];
       },
     },
     createTime: {

@@ -49,18 +49,18 @@ export async function createRoom(req, res) {
     }
 
     // Validate sections
-    if (!sections || sections.length !== 5) {
+    if (!sections || sections.length < 1) {
       return res.status(400).json({
-        message: "Room must have exactly 5 sections with class timings",
+        message: "Room must have at least 1 section with class timings",
       });
     }
 
-    // Validate that each section has exactly 2 class timings
+    // Validate that each section has at least 1 class timing
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
-      if (!section.classTimings || section.classTimings.length !== 2) {
+      if (!section.classTimings || section.classTimings.length < 1) {
         return res.status(400).json({
-          message: `Section ${i + 1} must have exactly 2 class timings`,
+          message: `Section ${i + 1} must have at least 1 class timing`,
         });
       }
       // Ensure section number is correct

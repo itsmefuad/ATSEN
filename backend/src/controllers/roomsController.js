@@ -92,18 +92,18 @@ export async function createRoom(req, res) {
     const { room_name, description, sections } = req.body;
 
     // Validate that sections are provided and contain class timings
-    if (!sections || sections.length !== 5) {
+    if (!sections || sections.length < 1) {
       return res.status(400).json({
-        message: "Room must have exactly 5 sections with class timings",
+        message: "Room must have at least 1 section with class timings",
       });
     }
 
-    // Validate that each section has exactly 2 class timings
+    // Validate that each section has at least 1 class timing
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
-      if (!section.classTimings || section.classTimings.length !== 2) {
+      if (!section.classTimings || section.classTimings.length < 1) {
         return res.status(400).json({
-          message: `Section ${i + 1} must have exactly 2 class timings`,
+          message: `Section ${i + 1} must have at least 1 class timing`,
         });
       }
       // Ensure section number is correct
@@ -129,18 +129,18 @@ export async function updateRoom(req, res) {
 
     // If sections are provided, validate them
     if (sections) {
-      if (sections.length !== 5) {
+      if (sections.length < 1) {
         return res.status(400).json({
-          message: "Room must have exactly 5 sections",
+          message: "Room must have at least 1 section",
         });
       }
 
       // Validate each section
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i];
-        if (!section.classTimings || section.classTimings.length !== 2) {
+        if (!section.classTimings || section.classTimings.length < 1) {
           return res.status(400).json({
-            message: `Section ${i + 1} must have exactly 2 class timings`,
+            message: `Section ${i + 1} must have at least 1 class timing`,
           });
         }
         // Ensure section number is correct
@@ -249,7 +249,8 @@ export async function getAvailableTimeSlots(req, res) {
     res.status(200).json({
       timeSlots,
       availableDays,
-      message: "Each section requires exactly 2 class timings",
+      message:
+        "Each room requires at least 1 section. Each section requires at least 1 class timing. Additional sections and class timings can be added as needed.",
     });
   } catch (error) {
     console.error("Error in getAvailableTimeSlots controller", error);
@@ -285,18 +286,18 @@ export async function updateRoomSections(req, res) {
     const { sections } = req.body;
 
     // Validate sections
-    if (!sections || sections.length !== 5) {
+    if (!sections || sections.length < 1) {
       return res.status(400).json({
-        message: "Room must have exactly 5 sections with class timings",
+        message: "Room must have at least 1 section with class timings",
       });
     }
 
-    // Validate that each section has exactly 2 class timings
+    // Validate that each section has at least 1 class timing
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
-      if (!section.classTimings || section.classTimings.length !== 2) {
+      if (!section.classTimings || section.classTimings.length < 1) {
         return res.status(400).json({
-          message: `Section ${i + 1} must have exactly 2 class timings`,
+          message: `Section ${i + 1} must have at least 1 class timing`,
         });
       }
       // Ensure section number is correct

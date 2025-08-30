@@ -35,11 +35,6 @@ const sampleRoomData = {
           startTime: "9:30 AM",
           endTime: "10:50 AM",
         },
-        {
-          day: "Tuesday",
-          startTime: "2:00 PM",
-          endTime: "3:20 PM",
-        },
       ],
     },
     {
@@ -55,35 +50,10 @@ const sampleRoomData = {
           startTime: "12:30 PM",
           endTime: "1:50 PM",
         },
-      ],
-    },
-    {
-      sectionNumber: 4,
-      classTimings: [
         {
-          day: "Tuesday",
-          startTime: "11:00 AM",
-          endTime: "12:20 PM",
-        },
-        {
-          day: "Thursday",
-          startTime: "3:30 PM",
-          endTime: "4:50 PM",
-        },
-      ],
-    },
-    {
-      sectionNumber: 5,
-      classTimings: [
-        {
-          day: "Wednesday",
-          startTime: "9:30 AM",
-          endTime: "10:50 AM",
-        },
-        {
-          day: "Thursday",
-          startTime: "8:00 AM",
-          endTime: "9:20 AM",
+          day: "Friday",
+          startTime: "2:00 PM",
+          endTime: "3:20 PM",
         },
       ],
     },
@@ -167,9 +137,10 @@ console.log(
   "- Time Slots: 8:00 AM-9:20 AM, 9:30 AM-10:50 AM, 11:00 AM-12:20 PM, 12:30 PM-1:50 PM, 2:00 PM-3:20 PM, 3:30 PM-4:50 PM"
 );
 console.log("\nRequirements:");
-console.log("- Each room must have exactly 5 sections");
-console.log("- Each section must have exactly 2 class timings");
-console.log("- Section numbers must be 1-5");
+console.log("- Each room must have at least 1 section");
+console.log("- Each section must have at least 1 class timing");
+console.log("- Additional sections and class timings can be added as needed");
+console.log("- Section numbers start from 1");
 
 console.log("\n=== API Examples ===\n");
 Object.entries(apiExamples).forEach(([key, example]) => {

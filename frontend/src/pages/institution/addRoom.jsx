@@ -21,38 +21,7 @@ export default function AddRoom() {
   const [sections, setSections] = useState([
     {
       sectionNumber: 1,
-      classTimings: [
-        { day: "", startTime: "", endTime: "" },
-        { day: "", startTime: "", endTime: "" },
-      ],
-    },
-    {
-      sectionNumber: 2,
-      classTimings: [
-        { day: "", startTime: "", endTime: "" },
-        { day: "", startTime: "", endTime: "" },
-      ],
-    },
-    {
-      sectionNumber: 3,
-      classTimings: [
-        { day: "", startTime: "", endTime: "" },
-        { day: "", startTime: "", endTime: "" },
-      ],
-    },
-    {
-      sectionNumber: 4,
-      classTimings: [
-        { day: "", startTime: "", endTime: "" },
-        { day: "", startTime: "", endTime: "" },
-      ],
-    },
-    {
-      sectionNumber: 5,
-      classTimings: [
-        { day: "", startTime: "", endTime: "" },
-        { day: "", startTime: "", endTime: "" },
-      ],
+      classTimings: [{ day: "", startTime: "", endTime: "" }],
     },
   ]);
 
@@ -83,8 +52,25 @@ export default function AddRoom() {
   // validate sections before submission
   const validateSections = () => {
     for (let section of sections) {
-      for (let timing of section.classTimings) {
-        if (!timing.day || !timing.startTime || !timing.endTime) {
+      // Check if section has at least one class timing
+      if (!section.classTimings || section.classTimings.length === 0) {
+        return false;
+      }
+
+      // Check if at least the first class timing is complete
+      const firstTiming = section.classTimings[0];
+      if (!firstTiming.day || !firstTiming.startTime || !firstTiming.endTime) {
+        return false;
+      }
+
+      // Check other timings for completeness (only if they have any field filled)
+      for (let i = 1; i < section.classTimings.length; i++) {
+        const timing = section.classTimings[i];
+        const hasAnyField = timing.day || timing.startTime || timing.endTime;
+        if (
+          hasAnyField &&
+          (!timing.day || !timing.startTime || !timing.endTime)
+        ) {
           return false;
         }
       }
@@ -99,10 +85,18 @@ export default function AddRoom() {
     // Validate sections
     if (!validateSections()) {
       alert(
-        "Please fill in all class timings for all sections. Each section needs 2 class timings."
+        "Please fill in at least one complete class timing for each section. If you start filling additional class timings, please complete all fields."
       );
       return;
     }
+
+    // Filter out incomplete class timings before sending to backend
+    const filteredSections = sections.map((section) => ({
+      ...section,
+      classTimings: section.classTimings.filter(
+        (timing) => timing.day && timing.startTime && timing.endTime
+      ),
+    }));
 
     const payload = {
       room_name: roomName,
@@ -110,7 +104,7 @@ export default function AddRoom() {
       maxCapacity,
       instructors: selectedInstructor ? [selectedInstructor._id] : [],
       institution: idOrName,
-      sections: sections,
+      sections: filteredSections,
     };
 
     try {
