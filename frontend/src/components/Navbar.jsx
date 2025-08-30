@@ -10,18 +10,32 @@ const Navbar = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // Check for admin user in localStorage
+  const adminData = JSON.parse(localStorage.getItem("adminData") || "null");
+  const currentUser = user || (adminData ? { ...adminData, role: "admin" } : null);
+
   const handleLogout = () => {
-    logout();
-    navigate("/auth/login");
+    if (adminData) {
+      // Admin logout
+      localStorage.removeItem("token");
+      localStorage.removeItem("adminData");
+      navigate("/admin/login");
+    } else {
+      // Regular user logout
+      logout();
+      navigate("/auth/login");
+    }
     setIsDropdownOpen(false);
   };
 
   const getDashboardLink = () => {
-    if (!user) return "/";
+    if (!currentUser) return "/";
 
-    switch (user.role) {
+    switch (currentUser.role) {
+      case "admin":
+        return "/admin/dashboard";
       case "institution":
-        return `/${user.slug}/dashboard`;
+        return `/${currentUser.slug}/dashboard`;
       case "instructor":
         return "/teacher/dashboard";
       case "student":
@@ -32,11 +46,13 @@ const Navbar = () => {
   };
 
   const getUserDisplayText = () => {
-    if (!user) return "";
+    if (!currentUser) return "";
 
-    switch (user.role) {
+    switch (currentUser.role) {
+      case "admin":
+        return "Admin";
       case "institution":
-        return user.name || "Institution";
+        return currentUser.name || "Institution";
       case "instructor":
         return "Instructor";
       case "student":
@@ -61,7 +77,7 @@ const Navbar = () => {
           </Link>
 
           {/* Divider and User Info - only show when logged in */}
-          {user && (
+          {currentUser && (
             <>
               <div className="text-base-content/40 text-xl font-light">|</div>
               <Link
@@ -89,7 +105,7 @@ const Navbar = () => {
             )}
           </button>
 
-          {user ? (
+          {currentUser ? (
             // Logged in user dropdown
             <div className="relative">
               <button
@@ -97,7 +113,7 @@ const Navbar = () => {
                 className="flex items-center space-x-2 text-base-content hover:text-primary transition-colors duration-200 p-2 rounded-md hover:bg-base-200"
               >
                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-content font-medium text-sm">
-                  {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : "U"}
                 </div>
                 <ChevronDown
                   className={`h-4 w-4 transition-transform duration-200 ${
@@ -110,11 +126,11 @@ const Navbar = () => {
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
                   <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
-                    {user.email || "User Account"}
+                    {currentUser.email || "User Account"}
                   </div>
 
                   {/* Profile option for students */}
-                  {user.role === "student" && (
+                  {currentUser.role === "student" && (
                     <>
                       <Link
                         to="/student/profile"

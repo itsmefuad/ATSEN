@@ -2,12 +2,8 @@
 
 import jwt from "jsonwebtoken";
 import InstitutionPass from "../models/passkeys/I_Pass.js";
-
-const ADMIN = {
-  username: "admin",
-  email:    "admin@example.com",
-  password: "password123"
-};
+import Admin from "../models/Admin.js";
+import Institution from "../models/institution.js";
 
 // In-memory list of pending institution requests
 let pendingInstitutions = [
@@ -23,19 +19,55 @@ function makePasskey(name) {
 }
 
 // POST /api/admin/login
-export function loginAdmin(req, res) {
-  const { username, password } = req.body;
-  if (username !== ADMIN.username || password !== ADMIN.password) {
-    return res.status(401).json({ message: "Invalid credentials" });
+export async function loginAdmin(req, res) {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+    
+    // Find admin by email
+    const admin = await Admin.findOne({ email: email.toLowerCase() });
+    if (!admin) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    
+    // Check if admin is active
+    if (!admin.isActive) {
+      return res.status(401).json({ message: "Account is deactivated" });
+    }
+    
+    // Verify password
+    const isPasswordValid = await admin.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { 
+        id: admin._id,
+        email: admin.email,
+        name: admin.name,
+        role: admin.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    res.json({ 
+      token, 
+      admin: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role
+      }
+    });
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  const token = jwt.sign(
-    { username: ADMIN.username, email: ADMIN.email },
-    process.env.JWT_SECRET,
-    { expiresIn: "1h" }
-  );
-
-  res.json({ token, username: ADMIN.username });
 }
 
 // GET /api/admin/institutions/pending
@@ -73,4 +105,18 @@ export async function approveInstitution(req, res) {
   pendingInstitutions.splice(instIndex, 1);
 
   res.json({ passkey, institution: inst });
+}
+
+// GET /api/admin/institutions - Get all institutions
+export async function getAllInstitutions(req, res) {
+  try {
+    const institutions = await Institution.find({})
+      .select('name eiin email active createdAt')
+      .sort({ createdAt: -1 });
+    
+    res.json(institutions);
+  } catch (error) {
+    console.error("Error fetching institutions:", error);
+    res.status(500).json({ message: "Failed to fetch institutions" });
+  }
 }

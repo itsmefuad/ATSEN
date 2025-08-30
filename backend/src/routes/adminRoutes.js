@@ -2,7 +2,8 @@ import express from "express";
 import {
   loginAdmin,
   getPendingInstitutions,
-  approveInstitution
+  approveInstitution,
+  getAllInstitutions
 } from "../controllers/adminController.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 
@@ -12,6 +13,12 @@ const router = express.Router();
 router.post("/login", loginAdmin);
 
 // Protected routes
+router.get(
+  "/institutions",
+  verifyToken,
+  getAllInstitutions
+);
+
 router.get(
   "/institutions/pending",
   verifyToken,
