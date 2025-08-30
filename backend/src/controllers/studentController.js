@@ -75,41 +75,59 @@ export async function getAllStudents(req, res) {
 export async function getStudentRooms(req, res) {
   try {
     const { studentId } = req.params;
-    
+
     const student = await Student.findById(studentId)
       .populate({
-        path: 'institutions',
-        select: 'name logo'
+        path: "institutions",
+        select: "name logo",
       })
       .populate({
-        path: 'room',
-        select: 'room_name description createdAt institution',
+        path: "room",
+        select: "room_name description createdAt institution sections",
         populate: {
-          path: 'institution',
-          select: 'name logo'
-        }
+          path: "institution",
+          select: "name logo",
+        },
       });
-    
+
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
     // Group rooms by institution
     const roomsByInstitution = {};
-    
-    student.institutions.forEach(institution => {
-      const institutionRooms = student.room.filter(room => 
-        room.institution && room.institution._id.toString() === institution._id.toString()
+
+    student.institutions.forEach((institution) => {
+      const institutionRooms = student.room.filter(
+        (room) =>
+          room.institution &&
+          room.institution._id.toString() === institution._id.toString()
       );
-      
-      if (institutionRooms.length > 0) {
+
+      // Filter sections to only include those where the student is assigned
+      const filteredRooms = institutionRooms.map((room) => {
+        const studentSections = room.sections.filter(
+          (section) =>
+            section.students &&
+            section.students.some(
+              (studentId) => studentId.toString() === student._id.toString()
+            )
+        );
+
+        return {
+          ...room.toObject(),
+          sections: studentSections,
+        };
+      });
+
+      if (filteredRooms.length > 0) {
         roomsByInstitution[institution._id] = {
           institution: institution,
-          rooms: institutionRooms
+          rooms: filteredRooms,
         };
       }
     });
-    
+
     return res.json(roomsByInstitution);
   } catch (err) {
     console.error("getStudentRooms error:", err);
@@ -121,25 +139,24 @@ export async function getStudentRooms(req, res) {
 export async function getStudentById(req, res) {
   try {
     const { studentId } = req.params;
-    
+
     const student = await Student.findById(studentId, "-password")
       .populate({
-        path: 'institutions',
-        select: 'name eiin email address description'
+        path: "institutions",
+        select: "name eiin email address description",
       })
       .populate({
-        path: 'room',
-        select: 'room_name description createdAt'
+        path: "room",
+        select: "room_name description createdAt",
       });
-    
+
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
-    
+
     return res.json(student);
   } catch (err) {
     console.error("getStudentById error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 }
-

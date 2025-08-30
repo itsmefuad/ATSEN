@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import RateLimitedUi from "../../components/RateLimitedUi";
 import InstitutionAnnouncementsWidget from "../../components/common/InstitutionAnnouncementsWidget";
+import ClassRoutine from "../../components/ClassRoutine";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import RoomCard from "../../components/RoomCard";
-import { Link } from "react-router";
-import { Plus } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 const T_Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -16,10 +15,10 @@ const T_Dashboard = () => {
 
   useEffect(() => {
     const fetchRooms = async () => {
-      if (!user?.id) return;
+      if (!user?._id) return;
 
       try {
-        const res = await api.get(`/instructors/${user.id}/rooms`);
+        const res = await api.get(`/instructors/${user._id}/rooms`);
         console.log(res.data);
         setRooms(res.data);
         setIsRateLimited(false);
@@ -43,7 +42,7 @@ const T_Dashboard = () => {
     return (
       <div className="min-h-screen bg-base-200">
         <Navbar />
-        <div className="max-w-7xl mx-auto p-4 mt-6 flex items-center justify-center">
+        <div className="max-w-[95vw] mx-auto px-2 py-4 mt-6 flex items-center justify-center">
           <div className="text-center">
             <div className="loading loading-spinner loading-lg"></div>
             <p className="mt-2 text-base-content/70">Loading dashboard...</p>
@@ -59,7 +58,7 @@ const T_Dashboard = () => {
 
       {isRateLimited && <RateLimitedUi />}
 
-      <div className="max-w-7xl mx-auto p-4 mt-6">
+      <div className="max-w-[95vw] mx-auto px-2 py-4 mt-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-base-content mb-2">
             Welcome, {user?.name || "Instructor"}
@@ -79,47 +78,53 @@ const T_Dashboard = () => {
           <>
             {rooms.length > 0 ? (
               <div className="space-y-8">
-                {/* Normal grid with rooms + create card */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {rooms.map((room) => (
-                    <RoomCard key={room._id} room={room} setRooms={setRooms} />
-                  ))}
-                  <Link
-                    to={"/teacher/create/room"}
-                    className="flex flex-col items-center justify-center border-2 border-dashed border-primary/40 rounded-lg p-6 hover:bg-primary/10 transition bg-base-100"
-                  >
-                    <Plus className="w-16 h-16 text-primary" />
-                    <span className="mt-4 text-primary font-medium text-lg">
-                      Create a Course
-                    </span>
-                  </Link>
+                {/* Grid with rooms and routine */}
+                <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+                  {/* Rooms Grid */}
+                  <div className="lg:col-span-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      {rooms.map((room) => (
+                        <RoomCard key={room._id} room={room} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Class Routine */}
+                  <div className="lg:col-span-3">
+                    <ClassRoutine
+                      rooms={rooms}
+                      userType="instructor"
+                      userId={user?._id}
+                    />
+                  </div>
                 </div>
 
                 {/* Institution Announcements Widget */}
                 <InstitutionAnnouncementsWidget
                   userType="instructor"
-                  userId={user?.id}
+                  userId={user?._id}
                 />
               </div>
             ) : (
               <div className="space-y-8">
-                {/* Centered create card when no rooms exist */}
+                {/* Message when no rooms exist */}
                 <div className="flex justify-center mt-20">
-                  <Link
-                    to={"/teacher/create/room"}
-                    className="flex flex-col items-center justify-center border-2 border-dashed border-primary/40 rounded-lg p-12 hover:bg-primary/10 transition w-80 h-64 bg-base-100"
-                  >
-                    <Plus className="w-20 h-20 text-primary" />
-                    <span className="mt-4 text-primary font-medium text-xl">
-                      Create a Course
-                    </span>
-                  </Link>
+                  <div className="text-center p-12 w-80 h-64 bg-base-100 rounded-lg border border-base-300">
+                    <div className="text-6xl mb-4">📚</div>
+                    <h3 className="text-xl font-semibold text-base-content mb-2">
+                      No Courses Yet
+                    </h3>
+                    <p className="text-base-content/70">
+                      You haven't been assigned to any courses yet. Contact your
+                      institution administrator to get added to courses.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Show announcements even if no rooms */}
                 <InstitutionAnnouncementsWidget
                   userType="instructor"
-                  userId={user?.id}
+                  userId={user?._id}
                 />
               </div>
             )}

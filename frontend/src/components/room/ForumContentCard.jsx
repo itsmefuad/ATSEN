@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { Pin, Edit, Trash2, User, Calendar, Tag, X, Check } from "lucide-react";
+import {
+  Pin,
+  Edit,
+  Trash2,
+  User,
+  Calendar,
+  Tag,
+  X,
+  Check,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
@@ -33,13 +44,23 @@ const ForumContentCard = ({
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
 
-      const response = await api.put(`/forum-content/${announcement._id}`, {
+      // Build request payload - only include isPinned for teachers
+      const payload = {
         title: editData.title,
         content: editData.content,
         tags,
-        isPinned: editData.isPinned,
         userRole: isStudent ? "student" : "teacher",
-      });
+      };
+
+      // Only include isPinned for teachers
+      if (!isStudent) {
+        payload.isPinned = editData.isPinned;
+      }
+
+      const response = await api.put(
+        `/forum-content/${announcement._id}`,
+        payload
+      );
 
       toast.success(
         announcement.contentType === "discussion"
@@ -236,9 +257,18 @@ const ForumContentCard = ({
     >
       <div className="card-body">
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1">
             <h3 className="text-lg font-semibold">{announcement.title}</h3>
             {announcement.isPinned && <Pin className="h-4 w-4 text-primary" />}
+
+            {/* Approval Status Indicator for Discussions */}
+            {announcement.contentType === "discussion" &&
+              !announcement.isApproved && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-warning/10 text-warning rounded-full text-xs">
+                  <Clock className="h-3 w-3" />
+                  <span>Pending Approval</span>
+                </div>
+              )}
           </div>
           <div className="flex gap-1">
             {!isStudent && (

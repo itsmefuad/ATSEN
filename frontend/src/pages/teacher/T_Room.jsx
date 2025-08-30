@@ -7,13 +7,13 @@ import api from "../../lib/axios";
 import {
   ArrowLeft,
   Loader,
-  Trash2,
-  Settings,
+  Info,
   MessageSquare,
   BookOpen,
   Calendar,
   TrendingUp,
   Video, // ← added Video icon
+  Users,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import DiscussionForum from "../../components/room/DiscussionForum";
@@ -25,9 +25,9 @@ import CourseTimeline from "../../components/room/CourseTimeline";
 const T_Room = () => {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [meetingLoading, setMeetingLoading] = useState(false); // ← added meetingLoading
   const [activeTab, setActiveTab] = useState("forum"); // Default to forum
+  const [lastActiveTab, setLastActiveTab] = useState("forum"); // Store last active tab before details
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,24 +35,40 @@ const T_Room = () => {
 
   // Determine active tab based on URL
   useEffect(() => {
-    if (location.pathname.includes("/edit")) {
-      setActiveTab("settings");
+    if (location.pathname.includes("/details")) {
+      setActiveTab("details");
     } else if (location.pathname.includes("/materials")) {
+      // Store as last active tab if not coming from details
+      if (activeTab !== "details") {
+        setLastActiveTab("materials");
+      }
       setActiveTab("materials");
     } else if (location.pathname.includes("/assessment")) {
+      // Store as last active tab if not coming from details
+      if (activeTab !== "details") {
+        setLastActiveTab("assessment");
+      }
       setActiveTab("assessment");
     } else if (location.pathname.includes("/grades")) {
+      // Store as last active tab if not coming from details
+      if (activeTab !== "details") {
+        setLastActiveTab("grades");
+      }
       setActiveTab("grades");
     } else {
+      // Store as last active tab if not coming from details
+      if (activeTab !== "details") {
+        setLastActiveTab("forum");
+      }
       setActiveTab("forum");
     }
-  }, [location.pathname]);
+  }, [location.pathname, activeTab]);
 
   // Fetch room details
   useEffect(() => {
     const fetchRoom = async () => {
       try {
-        const res = await api.get(`/rooms/${id}`);
+        const res = await api.get(`/rooms/${id}/with-sections`);
         setRoom(res.data);
       } catch (error) {
         console.log("Error in fetching room details", error);
@@ -64,40 +80,6 @@ const T_Room = () => {
 
     fetchRoom();
   }, [id]);
-
-  // Delete room handler
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this room?")) return;
-    try {
-      await api.delete(`/rooms/${id}`);
-      toast.success("Room deleted successfully");
-      navigate("/teacher/dashboard");
-    } catch (error) {
-      console.log("Error in deleting room", error);
-      toast.error("Failed to delete room");
-    }
-  };
-
-  // Save room settings handler
-  const handleSave = async () => {
-    if (!room.room_name.trim() || !room.description.trim()) {
-      toast.error("All fields are required");
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await api.put(`/rooms/${id}`, room);
-      toast.success("Room updated successfully!");
-      navigate(`/teacher/dashboard`);
-    } catch (error) {
-      console.log("Error updating the room", error);
-      toast.error("Failed to update room");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // Meeting creation handler
   const handleMeeting = async () => {
@@ -111,6 +93,17 @@ const T_Room = () => {
       toast.error("Could not start meeting");
     } finally {
       setMeetingLoading(false);
+    }
+  };
+
+  // Handle details button toggle
+  const handleDetailsToggle = () => {
+    if (activeTab === "details") {
+      // If details is currently active, go back to last active tab
+      navigate(`/teacher/room/${id}/${lastActiveTab}`);
+    } else {
+      // If details is not active, show details
+      navigate(`/teacher/room/${id}/details`);
     }
   };
 
@@ -158,16 +151,16 @@ const T_Room = () => {
                         <Video className="h-4 w-4 mr-1" />
                         {meetingLoading ? "Starting…" : "Meeting"}
                       </button>
-                      {/* Settings button second */}
-                      <Link
-                        to={`/teacher/room/${id}/edit`}
+                      {/* Details button second */}
+                      <button
+                        onClick={handleDetailsToggle}
                         className={`btn btn-sm ${
-                          activeTab === "settings" ? "btn-primary" : "btn-ghost"
+                          activeTab === "details" ? "btn-primary" : "btn-ghost"
                         }`}
                       >
-                        <Settings className="h-4 w-4 mr-1" />
-                        Settings
-                      </Link>
+                        <Info className="h-4 w-4 mr-1" />
+                        Details
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -212,53 +205,137 @@ const T_Room = () => {
               </div>
 
               {/* Tab Content */}
-              {activeTab === "settings" && (
-                <div className="card bg-base-100 border border-base-300">
-                  <div className="p-6">
-                    <div className="mb-4">
-                      <label className="label">
-                        <span className="label-text">Room name</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="room name"
-                        className="input input-bordered w-full"
-                        value={room.room_name}
-                        onChange={(e) =>
-                          setRoom({ ...room, room_name: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className="label">
-                        <span className="label-text">Description</span>
-                      </label>
-                      <textarea
-                        placeholder="Write your description here..."
-                        className="textarea textarea-bordered w-full h-32"
-                        value={room.description}
-                        onChange={(e) =>
-                          setRoom({ ...room, description: e.target.value })
-                        }
-                      />
-                    </div>
+              {activeTab === "details" && (
+                <div className="space-y-6">
+                  {/* Room Information Card */}
+                  <div className="card bg-base-100 border border-base-300">
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <Info className="h-5 w-5 text-primary" />
+                        Room Information
+                      </h3>
 
-                    <div className="flex justify-between items-center">
-                      <button
-                        type="button"
-                        onClick={handleDelete}
-                        className="btn btn-error"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Room
-                      </button>
-                      <button
-                        className="btn btn-primary"
-                        disabled={saving}
-                        onClick={handleSave}
-                      >
-                        {saving ? "Saving..." : "Save Changes"}
-                      </button>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="label">
+                            <span className="label-text font-medium">
+                              Room Name
+                            </span>
+                          </label>
+                          <div className="bg-base-200 p-3 rounded-lg">
+                            <p className="text-base-content">
+                              {room.room_name}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="label">
+                            <span className="label-text font-medium">
+                              Created Date
+                            </span>
+                          </label>
+                          <div className="bg-base-200 p-3 rounded-lg">
+                            <p className="text-base-content">
+                              {new Date(room.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <label className="label">
+                          <span className="label-text font-medium">
+                            Description
+                          </span>
+                        </label>
+                        <div className="bg-base-200 p-3 rounded-lg">
+                          <p className="text-base-content whitespace-pre-wrap">
+                            {room.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* My Assigned Sections */}
+                      {room.userSections && room.userSections.length > 0 && (
+                        <div className="mt-4">
+                          <label className="label">
+                            <span className="label-text font-medium">
+                              My Assigned Sections
+                            </span>
+                          </label>
+                          <div className="bg-base-200 p-3 rounded-lg">
+                            <div className="flex flex-wrap gap-2">
+                              {room.userSections.map((sectionNum) => (
+                                <span
+                                  key={sectionNum}
+                                  className="badge badge-primary badge-lg"
+                                >
+                                  Section {sectionNum}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Students Information Card */}
+                  <div className="card bg-base-100 border border-base-300">
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <Users className="h-5 w-5 text-primary" />
+                        Enrolled Students
+                        <span className="badge badge-primary ml-2">
+                          {room.students?.length || 0}
+                        </span>
+                      </h3>
+
+                      {room.students && room.students.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {room.students.map((student, index) => (
+                            <div
+                              key={student._id || index}
+                              className="bg-base-200 p-4 rounded-lg"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="avatar placeholder">
+                                  <div className="bg-primary text-primary-content rounded-full w-10">
+                                    <span className="text-sm font-semibold">
+                                      {student.name
+                                        ? student.name.charAt(0).toUpperCase()
+                                        : "S"}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h4 className="font-medium text-base-content">
+                                    {student.name || "Student"}
+                                  </h4>
+                                  <p className="text-sm text-base-content/70">
+                                    {student.email || "No email"}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Users className="h-12 w-12 text-base-content/30 mx-auto mb-3" />
+                          <p className="text-base-content/70">
+                            No students enrolled yet
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

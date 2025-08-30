@@ -41,7 +41,7 @@ const S_SupportTickets = () => {
   ];
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?._id) return;
     fetchTickets();
   }, [user, filters]);
 
@@ -52,7 +52,7 @@ const S_SupportTickets = () => {
         ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v)),
       });
 
-      const response = await api.get(`/support/students/${user.id}/tickets?${params}`);
+      const response = await api.get(`/support/students/${user._id}/tickets?${params}`);
       setTickets(response.data.tickets);
     } catch (error) {
       console.error("Error fetching support tickets:", error);

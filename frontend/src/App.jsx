@@ -13,6 +13,9 @@ import AdminProtectedRoute from "./pages/admin/ProtectedRoute";
 // Auth
 import AuthLogin from "./pages/auth/Login.jsx";
 import AuthSignup from "./pages/auth/Signup.jsx";
+import StudentSignup from "./pages/auth/StudentSignup.jsx";
+import InstructorSignup from "./pages/auth/InstructorSignup.jsx";
+import InstitutionRegistration from "./pages/auth/InstitutionRegistration.jsx";
 
 // Institution
 import InstitutionLayout from "./pages/institution/InstitutionLayout.jsx";
@@ -29,7 +32,6 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 // Teacher
 import T_Dashboard from "./pages/teacher/T_Dashboard.jsx";
-import T_CreateRoom from "./pages/teacher/T_CreateRoom.jsx";
 import T_Room from "./pages/teacher/T_Room.jsx";
 import T_AssignmentDetail from "./pages/teacher/T_AssignmentDetail.jsx";
 import T_QuizDetail from "./pages/teacher/T_QuizDetail.jsx";
@@ -65,6 +67,15 @@ export default function App() {
           {/* 2. Auth (login/signup) */}
           <Route path="/auth/login" element={<AuthLogin />} />
           <Route path="/auth/signup" element={<AuthSignup />} />
+          <Route path="/auth/signup/student" element={<StudentSignup />} />
+          <Route
+            path="/auth/signup/instructor"
+            element={<InstructorSignup />}
+          />
+          <Route
+            path="/auth/institution-register"
+            element={<InstitutionRegistration />}
+          />
 
           {/* 3. Legacy redirect for old login path */}
           <Route
@@ -126,7 +137,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/teacher/create/room" element={<T_CreateRoom />} />
           <Route path="/teacher/room/:id/forum" element={<T_Room />} />
           <Route path="/teacher/room/:id/materials" element={<T_Room />} />
           <Route path="/teacher/room/:id/assessment" element={<T_Room />} />
@@ -139,9 +149,8 @@ export default function App() {
             path="/teacher/room/:id/quiz/:assessmentId"
             element={<T_QuizDetail />}
           />
-          <Route path="/teacher/room/:id/edit" element={<T_Room />} />
+          <Route path="/teacher/room/:id/details" element={<T_Room />} />
           <Route path="/teacher/room/:id" element={<T_Room />} />
-          <Route path="/teacher/edit/room/:id" element={<T_Room />} />
 
           {/* Student routes */}
           <Route
@@ -174,6 +183,7 @@ export default function App() {
           <Route path="/student/room/:id/assessment" element={<S_Room />} />
           <Route path="/student/room/:id/grades" element={<S_Room />} />
           <Route path="/student/room/:id/standings" element={<S_Room />} />
+          <Route path="/student/room/:id/details" element={<S_Room />} />
           <Route
             path="/student/room/:id/assessment/:assessmentId"
             element={<S_AssignmentDetail />}
@@ -194,18 +204,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* Forms Route - accessible to all authenticated users */}
-          <Route
-            path="/forms"
-            element={
-              <ProtectedRoute>
-                <YuvrajForms />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route path="/teacher/edit/room/:id" element={<T_Room />} />
 
           {/* Demo route for timeline testing */}
           <Route path="/demo/timeline" element={<TimelineDemo />} />

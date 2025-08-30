@@ -88,22 +88,22 @@ export default function AddInstructor() {
       <div className="flex items-center gap-4 mb-8">
         <Link
           to={`/${encodeURIComponent(idOrName)}/instructors`}
-          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
             <UserPlus className="h-8 w-8 text-purple-500" />
             Add Instructor
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-base-content/70 mt-1">
             Search and add an instructor to your institution
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="card bg-base-100 border border-base-300 p-6">
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-700">{error}</p>
@@ -112,13 +112,13 @@ export default function AddInstructor() {
 
         <form onSubmit={handleAdd}>
           {/* Search Input */}
-          <div className="mb-6 relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-base-content/70 mb-2">
               Search for Instructor
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+                <Search className="h-5 w-5 text-base-content/40" />
               </div>
               <input
                 type="text"
@@ -129,42 +129,44 @@ export default function AddInstructor() {
                   setSelectedInstructor(null);
                   setError("");
                 }}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="block w-full pl-10 pr-3 py-3 border border-base-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-base-100 text-base-content"
                 autoComplete="off"
               />
-            </div>
 
-            {/* Search Results Dropdown */}
-            {searchQuery && (
-              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {filtered.length > 0 ? (
-                  filtered.map((ins) => (
-                    <div
-                      key={ins._id}
-                      onClick={() => {
-                        setSelectedInstructor(ins);
-                        setSearchQuery("");
-                        setError("");
-                      }}
-                      className={`p-4 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                        selectedInstructor?._id === ins._id
-                          ? "bg-purple-50"
-                          : ""
-                      }`}
-                    >
-                      <div className="font-medium text-gray-900">
-                        {ins.name}
+              {/* Search Results Dropdown */}
+              {searchQuery && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {filtered.length > 0 ? (
+                    filtered.map((ins) => (
+                      <div
+                        key={ins._id}
+                        onClick={() => {
+                          setSelectedInstructor(ins);
+                          setSearchQuery("");
+                          setError("");
+                        }}
+                        className={`p-4 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
+                          selectedInstructor?._id === ins._id
+                            ? "bg-purple-50"
+                            : ""
+                        }`}
+                      >
+                        <div className="font-medium text-base-content">
+                          {ins.name}
+                        </div>
+                        <div className="text-sm text-base-content/70">
+                          {ins.email}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-500">{ins.email}</div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-base-content/60">
+                      No instructors found
                     </div>
-                  ))
-                ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    No instructors found
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Selected Instructor Display */}
@@ -213,7 +215,7 @@ export default function AddInstructor() {
 
             <Link
               to={`/${encodeURIComponent(idOrName)}/instructors`}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="px-6 py-3 border border-base-300 text-base-content/70 rounded-lg hover:bg-base-200 transition-colors font-medium"
             >
               Cancel
             </Link>

@@ -77,13 +77,30 @@ export async function loginInstructor(req, res) {
 export async function getInstructorRooms(req, res) {
   try {
     const { instructorId } = req.params;
-    
+
     const rooms = await Room.find({ instructors: instructorId })
-      .populate('students', 'name email')
-      .populate('instructors', 'name email')
+      .populate("students", "name email")
+      .populate("instructors", "name email")
+      .select("room_name description createdAt students instructors sections")
       .sort({ createdAt: -1 });
-    
-    res.json(rooms);
+
+    // Filter sections to only include those where the instructor is assigned
+    const filteredRooms = rooms.map((room) => {
+      const instructorSections = room.sections.filter(
+        (section) =>
+          section.instructors &&
+          section.instructors.some(
+            (instId) => instId.toString() === instructorId.toString()
+          )
+      );
+
+      return {
+        ...room.toObject(),
+        sections: instructorSections,
+      };
+    });
+
+    res.json(filteredRooms);
   } catch (err) {
     console.error("Get instructor rooms error:", err);
     res.status(500).json({ message: "Server error." });

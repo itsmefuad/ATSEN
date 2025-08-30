@@ -3,6 +3,7 @@ import Navbar from "../../components/Navbar";
 import RateLimitedUi from "../../components/RateLimitedUi";
 import InstitutionCard from "../../components/InstitutionCard";
 import InstitutionAnnouncementsWidget from "../../components/common/InstitutionAnnouncementsWidget";
+import ClassRoutine from "../../components/ClassRoutine";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import { Link } from "react-router";
@@ -26,11 +27,11 @@ const S_Dashboard = () => {
 
   useEffect(() => {
     const fetchStudentData = async () => {
-      if (!user?.id) return;
+      if (!user?._id) return;
 
       try {
         // Fetch rooms grouped by institution
-        const roomsRes = await api.get(`/students/${user.id}/rooms`);
+        const roomsRes = await api.get(`/students/${user._id}/rooms`);
         setRoomsByInstitution(roomsRes.data);
 
         // Extract all rooms for backwards compatibility (if needed)
@@ -41,7 +42,7 @@ const S_Dashboard = () => {
         setRooms(allRooms);
 
         // Fetch student details with institutions
-        const studentRes = await api.get(`/students/${user.id}`);
+        const studentRes = await api.get(`/students/${user._id}`);
         if (studentRes.data.institutions) {
           setInstitutions(studentRes.data.institutions);
         }
@@ -79,7 +80,7 @@ const S_Dashboard = () => {
     return (
       <div className="min-h-screen bg-base-200">
         <Navbar />
-        <div className="max-w-7xl mx-auto p-4 mt-6 flex items-center justify-center">
+        <div className="max-w-[95vw] mx-auto px-2 py-4 mt-6 flex items-center justify-center">
           <div className="text-center">
             <div className="loading loading-spinner loading-lg"></div>
             <p className="mt-2 text-base-content/70">Loading dashboard...</p>
@@ -95,7 +96,7 @@ const S_Dashboard = () => {
 
       {isRateLimited && <RateLimitedUi />}
 
-      <div className="max-w-7xl mx-auto p-4 mt-6">
+      <div className="max-w-[95vw] mx-auto px-2 py-4 mt-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-base-content mb-2">
             Welcome, {user?.name || "Student"}
@@ -194,38 +195,54 @@ const S_Dashboard = () => {
                             </div>
                           </div>
 
-                          {/* Rooms Grid for this Institution */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {data.rooms.map((room) => (
-                              <Link
-                                key={room._id}
-                                to={`/student/room/${room._id}/forum`}
-                                className="card bg-base-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 border border-base-300 group border-t-4 border-solid border-t-[#00A2E8]"
-                              >
-                                <div className="p-6">
-                                  <div className="flex items-start justify-between mb-2">
-                                    <h3 className="text-lg font-semibold text-base-content group-hover:text-primary">
-                                      {room.room_name}
-                                    </h3>
-                                    <BookOpen className="h-5 w-5 text-primary group-hover:text-primary" />
-                                  </div>
-                                  <p className="text-base-content/70 line-clamp-3 mb-4">
-                                    {room.description}
-                                  </p>
+                          {/* Rooms and Routine Layout */}
+                          <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+                            {/* Rooms Grid */}
+                            <div className="lg:col-span-3">
+                              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {data.rooms.map((room) => (
+                                  <Link
+                                    key={room._id}
+                                    to={`/student/room/${room._id}/forum`}
+                                    className="card bg-base-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 border border-base-300 group border-t-4 border-solid border-t-[#00A2E8]"
+                                  >
+                                    <div className="p-6">
+                                      <div className="flex items-start justify-between mb-2">
+                                        <h3 className="text-lg font-semibold text-base-content group-hover:text-primary">
+                                          {room.room_name}
+                                        </h3>
+                                        <BookOpen className="h-5 w-5 text-primary group-hover:text-primary" />
+                                      </div>
+                                      <p className="text-base-content/70 line-clamp-3 mb-4">
+                                        {room.description}
+                                      </p>
 
-                                  <div className="flex items-center justify-between text-sm text-base-content/60">
-                                    <div className="flex items-center gap-1">
-                                      <Calendar className="h-3 w-3" />
-                                      <span>{formatDate(room.createdAt)}</span>
+                                      <div className="flex items-center justify-between text-sm text-base-content/60">
+                                        <div className="flex items-center gap-1">
+                                          <Calendar className="h-3 w-3" />
+                                          <span>
+                                            {formatDate(room.createdAt)}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Users className="h-3 w-3" />
+                                          <span>Enrolled</span>
+                                        </div>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center gap-1">
-                                      <Users className="h-3 w-3" />
-                                      <span>Enrolled</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </Link>
-                            ))}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Class Routine */}
+                            <div className="lg:col-span-3">
+                              <ClassRoutine
+                                rooms={data.rooms}
+                                userType="student"
+                                userId={user?._id}
+                              />
+                            </div>
                           </div>
                         </div>
                       )
@@ -235,7 +252,7 @@ const S_Dashboard = () => {
                     <div className="mt-8">
                       <InstitutionAnnouncementsWidget
                         userType="student"
-                        userId={user?.id}
+                        userId={user?._id}
                       />
                     </div>
                   </div>
@@ -255,7 +272,7 @@ const S_Dashboard = () => {
                     {/* Show announcements even if no rooms */}
                     <InstitutionAnnouncementsWidget
                       userType="student"
-                      userId={user?.id}
+                      userId={user?._id}
                     />
                   </div>
                 )}
