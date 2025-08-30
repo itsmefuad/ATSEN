@@ -62,6 +62,7 @@ const SectionManager = ({ sections, onSectionsChange }) => {
     newSections.push({
       sectionNumber: newSectionNumber,
       classTimings: [{ day: "", startTime: "", endTime: "" }],
+      instructors: [],
     });
     onSectionsChange(newSections);
   };

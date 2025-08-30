@@ -32,13 +32,17 @@ async function findInstitution(idOrName) {
 export async function createRoom(req, res) {
   try {
     const { idOrName } = req.params;
-    const {
+    const { room_name, description, instructors = [], sections } = req.body;
+
+    console.log("=== ROOM CREATION BACKEND ===");
+    console.log("Received data:", {
       room_name,
       description,
-      maxCapacity,
-      instructors = [],
+      instructors,
       sections,
-    } = req.body;
+    });
+    console.log("Instructors array:", instructors);
+    console.log("Number of sections:", sections?.length);
 
     // validate required fields
     if (!room_name) {
@@ -77,7 +81,6 @@ export async function createRoom(req, res) {
     const room = await Room.create({
       room_name,
       description,
-      maxCapacity,
       instructors: Array.isArray(instructors) ? instructors : [],
       institution: inst._id,
       sections,

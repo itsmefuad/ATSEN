@@ -94,6 +94,11 @@ export async function getRoomDetails(req, res) {
       instructors: instructorsWithSections,
     };
 
+    console.log("=== ROOM DETAILS RESPONSE ===");
+    console.log("Room instructors count:", room.instructors?.length || 0);
+    console.log("Room instructors:", room.instructors);
+    console.log("Instructors with sections:", instructorsWithSections);
+
     console.log("Sending room data successfully");
     res.json(roomWithSectionInfo);
   } catch (err) {

@@ -1,7 +1,7 @@
 // frontend/src/pages/institution/AddRoom.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Plus, Minus, Home } from "lucide-react";
+import { ArrowLeft, Plus, Home } from "lucide-react";
 import SectionManager from "../../components/SectionManager.jsx";
 
 export default function AddRoom() {
@@ -11,17 +11,18 @@ export default function AddRoom() {
   // form state
   const [roomName, setRoomName] = useState("");
   const [description, setDescription] = useState("");
-  const [maxCapacity, setMaxCapacity] = useState(30);
   const [searchQuery, setSearchQuery] = useState("");
   const [instructors, setInstructors] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
+  const [selectedSections, setSelectedSections] = useState([]);
 
   // sections state
   const [sections, setSections] = useState([
     {
       sectionNumber: 1,
       classTimings: [{ day: "", startTime: "", endTime: "" }],
+      instructors: [],
     },
   ]);
 
@@ -45,9 +46,62 @@ export default function AddRoom() {
     setFiltered(instructors.filter((t) => t.name.toLowerCase().includes(q)));
   }, [searchQuery, instructors]);
 
-  // capacity controls
-  const decrement = () => setMaxCapacity((n) => Math.max(0, n - 1));
-  const increment = () => setMaxCapacity((n) => Math.min(10000, n + 1));
+  // Handle section selection for instructor assignment
+  const handleSectionToggle = (sectionNumber) => {
+    setSelectedSections((prev) =>
+      prev.includes(sectionNumber)
+        ? prev.filter((s) => s !== sectionNumber)
+        : [...prev, sectionNumber]
+    );
+  };
+
+  // Handle instructor assignment to sections
+  const assignInstructorToSections = () => {
+    if (!selectedInstructor || selectedSections.length === 0) {
+      alert("Please select an instructor and at least one section.");
+      return;
+    }
+
+    // Update sections with instructor assignment
+    setSections((prevSections) =>
+      prevSections.map((section) => {
+        if (selectedSections.includes(section.sectionNumber)) {
+          const instructorExists = section.instructors?.some(
+            (inst) => inst._id === selectedInstructor._id
+          );
+          if (!instructorExists) {
+            return {
+              ...section,
+              instructors: [...(section.instructors || []), selectedInstructor],
+            };
+          }
+        }
+        return section;
+      })
+    );
+
+    // Reset selections
+    setSelectedInstructor(null);
+    setSelectedSections([]);
+    setSearchQuery("");
+  };
+
+  // Remove instructor from a specific section
+  const removeInstructorFromSection = (sectionNumber, instructorId) => {
+    setSections((prevSections) =>
+      prevSections.map((section) => {
+        if (section.sectionNumber === sectionNumber) {
+          return {
+            ...section,
+            instructors: section.instructors.filter(
+              (inst) => inst._id !== instructorId
+            ),
+          };
+        }
+        return section;
+      })
+    );
+  };
 
   // validate sections before submission
   const validateSections = () => {
@@ -96,13 +150,15 @@ export default function AddRoom() {
       classTimings: section.classTimings.filter(
         (timing) => timing.day && timing.startTime && timing.endTime
       ),
+      instructors: (section.instructors || []).map(
+        (instructor) => instructor._id
+      ),
     }));
 
     const payload = {
       room_name: roomName,
       description,
-      maxCapacity,
-      instructors: selectedInstructor ? [selectedInstructor._id] : [],
+      instructors: [],
       institution: idOrName,
       sections: filteredSections,
     };
@@ -186,37 +242,26 @@ export default function AddRoom() {
               required
             />
           </div>
+        </div>
 
-          {/* Maximum Capacity */}
-          <div className="form-control mb-6">
-            <label className="label">
-              <span className="label-text font-medium">Maximum Capacity</span>
-            </label>
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={decrement}
-                className="btn btn-outline btn-sm btn-circle"
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="text-lg font-semibold bg-base-200 px-4 py-2 rounded-lg min-w-[60px] text-center">
-                {maxCapacity}
-              </span>
-              <button
-                type="button"
-                onClick={increment}
-                className="btn btn-outline btn-sm btn-circle"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+        {/* Class Sections Configuration Card */}
+        <div className="card bg-base-100 border border-base-300 p-6">
+          <h2 className="text-xl font-semibold text-base-content mb-4">
+            Class Sections
+          </h2>
+          <SectionManager sections={sections} onSectionsChange={setSections} />
+        </div>
 
-          {/* Assign Instructor */}
-          <div className="form-control">
+        {/* Instructor Assignment Card */}
+        <div className="card bg-base-100 border border-base-300 p-6">
+          <h2 className="text-xl font-semibold text-base-content mb-4">
+            Assign Instructors to Sections
+          </h2>
+
+          {/* Instructor Selection */}
+          <div className="form-control mb-4">
             <label className="label">
-              <span className="label-text font-medium">Assign Instructor</span>
+              <span className="label-text font-medium">Select Instructor</span>
             </label>
             <div className="relative">
               <input
@@ -264,39 +309,154 @@ export default function AddRoom() {
                 </div>
               )}
             </div>
-
-            {/* Selected Instructor Display */}
-            {selectedInstructor && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-blue-900">
-                      Selected Instructor
-                    </h3>
-                    <p className="text-blue-700">{selectedInstructor.name}</p>
-                    <p className="text-sm text-blue-600">
-                      {selectedInstructor.email}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedInstructor(null)}
-                    className="btn btn-ghost btn-sm btn-circle text-blue-400 hover:text-blue-600"
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Class Sections Configuration Card */}
-        <div className="card bg-base-100 border border-base-300 p-6">
-          <h2 className="text-xl font-semibold text-base-content mb-4">
-            Class Sections
-          </h2>
-          <SectionManager sections={sections} onSectionsChange={setSections} />
+          {/* Selected Instructor Display */}
+          {selectedInstructor && (
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-blue-900">
+                    Selected Instructor
+                  </h3>
+                  <p className="text-blue-700">{selectedInstructor.name}</p>
+                  <p className="text-sm text-blue-600">
+                    {selectedInstructor.email}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedInstructor(null)}
+                  className="btn btn-ghost btn-sm btn-circle text-blue-400 hover:text-blue-600"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Section Selection */}
+          {selectedInstructor && sections.length > 0 && (
+            <div className="form-control mb-4">
+              <label className="label">
+                <span className="label-text font-medium">
+                  Assign to Sections
+                </span>
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {sections.map((section) => (
+                  <label key={section.sectionNumber} className="cursor-pointer">
+                    <div
+                      className={`p-3 border-2 rounded-lg transition-colors ${
+                        selectedSections.includes(section.sectionNumber)
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-base-300 hover:border-blue-300"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-primary"
+                          checked={selectedSections.includes(
+                            section.sectionNumber
+                          )}
+                          onChange={() =>
+                            handleSectionToggle(section.sectionNumber)
+                          }
+                        />
+                        <span className="font-medium">
+                          Section {section.sectionNumber}
+                        </span>
+                      </div>
+                      <div className="text-sm text-base-content/70 mt-1">
+                        {section.classTimings.length} class timing(s)
+                      </div>
+                      {section.instructors &&
+                        section.instructors.length > 0 && (
+                          <div className="text-xs text-green-600 mt-1">
+                            Instructors:{" "}
+                            {section.instructors
+                              .map((inst) => inst.name)
+                              .join(", ")}
+                          </div>
+                        )}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Assignment Button */}
+          {selectedInstructor && selectedSections.length > 0 && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={assignInstructorToSections}
+                className="btn btn-primary"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Assign to Selected Sections
+              </button>
+            </div>
+          )}
+
+          {/* Current Assignments Display */}
+          {sections.some(
+            (section) => section.instructors && section.instructors.length > 0
+          ) && (
+            <div className="mt-6">
+              <h3 className="text-lg font-medium text-base-content mb-3">
+                Current Assignments
+              </h3>
+              <div className="space-y-2">
+                {sections.map(
+                  (section) =>
+                    section.instructors &&
+                    section.instructors.length > 0 && (
+                      <div
+                        key={section.sectionNumber}
+                        className="p-3 bg-green-50 border border-green-200 rounded-lg"
+                      >
+                        <div className="font-medium text-green-800 mb-2">
+                          Section {section.sectionNumber}
+                        </div>
+                        <div className="space-y-1">
+                          {section.instructors.map((instructor) => (
+                            <div
+                              key={instructor._id}
+                              className="flex items-center justify-between bg-white p-2 rounded border"
+                            >
+                              <div>
+                                <span className="text-sm font-medium text-green-700">
+                                  {instructor.name}
+                                </span>
+                                <span className="text-xs text-green-600 ml-2">
+                                  ({instructor.email})
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removeInstructorFromSection(
+                                    section.sectionNumber,
+                                    instructor._id
+                                  )
+                                }
+                                className="btn btn-ghost btn-xs text-red-500 hover:text-red-700"
+                                title="Remove instructor from this section"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
