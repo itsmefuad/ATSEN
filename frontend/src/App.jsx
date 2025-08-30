@@ -6,9 +6,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 
 // Admin
-import Login from "./pages/admin/Login";
-import Dashboard from "./pages/admin/Dashboard";
-import AdminProtectedRoute from "./pages/admin/ProtectedRoute";
+import Login from "./pages/admin/Login.jsx";
+import Dashboard from "./pages/admin/Dashboard.jsx";
+import AdminProtectedRoute from "./pages/admin/ProtectedRoute.jsx";
 
 // Auth
 import AuthLogin from "./pages/auth/Login.jsx";

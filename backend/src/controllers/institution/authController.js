@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
 import Institution from "../../models/institution.js";
+import PendingInstitute from "../../models/PendingInstitute.js";
 
 // Utility to generate an 8‐digit unique loginId
 async function generateLoginId() {
@@ -29,7 +30,7 @@ async function ensureSlug(inst) {
   return inst.slug;
 }
 
-// Register a new institution
+// Register a new institution (saves to pending for admin approval)
 export async function registerInstitution(req, res) {
   const { name, eiin, email, password, phone, address, description } = req.body;
   if (!name || !eiin || !email || !password) {
@@ -37,38 +38,36 @@ export async function registerInstitution(req, res) {
   }
 
   try {
-    const existing = await Institution.findOne({ $or: [{ eiin }, { email }] });
-    if (existing) {
+    // Check if institution already exists (approved) or is pending
+    const existingInstitution = await Institution.findOne({ $or: [{ eiin }, { email }] });
+    if (existingInstitution) {
       return res.status(409).json({
         message: "Institution with same EIIN or Email already exists."
       });
     }
 
-    const loginId = await generateLoginId();
-    const hashed = await bcrypt.hash(password, 10);
+    const existingPending = await PendingInstitute.findOne({ $or: [{ eiin }, { email }] });
+    if (existingPending) {
+      return res.status(409).json({
+        message: "Registration request with same EIIN or Email is already pending approval."
+      });
+    }
 
-    const inst = await Institution.create({
+    // Create pending institution request
+    const pendingInstitute = await PendingInstitute.create({
       name,
       eiin: eiin.toUpperCase().trim(),
       email: email.toLowerCase().trim(),
-      password: hashed,
+      password, // Will be hashed by the model's pre-save hook
       phone,
       address,
-      description,
-      loginId
+      description
     });
 
-    const slug = await ensureSlug(inst);
-
-    const token = jwt.sign(
-      { id: inst._id, role: "institution" },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
     return res.status(201).json({
-      token,
-      institution: { id: inst._id, slug, name: inst.name }
+      message: "Registration request submitted successfully. Please wait for admin approval.",
+      requestId: pendingInstitute._id,
+      status: "pending"
     });
   } catch (err) {
     console.error("Register institution error:", err);

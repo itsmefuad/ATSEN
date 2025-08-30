@@ -2,7 +2,9 @@ import express from "express";
 import {
   loginAdmin,
   getPendingInstitutions,
-  approveInstitution
+  approveInstitution,
+  rejectInstitution,
+  getAllInstitutions
 } from "../controllers/adminController.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 
@@ -13,6 +15,12 @@ router.post("/login", loginAdmin);
 
 // Protected routes
 router.get(
+  "/institutions",
+  verifyToken,
+  getAllInstitutions
+);
+
+router.get(
   "/institutions/pending",
   verifyToken,
   getPendingInstitutions
@@ -22,6 +30,12 @@ router.post(
   "/institutions/:id/approve",
   verifyToken,
   approveInstitution
+);
+
+router.post(
+  "/institutions/:id/reject",
+  verifyToken,
+  rejectInstitution
 );
 
 export default router;

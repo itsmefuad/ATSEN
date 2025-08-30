@@ -37,19 +37,31 @@ export default function InstructorSignup() {
   };
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <Navbar />
-      <div
-        className="flex items-center justify-center px-4"
-        style={{ minHeight: "calc(100vh - 64px)" }}
-      >
-        <div className="max-w-md w-full bg-base-100 shadow-lg rounded-lg p-8">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-semibold text-base-content mb-2">
-              Instructor Registration
-            </h2>
-            <p className="text-base-content/70">Create your instructor account</p>
-          </div>
+    <div className="min-h-screen relative">
+      {/* Background Image with Blur */}
+      <div className="absolute inset-0">
+        <img 
+          src="/BlueHomeAbstract.jpg" 
+          alt="Background" 
+          className="w-full h-full object-cover blur-sm"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-40" />
+      </div>
+      
+      {/* Content */}
+      <div className="relative z-10">
+        <Navbar />
+        <div
+          className="flex items-center justify-center px-4"
+          style={{ minHeight: "calc(100vh - 64px)" }}
+        >
+          <div className="max-w-md w-full bg-base-100/95 backdrop-blur-sm shadow-lg rounded-lg p-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-semibold text-base-content mb-2">
+                Instructor Registration
+              </h2>
+              <p className="text-base-content/70">Create your instructor account</p>
+            </div>
 
           {error && (
             <div className="alert alert-error mb-4">
@@ -126,6 +138,7 @@ export default function InstructorSignup() {
             </Link>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
