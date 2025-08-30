@@ -103,6 +103,7 @@ const T_Dashboard = () => {
                 <InstitutionAnnouncementsWidget
                   userType="instructor"
                   userId={user?._id}
+                  institutionSlug="hogwarts"
                 />
               </div>
             ) : (
@@ -125,6 +126,7 @@ const T_Dashboard = () => {
                 <InstitutionAnnouncementsWidget
                   userType="instructor"
                   userId={user?._id}
+                  institutionSlug="hogwarts"
                 />
               </div>
             )}

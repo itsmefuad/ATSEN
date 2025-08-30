@@ -10,6 +10,7 @@ import {
   Trophy,
   Info,
   Users,
+  FileText,
 } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
@@ -20,6 +21,7 @@ import StudentAssessment from "../../components/room/StudentAssessment";
 import StudentGrades from "../../components/room/StudentGrades";
 import CourseTimeline from "../../components/room/CourseTimeline";
 import RoomStandings from "../../components/room/RoomStandings";
+import YuvrajForms from "../yuvraj_Forms";
 
 const S_Room = () => {
   const [room, setRoom] = useState(null);
@@ -59,6 +61,12 @@ const S_Room = () => {
         setLastActiveTab("standings");
       }
       setActiveTab("standings");
+    } else if (location.pathname.includes("/forms")) {
+      // Store as last active tab if not coming from details
+      if (activeTab !== "details") {
+        setLastActiveTab("forms");
+      }
+      setActiveTab("forms");
     } else {
       // Store as last active tab if not coming from details
       if (activeTab !== "details") {
@@ -191,6 +199,15 @@ const S_Room = () => {
                 >
                   <Trophy className="h-4 w-4 mr-2" />
                   Standings
+                </Link>
+                <Link
+                  to={`/student/room/${id}/forms`}
+                  className={`tab ${
+                    activeTab === "forms" ? "tab-active" : ""
+                  }`}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Forms
                 </Link>
               </div>
 
@@ -342,6 +359,8 @@ const S_Room = () => {
               {activeTab === "grades" && <StudentGrades roomId={id} />}
 
               {activeTab === "standings" && <RoomStandings roomId={id} />}
+
+              {activeTab === "forms" && <YuvrajForms hideNavbar={true} />}
             </div>
 
             {/* Timeline Sidebar */}

@@ -46,8 +46,10 @@ import MyProgress from "./pages/MyProgress.jsx";
 // Institution Document Management
 import DocumentDesk from "./pages/institution/DocumentDesk.jsx";
 import InstitutionSupportDesk from "./pages/institution/InstitutionSupportDesk.jsx";
+import InstitutionAnnouncementDetail from "./pages/institution/InstitutionAnnouncementDetail.jsx";
 import S_AssignmentDetail from "./pages/student/S_AssignmentDetail.jsx";
 import S_QuizDetail from "./pages/student/S_QuizDetail.jsx";
+import AnnouncementDetail from "./pages/student/AnnouncementDetail.jsx";
 
 import TimelineDemo from "./components/room/TimelineDemo.jsx";
 import PostLoginRedirect from "./components/PostLoginRedirect.jsx";
@@ -126,7 +128,14 @@ export default function App() {
 
             {/* Support Desk */}
             <Route path="support-desk" element={<InstitutionSupportDesk />} />
-          </Route>
+
+                         {/* Forms */}
+             <Route path="forms" element={<YuvrajForms hideNavbar={true} />} />
+             
+             {/* Announcements */}
+             <Route path="announcements" element={<InstitutionAnnouncementDetail />} />
+             <Route path="announcements/:announcementId" element={<InstitutionAnnouncementDetail />} />
+           </Route>
 
           {/* 6. Teacher */}
           <Route
@@ -152,37 +161,54 @@ export default function App() {
           <Route path="/teacher/room/:id/details" element={<T_Room />} />
           <Route path="/teacher/room/:id" element={<T_Room />} />
 
-          {/* Student routes */}
-          <Route
-            path="/student/dashboard"
-            element={
-              <ProtectedRoute requiredRole="student">
-                <S_Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/student/profile" element={<S_Profile />} />
-          <Route
-            path="/student/documents"
-            element={
-              <ProtectedRoute requiredRole="student">
-                <S_Documents />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/student/support-tickets"
-            element={
-              <ProtectedRoute requiredRole="student">
-                <S_SupportTickets />
-              </ProtectedRoute>
-            }
-          />
+                     {/* Student routes */}
+           <Route
+             path="/student/dashboard"
+             element={
+               <ProtectedRoute requiredRole="student">
+                 <S_Dashboard />
+               </ProtectedRoute>
+             }
+           />
+           <Route path="/student/profile" element={<S_Profile />} />
+           <Route
+             path="/student/documents"
+             element={
+               <ProtectedRoute requiredRole="student">
+                 <S_Documents />
+               </ProtectedRoute>
+             }
+           />
+           <Route
+             path="/student/support-tickets"
+             element={
+               <ProtectedRoute requiredRole="student">
+                 <S_SupportTickets />
+               </ProtectedRoute>
+             }
+           />
+           <Route
+             path="/student/announcements/:idOrName"
+             element={
+               <ProtectedRoute requiredRole="student">
+                 <AnnouncementDetail />
+               </ProtectedRoute>
+             }
+           />
+           <Route
+             path="/student/announcements/:idOrName/:announcementId"
+             element={
+               <ProtectedRoute requiredRole="student">
+                 <AnnouncementDetail />
+               </ProtectedRoute>
+             }
+           />
           <Route path="/student/room/:id/forum" element={<S_Room />} />
           <Route path="/student/room/:id/materials" element={<S_Room />} />
           <Route path="/student/room/:id/assessment" element={<S_Room />} />
           <Route path="/student/room/:id/grades" element={<S_Room />} />
           <Route path="/student/room/:id/standings" element={<S_Room />} />
+          <Route path="/student/room/:id/forms" element={<S_Room />} />
           <Route path="/student/room/:id/details" element={<S_Room />} />
           <Route
             path="/student/room/:id/assessment/:assessmentId"
@@ -201,6 +227,26 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MyProgress />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Forms Route for Students - Institution Context */}
+          <Route
+            path="/student/:idOrName/forms"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <YuvrajForms />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Global Forms Route for Students (fallback) */}
+          <Route
+            path="/forms"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <YuvrajForms />
               </ProtectedRoute>
             }
           />

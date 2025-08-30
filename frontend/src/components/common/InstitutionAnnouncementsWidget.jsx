@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Megaphone, Calendar, Pin, Tag } from "lucide-react";
+import { Megaphone, Calendar, Pin, Tag, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import api from "../../lib/axios";
 
-const InstitutionAnnouncementsWidget = ({ userType, userId }) => {
+const InstitutionAnnouncementsWidget = ({ userType, userId, institutionSlug }) => {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -70,11 +71,23 @@ const InstitutionAnnouncementsWidget = ({ userType, userId }) => {
 
   return (
     <div className="card bg-base-100 border border-base-300 p-6">
-      <div className="flex items-center mb-4">
-        <Megaphone className="h-6 w-6 text-[#00A2E8] mr-3" />
-        <h3 className="text-lg font-semibold text-base-content">
-          Institution Announcements
-        </h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <Megaphone className="h-6 w-6 text-[#00A2E8] mr-3" />
+          <h3 className="text-lg font-semibold text-base-content">
+            Institution Announcements
+          </h3>
+        </div>
+        
+                 {announcements.length > 0 && (
+           <Link
+             to={`/student/announcements/${institutionSlug || announcements[0]?.institution?.slug || 'hogwarts'}`}
+             className="btn btn-sm btn-outline btn-primary hover:btn-primary"
+           >
+             View All
+             <ArrowRight className="h-4 w-4 ml-1" />
+           </Link>
+         )}
       </div>
 
       {announcements.length === 0 ? (
@@ -86,15 +99,19 @@ const InstitutionAnnouncementsWidget = ({ userType, userId }) => {
           </p>
         </div>
       ) : (
-        <div className="space-y-4 max-h-96 overflow-y-auto">
-          {announcements.map((announcement) => (
-            <div
+                <div className="space-y-3">
+          {announcements.slice(0, 2).map((announcement, index) => (
+            <Link
               key={announcement._id}
-              className={`p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${
+              to={`/student/announcements/${institutionSlug || announcement.institution?.slug || 'hogwarts'}/${announcement._id}`}
+              className={`block p-4 rounded-lg border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transform ${
                 announcement.isPinned
-                  ? "border-[#00A2E8]/30 bg-[#00A2E8]/5"
-                  : "border-base-300 bg-base-50"
+                  ? "border-[#00A2E8]/30 bg-[#00A2E8]/5 hover:bg-[#00A2E8]/10"
+                  : "border-base-300 bg-base-50 hover:bg-base-100"
               }`}
+              style={{ 
+                transitionDelay: `${index * 100}ms` 
+              }}
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
@@ -144,8 +161,21 @@ const InstitutionAnnouncementsWidget = ({ userType, userId }) => {
                   <span>Updated: {formatDate(announcement.updatedAt)}</span>
                 )}
               </div>
-            </div>
+            </Link>
           ))}
+          
+          {/* Show "View All" link if there are more than 2 announcements */}
+          {announcements.length > 2 && (
+            <div className="mt-4 text-center">
+              <Link
+                to={`/student/announcements/${institutionSlug || announcements[0]?.institution?.slug || 'hogwarts'}`}
+                className="btn btn-sm btn-ghost btn-outline hover:btn-primary transition-all duration-200"
+              >
+                <ArrowRight className="h-4 w-4 mr-1" />
+                View All {announcements.length} Announcements
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </div>

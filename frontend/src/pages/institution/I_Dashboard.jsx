@@ -236,6 +236,12 @@ export default function I_Dashboard() {
               Institution Announcements
             </h2>
           </div>
+          <Link
+            to={`/${idOrName}/announcements`}
+            className="btn btn-outline btn-primary hover:btn-primary"
+          >
+            View All Announcements
+          </Link>
         </div>
 
         {/* Create Announcement Component */}

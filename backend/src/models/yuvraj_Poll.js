@@ -11,6 +11,16 @@ const YuvrajPollSchema = new mongoose.Schema(
         label: { type: String },
       },
     ],
+    // Custom evaluation questions
+    customQuestions: [
+      {
+        type: { type: String, enum: ["slider", "multiple_choice", "text"] },
+        question: { type: String },
+        min: { type: Number },
+        max: { type: Number },
+        options: [{ type: String }]
+      }
+    ],
     // For evaluation - updated to use ObjectId for ATSEN2 consistency
     targetInstructorId: { type: mongoose.Schema.Types.ObjectId, ref: "Instructor" },
     targetInstructorName: { type: String },
@@ -38,6 +48,14 @@ const YuvrajPollResponseSchema = new mongoose.Schema(
     satisfactionLevel: { type: Number, min: 1, max: 10 },
     contentDeliveryRating: { type: Number, min: 1, max: 10 },
     recommendations: { type: String },
+    // Custom question responses
+    customResponses: [
+      {
+        questionIndex: { type: Number },
+        questionType: { type: String },
+        value: { type: mongoose.Schema.Types.Mixed } // Can be number for slider, string for text/multiple choice
+      }
+    ]
   },
   { timestamps: true }
 );

@@ -12,6 +12,7 @@ import {
   User,
   X,
   Paperclip,
+  Eye,
 } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
@@ -297,39 +298,73 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
                         {(material.fileType === "pdf" ||
                           material.fileType === "link_and_pdf") &&
                           material.filePath && (
-                            <button
-                              onClick={async () => {
-                                try {
-                                  const response = await api.get(
-                                    `/materials/${material._id}/download`,
-                                    {
-                                      responseType: "blob",
-                                    }
-                                  );
-                                  const url = window.URL.createObjectURL(
-                                    new Blob([response.data])
-                                  );
-                                  const link = document.createElement("a");
-                                  link.href = url;
-                                  link.setAttribute(
-                                    "download",
-                                    material.originalFileName ||
-                                      material.fileName
-                                  );
-                                  document.body.appendChild(link);
-                                  link.click();
-                                  link.remove();
-                                  window.URL.revokeObjectURL(url);
-                                } catch (error) {
-                                  console.error("Download error:", error);
-                                  toast.error("Failed to download PDF");
-                                }
-                              }}
-                              className="btn btn-secondary btn-sm"
-                            >
-                              <Download className="h-4 w-4 mr-1" />
-                              View PDF
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const response = await api.get(
+                                      `/materials/${material._id}/download`,
+                                      {
+                                        responseType: "blob",
+                                      }
+                                    );
+                                    const blob = new Blob([response.data], { type: 'application/pdf' });
+                                    const url = window.URL.createObjectURL(blob);
+                                    
+                                    // Open in new tab for viewing
+                                    window.open(url, '_blank');
+                                    
+                                    // Clean up after a delay
+                                    setTimeout(() => {
+                                      window.URL.revokeObjectURL(url);
+                                    }, 1000);
+                                  } catch (error) {
+                                    console.error("View error:", error);
+                                    toast.error("Failed to view PDF");
+                                  }
+                                }}
+                                className="btn btn-primary btn-sm"
+                                title="View PDF in new tab"
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View PDF
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const response = await api.get(
+                                      `/materials/${material._id}/download`,
+                                      {
+                                        responseType: "blob",
+                                      }
+                                    );
+                                    const url = window.URL.createObjectURL(
+                                      new Blob([response.data])
+                                    );
+                                    const link = document.createElement("a");
+                                    link.href = url;
+                                    link.setAttribute(
+                                      "download",
+                                      material.originalFileName ||
+                                        material.fileName
+                                    );
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.remove();
+                                    window.URL.revokeObjectURL(url);
+                                    toast.success("Download started!");
+                                  } catch (error) {
+                                    console.error("Download error:", error);
+                                    toast.error("Failed to download PDF");
+                                  }
+                                }}
+                                className="btn btn-secondary btn-sm"
+                                title="Download PDF to your device"
+                              >
+                                <Download className="h-4 w-4 mr-1" />
+                                Download
+                              </button>
+                            </div>
                           )}
                       </div>
                     </div>

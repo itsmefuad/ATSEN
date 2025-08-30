@@ -10,7 +10,7 @@ const router = express.Router();
 // Get all polls for a specific institution or room
 router.get("/", async (req, res) => {
   try {
-    const { institutionId, institutionSlug, roomId } = req.query;
+    const { institutionId, institutionSlug, roomId, studentId } = req.query;
     
     let query = { isActive: true };
     
@@ -21,20 +21,63 @@ router.get("/", async (req, res) => {
       if (institution) {
         query.institutionId = institution._id;
       }
+    } else if (studentId) {
+      // If no institution specified but we have a student, infer institutions from the student
+      try {
+        const student = await Student.findById(studentId).select('institutions');
+        if (student?.institutions?.length) {
+          query.institutionId = { $in: student.institutions };
+        }
+      } catch (e) {
+        // Best-effort; if this fails, we continue without institution filter
+      }
     }
     
     if (roomId) {
+      // When in room context, show both institution-wide forms AND room-specific forms for this room
       query.$or = [
         { createdFor: "institution", institutionId: query.institutionId },
         { createdFor: "room", targetRoomId: roomId }
       ];
     }
     
-    const polls = await YuvrajPoll.find(query)
+    let polls = await YuvrajPoll.find(query)
       .populate('targetInstructorId', 'name email')
       .populate('institutionId', 'name slug')
       .populate('targetRoomId', 'room_name')
       .sort({ createdAt: -1 });
+    
+    // Filter room-specific polls for students based on room membership
+    if (studentId) {
+      try {
+        const student = await Student.findById(studentId).populate('room');
+        const studentRoomIds = student?.room?.map(room => String(room._id)) || [];
+        
+        // If we're in a specific room context, we already filtered by roomId in the query
+        // But we still need to verify the student is actually in that room
+        if (roomId) {
+          // Verify student is in the requested room
+          if (!studentRoomIds.includes(String(roomId))) {
+            // Student not in this room, only show institution-wide forms
+            polls = polls.filter(poll => poll.createdFor === 'institution');
+          }
+          // If student is in the room, show all forms (both institution and room-specific)
+        } else {
+          // Not in room context, filter room-specific forms by student's room membership
+          polls = polls.filter(poll => {
+            if (poll.createdFor === 'institution') {
+              return true; // Institution-wide polls are visible to all students
+            } else if (poll.createdFor === 'room' && poll.targetRoomId) {
+              return studentRoomIds.includes(String(poll.targetRoomId));
+            }
+            return false;
+          });
+        }
+      } catch (e) {
+        console.error("Student room membership check failed:", e);
+        // If check fails, show all polls (fallback)
+      }
+    }
       
     res.json(polls);
   } catch (error) {
@@ -51,6 +94,7 @@ router.post("/", async (req, res) => {
       description,
       kind,
       options,
+      customQuestions,
       targetInstructorId,
       targetInstructorName,
       createdFor,
@@ -73,17 +117,31 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Institution ID or slug is required" });
     }
 
+    // For evaluations, get instructor name if not provided
+    let finalInstructorName = targetInstructorName || "";
+    if (kind === 'evaluation' && targetInstructorId && !finalInstructorName) {
+      try {
+        const instructor = await Instructor.findById(targetInstructorId);
+        if (instructor) {
+          finalInstructorName = instructor.name;
+        }
+      } catch (error) {
+        console.error("Error fetching instructor name:", error);
+      }
+    }
+
     const pollData = {
       title,
       description,
       kind,
       options: options || [],
+      customQuestions: customQuestions || [],
       institutionId: finalInstitutionId,
       institutionSlug,
       createdFor: createdFor || "institution",
       createdBy,
       targetInstructorId: targetInstructorId || undefined,
-      targetInstructorName: targetInstructorName || "",
+      targetInstructorName: finalInstructorName,
       targetRoomId: targetRoomId || undefined
     };
 
@@ -190,6 +248,36 @@ router.post("/:id/vote", async (req, res) => {
   } catch (error) {
     console.error("Error submitting response:", error);
     res.status(500).json({ message: "Failed to submit response" });
+  }
+});
+
+// Update poll title (institutions only)
+router.patch("/:id", async (req, res) => {
+  try {
+    const { title } = req.body;
+    const pollId = req.params.id;
+    
+    if (!title || !title.trim()) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+    
+    const poll = await YuvrajPoll.findById(pollId);
+    if (!poll) return res.status(404).json({ message: "Poll not found" });
+    
+    // Update the title
+    poll.title = title.trim();
+    await poll.save();
+    
+    // Return updated poll
+    const updated = await YuvrajPoll.findById(pollId)
+      .populate('targetInstructorId', 'name email')
+      .populate('institutionId', 'name slug')
+      .populate('targetRoomId', 'room_name');
+      
+    res.json(updated);
+  } catch (error) {
+    console.error("Error updating poll:", error);
+    res.status(500).json({ message: "Failed to update poll" });
   }
 });
 

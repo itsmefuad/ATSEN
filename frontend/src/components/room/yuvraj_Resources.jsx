@@ -286,12 +286,25 @@ const YuvrajResources = ({ roomId, user }) => {
                </button>
              </>
            ) : (
-             <button
-               onClick={() => setViewingResource(resource)}
-               className="btn btn-ghost btn-xs"
-             >
-               <Eye size={14} />
-             </button>
+             <div className="flex items-center gap-1">
+               <button
+                 onClick={() => setViewingResource(resource)}
+                 className="btn btn-ghost btn-xs"
+                 title="View in popup"
+               >
+                 <Eye size={14} />
+               </button>
+               {resource.type !== 'youtube' && resource.type !== 'text' && (
+                 <a
+                   href={resource.url}
+                   download
+                   className="btn btn-ghost btn-xs text-primary"
+                   title="Download document"
+                 >
+                   <Download size={14} />
+                 </a>
+               )}
+             </div>
            )}
          </div>
       </div>
@@ -419,6 +432,42 @@ const YuvrajResources = ({ roomId, user }) => {
           </div>
         </div>
 
+        {/* Resource Summary for Students */}
+        {!canManage && (resources.videos.length > 0 || resources.documents.length > 0) && (
+          <div className="stats shadow w-full">
+            <div className="stat">
+              <div className="stat-figure text-red-500">
+                <Youtube className="h-8 w-8" />
+              </div>
+              <div className="stat-title">Video Resources</div>
+              <div className="stat-value text-red-500">{resources.videos.length}</div>
+              <div className="stat-desc">Available for viewing</div>
+            </div>
+            
+            <div className="stat">
+              <div className="stat-figure text-blue-500">
+                <FileText className="h-8 w-8" />
+              </div>
+              <div className="stat-title">Document Resources</div>
+              <div className="stat-value text-blue-500">{resources.documents.length}</div>
+              <div className="stat-desc">Available for download</div>
+            </div>
+            
+            {(selectedVideo || selectedDocument) && (
+              <div className="stat">
+                <div className="stat-figure text-green-500">
+                  <Eye className="h-8 w-8" />
+                </div>
+                <div className="stat-title">Currently Viewing</div>
+                <div className="stat-value text-green-500">✓</div>
+                <div className="stat-desc">
+                  {selectedVideo ? 'Video Player Active' : 'Document Viewer Active'}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
              <div className="grid gap-6">
          {renderResourceSection(
            "videos",
@@ -435,125 +484,237 @@ const YuvrajResources = ({ roomId, user }) => {
          )}
        </div>
 
-       {/* Integrated Video Player Section */}
-       {selectedVideo && (
-         <div className="card bg-base-100 shadow-sm">
-           <div className="card-header p-4 border-b border-base-300">
-             <div className="flex items-center justify-between">
-               <div className="flex items-center gap-2">
-                 <Youtube className="h-5 w-5 text-red-500" />
-                 <h3 className="text-lg font-semibold">Video Player</h3>
-               </div>
-               <button
-                 onClick={() => setSelectedVideo(null)}
-                 className="btn btn-ghost btn-sm"
-               >
-                 ✕
-               </button>
-             </div>
-           </div>
-           <div className="card-body p-4">
-             <div className="aspect-video w-full">
-               <iframe
-                 src={getEmbedUrl(selectedVideo.url, selectedVideo.type)}
-                 title={selectedVideo.title}
-                 className="w-full h-full rounded-lg"
-                 frameBorder="0"
-                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                 allowFullScreen
-               />
-             </div>
-             <div className="mt-4">
-               <h4 className="font-medium text-lg mb-2">{selectedVideo.title}</h4>
-               <div className="flex gap-2">
-                 <a
-                   href={selectedVideo.url}
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   className="btn btn-outline btn-sm"
-                 >
-                   Open on YouTube
-                 </a>
-               </div>
-             </div>
-           </div>
-         </div>
-       )}
+             {/* Integrated Video Player Section */}
+      {selectedVideo && (
+        <div className="card bg-base-100 shadow-sm">
+          <div className="card-header p-4 border-b border-base-300">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Youtube className="h-5 w-5 text-red-500" />
+                <h3 className="text-lg font-semibold">Video Player</h3>
+                <span className="badge badge-error badge-sm">YOUTUBE</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="dropdown dropdown-end">
+                  <label tabIndex={0} className="btn btn-ghost btn-sm">
+                    ⋮
+                  </label>
+                  <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <li>
+                      <a 
+                        href={selectedVideo.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2"
+                      >
+                        <Youtube className="h-4 w-4" />
+                        Open on YouTube
+                      </a>
+                    </li>
+                    <li>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedVideo.url);
+                          toast.success('Video URL copied to clipboard!');
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        📋 Copy URL
+                      </button>
+                    </li>
+                    <li>
+                      <button 
+                        onClick={() => {
+                          const videoId = getVideoId(selectedVideo.url);
+                          const shareUrl = `https://youtu.be/${videoId}`;
+                          navigator.clipboard.writeText(shareUrl);
+                          toast.success('Short URL copied to clipboard!');
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        🔗 Copy Short URL
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                <button
+                  onClick={() => setSelectedVideo(null)}
+                  className="btn btn-ghost btn-sm"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="card-body p-4">
+            <div className="aspect-video w-full border border-base-300 rounded-lg overflow-hidden bg-black">
+              <iframe
+                src={getEmbedUrl(selectedVideo.url, selectedVideo.type)}
+                title={selectedVideo.title}
+                className="w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+            <div className="mt-4">
+              <h4 className="font-medium text-lg mb-2">{selectedVideo.title}</h4>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={selectedVideo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-error btn-sm"
+                >
+                  <Youtube className="h-4 w-4 mr-1" />
+                  Open on YouTube
+                </a>
+                <button
+                  onClick={() => {
+                    const videoId = getVideoId(selectedVideo.url);
+                    const shareUrl = `https://youtu.be/${videoId}`;
+                    navigator.clipboard.writeText(shareUrl);
+                    toast.success('Short URL copied!');
+                  }}
+                  className="btn btn-ghost btn-sm"
+                >
+                  🔗 Share
+                </button>
+                <a
+                  href={`https://www.youtube.com/watch?v=${getVideoId(selectedVideo.url)}&t=0s`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-ghost btn-sm"
+                >
+                  ⏰ Watch from start
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-       {/* Integrated Document Viewer Section */}
-       {selectedDocument && (
-         <div className="card bg-base-100 shadow-sm">
-           <div className="card-header p-4 border-b border-base-300">
-             <div className="flex items-center justify-between">
-               <div className="flex items-center gap-2">
-                 <FileText className="h-5 w-5 text-blue-500" />
-                 <h3 className="text-lg font-semibold">Document Viewer</h3>
-               </div>
-               <button
-                 onClick={() => setSelectedDocument(null)}
-                 className="btn btn-ghost btn-sm"
-               >
-                 ✕
-               </button>
-             </div>
-           </div>
-           <div className="card-body p-4">
-             <div className="w-full h-96">
-               {selectedDocument.type === 'pdf' ? (
-                 <iframe
-                   src={selectedDocument.url}
-                   title={selectedDocument.title}
-                   className="w-full h-full rounded-lg"
-                   frameBorder="0"
-                 />
-               ) : selectedDocument.type === 'doc' || selectedDocument.type === 'slides' || selectedDocument.type === 'sheet' ? (
-                 <iframe
-                   src={getEmbedUrl(selectedDocument.url, selectedDocument.type)}
-                   title={selectedDocument.title}
-                   className="w-full h-full rounded-lg"
-                   frameBorder="0"
-                 />
-               ) : selectedDocument.type === 'link' ? (
-                 <iframe
-                   src={selectedDocument.url}
-                   title={selectedDocument.title}
-                   className="w-full h-full rounded-lg"
-                   frameBorder="0"
-                 />
-               ) : (
-                 <div className="p-4 bg-base-200 rounded-lg h-full flex items-center justify-center">
-                   <div className="text-center">
-                     <p className="text-sm text-base-content/70 mb-2">Content:</p>
-                     <p className="whitespace-pre-wrap">{selectedDocument.content || selectedDocument.url}</p>
-                   </div>
-                 </div>
-               )}
-             </div>
-             <div className="mt-4">
-               <h4 className="font-medium text-lg mb-2">{selectedDocument.title}</h4>
-               <div className="flex gap-2">
-                 <a
-                   href={selectedDocument.url}
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   className="btn btn-outline btn-sm"
-                 >
-                   Open in new tab
-                 </a>
-                 {selectedDocument.type !== 'youtube' && (
-                   <a
-                     href={selectedDocument.url}
-                     download
-                     className="btn btn-outline btn-sm"
-                   >
-                     Download
-                   </a>
-                 )}
-               </div>
-             </div>
-           </div>
-         </div>
-       )}
+             {/* Integrated Document Viewer Section */}
+      {selectedDocument && (
+        <div className="card bg-base-100 shadow-sm">
+          <div className="card-header p-4 border-b border-base-300">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-semibold">Document Viewer</h3>
+                <span className="badge badge-info badge-sm">{selectedDocument.type.toUpperCase()}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="dropdown dropdown-end">
+                  <label tabIndex={0} className="btn btn-ghost btn-sm">
+                    <Download className="h-4 w-4" />
+                  </label>
+                  <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <li>
+                      <a 
+                        href={selectedDocument.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Open in new tab
+                      </a>
+                    </li>
+                    {selectedDocument.type !== 'youtube' && selectedDocument.type !== 'text' && (
+                      <li>
+                        <a 
+                          href={selectedDocument.url} 
+                          download 
+                          className="flex items-center gap-2"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download document
+                        </a>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                <button
+                  onClick={() => setSelectedDocument(null)}
+                  className="btn btn-ghost btn-sm"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="card-body p-4">
+            <div className="w-full h-96 border border-base-300 rounded-lg overflow-hidden">
+              {selectedDocument.type === 'pdf' ? (
+                <iframe
+                  src={selectedDocument.url}
+                  title={selectedDocument.title}
+                  className="w-full h-full"
+                  frameBorder="0"
+                />
+              ) : selectedDocument.type === 'doc' || selectedDocument.type === 'slides' || selectedDocument.type === 'sheet' ? (
+                <iframe
+                  src={getEmbedUrl(selectedDocument.url, selectedDocument.type)}
+                  title={selectedDocument.title}
+                  className="w-full h-full"
+                  frameBorder="0"
+                />
+              ) : selectedDocument.type === 'link' ? (
+                <iframe
+                  src={selectedDocument.url}
+                  title={selectedDocument.title}
+                  className="w-full h-full"
+                  frameBorder="0"
+                />
+              ) : (
+                <div className="p-6 bg-base-200 h-full flex items-center justify-center">
+                  <div className="text-center max-w-md">
+                    <FileText className="h-12 w-12 text-base-content/40 mx-auto mb-4" />
+                    <p className="text-sm text-base-content/70 mb-3">Text Content:</p>
+                    <div className="p-4 bg-base-100 rounded-lg text-left">
+                      <p className="whitespace-pre-wrap text-sm">{selectedDocument.content || selectedDocument.url}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="mt-4">
+              <h4 className="font-medium text-lg mb-2">{selectedDocument.title}</h4>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={selectedDocument.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary btn-sm"
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  Open in new tab
+                </a>
+                {selectedDocument.type !== 'youtube' && selectedDocument.type !== 'text' && (
+                  <a
+                    href={selectedDocument.url}
+                    download
+                    className="btn btn-secondary btn-sm"
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    Download
+                  </a>
+                )}
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(selectedDocument.url);
+                    toast.success('URL copied to clipboard!');
+                  }}
+                  className="btn btn-ghost btn-sm"
+                >
+                  📋 Copy URL
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
                            {/* Add/Edit Modal */}
        {showAddModal && (
