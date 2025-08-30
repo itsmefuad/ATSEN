@@ -1,13 +1,16 @@
 // src/pages/auth/InstitutionRegistration.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../lib/axios";
 import Navbar from "../../components/Navbar.jsx";
+import { CheckCircle } from "lucide-react";
 
 export default function InstitutionRegistration() {
   const [form, setForm] = useState({});
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const navigate = useNavigate();
 
@@ -19,10 +22,12 @@ export default function InstitutionRegistration() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     // Check if passwords match
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
+      setLoading(false);
       return;
     }
 
@@ -32,17 +37,44 @@ export default function InstitutionRegistration() {
     try {
       await api.post("/institutions/register", formData);
       setSuccess(
-        "Institution registration successful! Please log in with your credentials."
+        "Registration requested successfully. Your institution details will be reviewed for approval."
       );
       setForm({});
+      setShowSuccessPopup(true);
 
-      // Redirect to login after 2 seconds
+      // Redirect to homepage after 3 seconds
       setTimeout(() => {
-        navigate("/auth/login");
-      }, 2000);
+        navigate("/");
+      }, 3000);
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Success Popup Component
+  const SuccessPopup = () => {
+    if (!showSuccessPopup) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fade-in">
+        <div className="bg-base-100 rounded-lg shadow-2xl p-8 max-w-md w-full mx-4 animate-bounce-in border">
+          <div className="text-center">
+            <CheckCircle className="mx-auto h-16 w-16 text-success mb-4" />
+            <h3 className="text-xl font-semibold text-base-content mb-2">
+              Registration Requested Successfully!
+            </h3>
+            <p className="text-base-content/80 mb-4">
+              Your institution details will be reviewed for approval. You will receive an email notification once approved.
+            </p>
+            <p className="text-sm text-base-content/60">
+              Redirecting to homepage in 3 seconds...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -57,18 +89,12 @@ export default function InstitutionRegistration() {
             <h2 className="text-2xl font-semibold text-base-content mb-2">
               Institution Registration
             </h2>
-            <p className="text-base-content/70">Register your educational institution</p>
+            <p className="text-base-content/70">Request registration for your educational institution</p>
           </div>
 
           {error && (
             <div className="alert alert-error mb-4">
               <p className="text-sm">{error}</p>
-            </div>
-          )}
-
-          {success && (
-            <div className="alert alert-success mb-4">
-              <p className="text-sm">{success}</p>
             </div>
           )}
 
@@ -142,15 +168,16 @@ export default function InstitutionRegistration() {
 
             <button
               type="submit"
-              className="btn btn-primary w-full py-3 font-medium shadow-md hover:shadow-lg"
+              className={`btn btn-primary w-full py-3 font-medium shadow-md hover:shadow-lg ${loading ? 'loading' : ''}`}
+              disabled={loading}
             >
-              Register Institution
+              {loading ? "Submitting Request..." : "Request for Registration"}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-base-content/70">
-              Already have an account?{" "}
+              Already have an approved account?{" "}
               <Link
                 to="/auth/login"
                 className="text-primary hover:text-primary/80 font-medium hover:underline"
@@ -170,6 +197,7 @@ export default function InstitutionRegistration() {
           </div>
         </div>
       </div>
+      <SuccessPopup />
     </div>
   );
 }
