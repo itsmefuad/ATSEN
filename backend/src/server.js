@@ -33,6 +33,9 @@ import achievementRoutes from "./routes/achievementRoutes.js";
 import institutionAnnouncementRoutes from "./routes/institutionAnnouncementRoutes.js";
 import yuvrajPollsRoutes from "./routes/yuvraj_pollsRoutes.js";
 import yuvrajResourcesRoutes from "./routes/yuvraj_resourcesRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
+import linkPreviewRoutes from "./routes/linkPreviewRoutes.js";
+import helpDeskRoutes from "./routes/helpDeskRoutes.js";
 
 dotenv.config();
 
@@ -127,6 +130,9 @@ app.use("/api/achievements", achievementRoutes);
 app.use("/api/institution-announcements", institutionAnnouncementRoutes);
 app.use("/api/yuvraj-polls", yuvrajPollsRoutes);
 app.use("/api/yuvraj-resources", yuvrajResourcesRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/link-preview", linkPreviewRoutes);
+app.use("/api/helpdesk", helpDeskRoutes);
 
 // connect to DB, then start the server
 connectDB().then(() => {

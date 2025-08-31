@@ -105,7 +105,7 @@ export const getAnnouncementsForUser = async (req, res) => {
 export const createInstitutionAnnouncement = async (req, res) => {
   try {
     const { idOrName } = req.params;
-    const { title, content, tags, isPinned } = req.body;
+    const { title, content, tags, isPinned, externalLinks, images } = req.body;
 
     // Find the institution
     const institution = await findInstitutionByIdOrName(idOrName);
@@ -120,6 +120,8 @@ export const createInstitutionAnnouncement = async (req, res) => {
       institution: institution._id,
       author: institution._id, // Institution is the author
       tags: tags || [],
+      externalLinks: externalLinks || [],
+      images: images || [],
       isPinned: isPinned || false,
     });
 
@@ -141,7 +143,7 @@ export const createInstitutionAnnouncement = async (req, res) => {
 export const updateInstitutionAnnouncement = async (req, res) => {
   try {
     const { idOrName, announcementId } = req.params;
-    const { title, content, tags, isPinned } = req.body;
+    const { title, content, tags, isPinned, externalLinks, images } = req.body;
 
     // Find the institution
     const institution = await findInstitutionByIdOrName(idOrName);
@@ -162,6 +164,8 @@ export const updateInstitutionAnnouncement = async (req, res) => {
     if (title) announcement.title = title;
     if (content) announcement.content = content;
     if (tags) announcement.tags = tags;
+    if (externalLinks) announcement.externalLinks = externalLinks;
+    if (images) announcement.images = images;
     if (typeof isPinned === "boolean") announcement.isPinned = isPinned;
 
     const updatedAnnouncement = await announcement.save();

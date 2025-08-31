@@ -1,6 +1,8 @@
 import StudentDocument from "../models/StudentDocument.js";
 import Student from "../models/student.js";
 import Institution from "../models/institution.js";
+import fs from "fs";
+import path from "path";
 
 // Student Controllers
 export const createDocumentRequest = async (req, res) => {
@@ -304,6 +306,60 @@ export const getDocumentStatistics = async (req, res) => {
     console.error("Error fetching document statistics:", error);
     res.status(500).json({ 
       message: "Failed to fetch statistics", 
+      error: error.message 
+    });
+  }
+};
+
+// Download document file
+export const downloadDocument = async (req, res) => {
+  try {
+    const { documentId } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    
+    // Find the document and verify access
+    let filter = { _id: documentId };
+    
+    if (userRole === 'student') {
+      filter.student = userId;
+    } else if (userRole === 'institution') {
+      filter.institution = userId;
+    } else {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const document = await StudentDocument.findOne(filter);
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    // Check if document has an associated file
+    if (!document.filePath) {
+      return res.status(404).json({ message: "No file associated with this document" });
+    }
+
+    // Construct file path
+    const filePath = path.join(process.cwd(), 'uploads', 'materials', document.filePath);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: "File not found on server" });
+    }
+
+    // Set headers for file download
+    const filename = document.filePath.split('/').pop() || 'document.pdf';
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
+
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+
+  } catch (error) {
+    console.error("Error downloading document:", error);
+    res.status(500).json({ 
+      message: "Failed to download document", 
       error: error.message 
     });
   }

@@ -18,5 +18,6 @@ import "./SupportTicket.js";
 import "./ChatMessage.js";
 import "./yuvraj_Resource.js";
 import "./yuvraj_Poll.js";
+import "./HelpDesk.js";
 
 console.log("All models imported and registered");

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { FileText, Clock, CheckCircle, Truck, Package, AlertTriangle } from "lucide-react";
+import { FileText, Clock, CheckCircle, Truck, Package, AlertTriangle, Download } from "lucide-react";
 import Navbar from "../../components/Navbar";
-import { getStudentDocuments, updateStudentDocumentStatus } from "../../services/documentService";
+import { getStudentDocuments, updateStudentDocumentStatus, downloadDocument } from "../../services/documentService";
 import toast from "react-hot-toast";
 
 const S_Documents = () => {
@@ -31,6 +31,15 @@ const S_Documents = () => {
       fetchDocuments(); // Refresh the list
     } catch (error) {
       toast.error(error.message || "Failed to update document status");
+    }
+  };
+
+  const handleDownloadDocument = async (documentId, filename) => {
+    try {
+      await downloadDocument(documentId, filename);
+      toast.success("Document downloaded successfully!");
+    } catch (error) {
+      toast.error(error.message || "Failed to download document");
     }
   };
 
@@ -224,13 +233,22 @@ const S_Documents = () => {
                       </div>
                     </div>
 
-                    <div className="ml-6">
+                    <div className="ml-6 flex gap-2">
                       {document.status === "Dispatched" && (
                         <button
                           onClick={() => handleMarkAsReceived(document._id)}
                           className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-sm"
                         >
                           Mark as Received
+                        </button>
+                      )}
+                      {document.filePath && (
+                        <button
+                          onClick={() => handleDownloadDocument(document._id, document.filePath)}
+                          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm flex items-center gap-1"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download
                         </button>
                       )}
                     </div>

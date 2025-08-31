@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Megaphone, Calendar, Pin, Tag, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../../lib/axios";
@@ -8,13 +8,7 @@ const InstitutionAnnouncementsWidget = ({ userType, userId, institutionSlug }) =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (userType && userId) {
-      fetchAnnouncements();
-    }
-  }, [userType, userId]);
-
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncements = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -28,7 +22,15 @@ const InstitutionAnnouncementsWidget = ({ userType, userId, institutionSlug }) =
     } finally {
       setLoading(false);
     }
-  };
+  }, [userType, userId]);
+
+  useEffect(() => {
+    if (userType && userId) {
+      fetchAnnouncements();
+    }
+  }, [userType, userId, fetchAnnouncements]);
+
+
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -81,7 +83,10 @@ const InstitutionAnnouncementsWidget = ({ userType, userId, institutionSlug }) =
         
                  {announcements.length > 0 && (
            <Link
-             to={`/student/announcements/${institutionSlug || announcements[0]?.institution?.slug || 'hogwarts'}`}
+             to={userType === "instructor" 
+               ? `/teacher/announcements/${institutionSlug || announcements[0]?.institution?.slug || 'hogwarts'}`
+               : `/student/announcements/${institutionSlug || announcements[0]?.institution?.slug || 'hogwarts'}`
+             }
              className="btn btn-sm btn-outline btn-primary hover:btn-primary"
            >
              View All
@@ -101,10 +106,13 @@ const InstitutionAnnouncementsWidget = ({ userType, userId, institutionSlug }) =
       ) : (
                 <div className="space-y-3">
           {announcements.slice(0, 2).map((announcement, index) => (
-            <Link
-              key={announcement._id}
-              to={`/student/announcements/${institutionSlug || announcement.institution?.slug || 'hogwarts'}/${announcement._id}`}
-              className={`block p-4 rounded-lg border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transform ${
+                         <Link
+               key={announcement._id}
+               to={userType === "instructor" 
+                 ? `/teacher/announcements/${institutionSlug || announcement.institution?.slug || 'hogwarts'}/${announcement._id}`
+                 : `/student/announcements/${institutionSlug || announcement.institution?.slug || 'hogwarts'}/${announcement._id}`
+               }
+               className={`block p-4 rounded-lg border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 transform ${
                 announcement.isPinned
                   ? "border-[#00A2E8]/30 bg-[#00A2E8]/5 hover:bg-[#00A2E8]/10"
                   : "border-base-300 bg-base-50 hover:bg-base-100"
@@ -166,11 +174,14 @@ const InstitutionAnnouncementsWidget = ({ userType, userId, institutionSlug }) =
           
           {/* Show "View All" link if there are more than 2 announcements */}
           {announcements.length > 2 && (
-            <div className="mt-4 text-center">
-              <Link
-                to={`/student/announcements/${institutionSlug || announcements[0]?.institution?.slug || 'hogwarts'}`}
-                className="btn btn-sm btn-ghost btn-outline hover:btn-primary transition-all duration-200"
-              >
+                         <div className="mt-4 text-center">
+               <Link
+                 to={userType === "instructor" 
+                   ? `/teacher/announcements/${institutionSlug || announcements[0]?.institution?.slug || 'hogwarts'}`
+                   : `/student/announcements/${institutionSlug || announcements[0]?.institution?.slug || 'hogwarts'}`
+                 }
+                 className="btn btn-sm btn-ghost btn-outline hover:btn-primary transition-all duration-200"
+               >
                 <ArrowRight className="h-4 w-4 mr-1" />
                 View All {announcements.length} Announcements
               </Link>

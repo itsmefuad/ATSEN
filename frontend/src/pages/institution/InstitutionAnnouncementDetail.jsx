@@ -12,7 +12,12 @@ import {
   ChevronRight,
   BookOpen,
   Edit,
-  Trash2
+  Trash2,
+  Image,
+  Youtube,
+  FileText,
+  Globe,
+  ExternalLink
 } from "lucide-react";
 import api from "../../lib/axios.js";
 import toast from "react-hot-toast";
@@ -113,7 +118,6 @@ export default function InstitutionAnnouncementDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-base-100">
-        <Navbar />
         <div className="flex items-center justify-center py-12">
           <div className="loading loading-spinner loading-lg text-primary"></div>
         </div>
@@ -124,7 +128,6 @@ export default function InstitutionAnnouncementDetail() {
   if (announcements.length === 0) {
     return (
       <div className="min-h-screen bg-base-100">
-        <Navbar />
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-base-content/50" />
@@ -137,14 +140,13 @@ export default function InstitutionAnnouncementDetail() {
 
   return (
     <div className="min-h-screen bg-base-100">
-      <Navbar />
       
       {/* Header Section */}
       <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b border-base-300">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center gap-4 mb-4">
             <Link 
-              to={`/${idOrName}/dashboard`}
+              to={user?.role === "instructor" ? "/teacher/dashboard" : `/${idOrName}/dashboard`}
               className="btn btn-ghost btn-sm"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -269,6 +271,73 @@ export default function InstitutionAnnouncementDetail() {
                       }}
                     />
                   </div>
+
+                  {/* External Links */}
+                  {currentAnnouncement.externalLinks && currentAnnouncement.externalLinks.length > 0 && (
+                    <div className="mt-6">
+                                       <h3 className="text-lg font-semibold text-base-content mb-3 flex items-center gap-2">
+                   <ExternalLink className="h-5 w-5" />
+                   External Links
+                 </h3>
+                      <div className="grid gap-3">
+                        {currentAnnouncement.externalLinks.map((link, index) => (
+                          <div key={index} className="card bg-base-100 shadow-sm border border-base-300">
+                            <div className="card-body p-4">
+                              <div className="flex items-center gap-3 mb-2">
+                                {link.type === 'youtube' && <Youtube className="h-5 w-5 text-red-500" />}
+                                {link.type === 'document' && <FileText className="h-5 w-5 text-blue-500" />}
+                                {link.type === 'website' && <Globe className="h-5 w-5 text-green-500" />}
+                                <h4 className="font-medium text-base-content">{link.title}</h4>
+                              </div>
+                              <a 
+                                href={link.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="btn btn-sm btn-primary"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                Open {link.type === 'youtube' ? 'Video' : link.type === 'document' ? 'Document' : 'Link'}
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Images */}
+                  {currentAnnouncement.images && currentAnnouncement.images.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="text-lg font-semibold text-base-content mb-3 flex items-center gap-2">
+                        <Image className="h-5 w-5" />
+                        Images
+                      </h3>
+                      <div className="grid gap-4">
+                        {currentAnnouncement.images.map((image, index) => (
+                          <div key={index} className="card bg-base-100 shadow-sm border border-base-300">
+                            <div className="card-body p-4">
+                              <img 
+                                src={image.url} 
+                                alt={image.alt || 'Announcement image'} 
+                                className="w-full h-auto rounded-lg max-h-96 object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'block';
+                                }}
+                              />
+                              <div className="hidden text-center py-8 text-base-content/50">
+                                <Image className="h-12 w-12 mx-auto mb-2" />
+                                <p>Image failed to load</p>
+                              </div>
+                              {image.caption && (
+                                <p className="text-sm text-base-content/70 mt-2 italic">{image.caption}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Footer */}
                   <div className="mt-8 pt-6 border-t border-base-300">

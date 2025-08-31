@@ -358,6 +358,16 @@ export default function YuvrajForms({ hideNavbar = false }) {
     return formDetail.responses?.some(r => String(r.studentId._id || r.studentId) === String(user._id));
   }, [formDetail, isStudent, user?._id]);
 
+  // Check if a form has been responded to by current user
+  const hasUserResponded = useMemo(() => {
+    if (!isStudent) return false;
+    return (formId) => {
+      const form = forms.find(f => f._id === formId);
+      if (!form) return false;
+      return form.responses?.some(r => String(r.studentId._id || r.studentId) === String(user._id));
+    };
+  }, [forms, isStudent, user?._id]);
+
   const getFormTypeIcon = (kind) => {
     switch (kind) {
       case 'poll': return <BarChart3 className="h-4 w-4" />;
@@ -613,7 +623,9 @@ export default function YuvrajForms({ hideNavbar = false }) {
                                 className="flex items-center justify-between flex-1 cursor-pointer"
                                 onClick={() => setActiveForm(form._id)}
                               >
-                                <h3 className="font-semibold text-base-content truncate">{form.title}</h3>
+                                <div className="flex items-center gap-2 flex-1">
+                                  <h3 className="font-semibold text-base-content truncate">{form.title}</h3>
+                                </div>
                                 <div className="flex items-center gap-1">
                                   {isInstitution && (
                                     <div className="flex items-center gap-1 mr-2">

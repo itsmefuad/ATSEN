@@ -55,6 +55,7 @@ import TimelineDemo from "./components/room/TimelineDemo.jsx";
 import PostLoginRedirect from "./components/PostLoginRedirect.jsx";
 import { useTheme } from "./contexts/ThemeContext.jsx";
 import YuvrajForms from "./pages/yuvraj_Forms.jsx";
+import HelpDesk from "./pages/HelpDesk.jsx";
 
 export default function App() {
   const { theme } = useTheme();
@@ -132,6 +133,9 @@ export default function App() {
                          {/* Forms */}
              <Route path="forms" element={<YuvrajForms hideNavbar={true} />} />
              
+                         {/* Help Desk */}
+             <Route path="helpdesk" element={<HelpDesk hideNavbar={true} />} />
+             
              {/* Announcements */}
              <Route path="announcements" element={<InstitutionAnnouncementDetail />} />
              <Route path="announcements/:announcementId" element={<InstitutionAnnouncementDetail />} />
@@ -160,6 +164,24 @@ export default function App() {
           />
           <Route path="/teacher/room/:id/details" element={<T_Room />} />
           <Route path="/teacher/room/:id" element={<T_Room />} />
+          
+          {/* Teacher Announcement Routes */}
+          <Route
+            path="/teacher/announcements/:idOrName"
+            element={
+              <ProtectedRoute requiredRole="instructor">
+                <InstitutionAnnouncementDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher/announcements/:idOrName/:announcementId"
+            element={
+              <ProtectedRoute requiredRole="instructor">
+                <InstitutionAnnouncementDetail />
+              </ProtectedRoute>
+            }
+          />
 
                      {/* Student routes */}
            <Route
@@ -209,6 +231,7 @@ export default function App() {
           <Route path="/student/room/:id/grades" element={<S_Room />} />
           <Route path="/student/room/:id/standings" element={<S_Room />} />
           <Route path="/student/room/:id/forms" element={<S_Room />} />
+          
           <Route path="/student/room/:id/details" element={<S_Room />} />
           <Route
             path="/student/room/:id/assessment/:assessmentId"
@@ -241,12 +264,32 @@ export default function App() {
             }
           />
           
+          {/* Help Desk Route for Students - Institution Context */}
+          <Route
+            path="/student/:idOrName/helpdesk"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <HelpDesk />
+              </ProtectedRoute>
+            }
+          />
+          
           {/* Global Forms Route for Students (fallback) */}
           <Route
             path="/forms"
             element={
               <ProtectedRoute requiredRole="student">
                 <YuvrajForms />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Global Help Desk Route for Students (fallback) */}
+          <Route
+            path="/helpdesk"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <HelpDesk />
               </ProtectedRoute>
             }
           />

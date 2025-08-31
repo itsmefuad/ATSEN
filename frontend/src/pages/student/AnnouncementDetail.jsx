@@ -10,7 +10,11 @@ import {
   Pin, 
   Clock,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  ExternalLink,
+  Youtube,
+  FileText,
+  Globe
 } from "lucide-react";
 import api from "../../lib/axios.js";
 import toast from "react-hot-toast";
@@ -270,7 +274,51 @@ export default function AnnouncementDetail() {
                     />
                   </div>
 
-                                     {/* Footer */}
+                  {/* External Links */}
+                  {currentAnnouncement.externalLinks && currentAnnouncement.externalLinks.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="text-lg font-semibold text-base-content mb-3 flex items-center gap-2">
+                        <ExternalLink className="h-5 w-5" />
+                        External Links
+                      </h3>
+                      <div className="grid gap-3">
+                        {currentAnnouncement.externalLinks.map((link, index) => (
+                          <div key={index} className="card bg-base-100 border border-base-300 hover:border-primary/30 transition-colors">
+                            <div className="card-body p-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex-shrink-0">
+                                  {link.type === 'youtube' && <Youtube className="h-5 w-5 text-red-500" />}
+                                  {link.type === 'document' && <FileText className="h-5 w-5 text-blue-500" />}
+                                  {link.type === 'website' && <Globe className="h-5 w-5 text-green-500" />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-base-content mb-1">
+                                    {link.title || 'External Link'}
+                                  </h4>
+                                  <p className="text-sm text-base-content/60 truncate">
+                                    {link.url}
+                                  </p>
+                                </div>
+                                <div className="flex-shrink-0">
+                                  <a
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-sm btn-primary"
+                                  >
+                                    Open
+                                    <ExternalLink className="h-3 w-3 ml-1" />
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Footer */}
                    <div className="mt-8 pt-6 border-t border-base-300">
                      <div className="flex items-center justify-between text-sm text-base-content/60">
                        <span>Last updated: {formatDate(currentAnnouncement.updatedAt)}</span>

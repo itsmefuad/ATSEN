@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Navbar from "../../components/Navbar";
 import RateLimitedUi from "../../components/RateLimitedUi";
 import InstitutionCard from "../../components/InstitutionCard";
@@ -62,6 +62,8 @@ const S_Dashboard = () => {
 
     fetchStudentData();
   }, [user]);
+
+
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {

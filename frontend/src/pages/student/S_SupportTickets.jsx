@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Link } from "react-router";
 import { 
@@ -44,8 +44,7 @@ const S_SupportTickets = () => {
     if (!user?._id) return;
     fetchTickets();
   }, [user, filters]);
-
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -60,7 +59,14 @@ const S_SupportTickets = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, filters]);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    fetchTickets();
+  }, [user, filters, fetchTickets]);
+
+
 
   const handleMarkAsResolved = async (ticketId) => {
     try {
