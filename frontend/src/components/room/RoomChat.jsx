@@ -28,12 +28,14 @@ const RoomChat = ({ roomId }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
+  const [editText, setEditText] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(null);
   
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
-  const textAreaRef = useRef(null);
+  const editTextAreaRef = useRef(null);
+  const messageInputRef = useRef(null);
 
   const commonEmojis = ['👍', '❤️', '😂', '😊', '😢', '😮', '😡', '👏', '🔥', '💯'];
 
@@ -50,6 +52,20 @@ const RoomChat = ({ roomId }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Add click outside handler to close emoji picker
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showEmojiPicker && !event.target.closest('.emoji-picker-container')) {
+        setShowEmojiPicker(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showEmojiPicker]);
 
   const fetchMessages = async () => {
     try {
@@ -118,6 +134,7 @@ const RoomChat = ({ roomId }) => {
         msg._id === messageId ? response.data : msg
       ));
       setEditingMessage(null);
+      setEditText("");
       toast.success("Message updated");
     } catch (error) {
       console.error("Error editing message:", error);
@@ -250,37 +267,40 @@ const RoomChat = ({ roomId }) => {
             p-3 rounded-lg relative group
           `}>
             {editingMessage === message._id ? (
-              <div className="space-y-2">
-                <textarea
-                  className="textarea textarea-sm w-full bg-base-100 text-base-content"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+              <div className="space-y-2 w-full">
+                <input
+                  type="text"
+                  className="input input-sm w-full bg-base-200 text-base-content border border-base-300 focus:border-primary focus:outline-none"
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
+                    if (e.key === 'Enter') {
                       e.preventDefault();
-                      editMessage(message._id, newMessage);
+                      editMessage(message._id, editText);
                     }
                     if (e.key === 'Escape') {
                       setEditingMessage(null);
-                      setNewMessage("");
+                      setEditText("");
                     }
                   }}
+                  placeholder="Edit your message..."
+                  autoFocus
                 />
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => editMessage(message._id, newMessage)}
-                    className="btn btn-xs btn-success"
-                  >
-                    Save
-                  </button>
+                <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => {
                       setEditingMessage(null);
-                      setNewMessage("");
+                      setEditText("");
                     }}
                     className="btn btn-xs btn-ghost"
                   >
                     Cancel
+                  </button>
+                  <button
+                    onClick={() => editMessage(message._id, editText)}
+                    className="btn btn-xs btn-primary"
+                  >
+                    Save
                   </button>
                 </div>
               </div>
@@ -348,40 +368,55 @@ const RoomChat = ({ roomId }) => {
                 
                 {/* Message Actions */}
                 <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="dropdown dropdown-end">
+                  <div className={`dropdown ${isOwnMessage ? 'dropdown-end' : 'dropdown-start'} dropdown-bottom`}>
                     <label tabIndex={0} className="btn btn-xs btn-ghost">
                       <MoreVertical className="h-3 w-3" />
                     </label>
-                    <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <ul 
+                      tabIndex={0} 
+                      className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-lg w-36 z-[9999] border border-base-300 mt-1"
+                    >
                       <li>
-                        <button onClick={() => setReplyingTo(message)}>
-                          <Reply className="h-4 w-4" />
+                        <a 
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-base-content hover:bg-base-200 rounded cursor-pointer whitespace-nowrap"
+                          onClick={() => setReplyingTo(message)}
+                        >
+                          <Reply className="h-4 w-4 flex-shrink-0" />
                           Reply
-                        </button>
+                        </a>
                       </li>
                       <li>
-                        <button onClick={() => setShowEmojiPicker(message._id)}>
-                          <Smile className="h-4 w-4" />
+                        <a 
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-base-content hover:bg-base-200 rounded cursor-pointer whitespace-nowrap"
+                          onClick={() => setShowEmojiPicker(message._id)}
+                        >
+                          <Smile className="h-4 w-4 flex-shrink-0" />
                           React
-                        </button>
+                        </a>
                       </li>
                       {isOwnMessage && message.messageType === 'text' && (
                         <li>
-                          <button onClick={() => {
-                            setEditingMessage(message._id);
-                            setNewMessage(message.content);
-                          }}>
-                            <Edit className="h-4 w-4" />
+                          <a 
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-base-content hover:bg-base-200 rounded cursor-pointer whitespace-nowrap"
+                            onClick={() => {
+                              setEditingMessage(message._id);
+                              setEditText(message.content);
+                            }}
+                          >
+                            <Edit className="h-4 w-4 flex-shrink-0" />
                             Edit
-                          </button>
+                          </a>
                         </li>
                       )}
                       {isOwnMessage && (
                         <li>
-                          <button onClick={() => deleteMessage(message._id)}>
-                            <Trash2 className="h-4 w-4" />
+                          <a 
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-base-200 rounded cursor-pointer whitespace-nowrap"
+                            onClick={() => deleteMessage(message._id)}
+                          >
+                            <Trash2 className="h-4 w-4 flex-shrink-0" />
                             Delete
-                          </button>
+                          </a>
                         </li>
                       )}
                     </ul>
@@ -392,18 +427,36 @@ const RoomChat = ({ roomId }) => {
             
             {/* Emoji Picker */}
             {showEmojiPicker === message._id && (
-              <div className="absolute bottom-full mb-2 bg-base-100 border rounded-lg p-2 shadow-lg z-10">
-                <div className="flex gap-1">
+              <div 
+                className="emoji-picker-container absolute bg-base-100 border border-base-300 rounded-lg p-2 shadow-lg z-[9999]"
+                style={{
+                  bottom: '100%',
+                  right: isOwnMessage ? '0' : 'auto',
+                  left: isOwnMessage ? 'auto' : '0',
+                  marginBottom: '8px',
+                  minWidth: 'max-content'
+                }}
+              >
+                <div className="flex gap-1 flex-wrap max-w-[200px]">
                   {commonEmojis.map(emoji => (
                     <button
                       key={emoji}
-                      onClick={() => addReaction(message._id, emoji)}
-                      className="hover:bg-base-200 p-1 rounded"
+                      onClick={() => {
+                        addReaction(message._id, emoji);
+                        setShowEmojiPicker(null);
+                      }}
+                      className="hover:bg-base-200 p-1 rounded text-lg"
                     >
                       {emoji}
                     </button>
                   ))}
                 </div>
+                <button
+                  onClick={() => setShowEmojiPicker(null)}
+                  className="absolute -top-2 -right-2 bg-base-300 hover:bg-base-400 text-base-content rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                >
+                  ×
+                </button>
               </div>
             )}
           </div>
@@ -571,7 +624,7 @@ const RoomChat = ({ roomId }) => {
             <Paperclip className="h-4 w-4" />
           </button>
           <textarea
-            ref={textAreaRef}
+            ref={messageInputRef}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message..."
