@@ -31,8 +31,10 @@ const RoomChat = ({ roomId }) => {
   const [editText, setEditText] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const fileInputRef = useRef(null);
   const editTextAreaRef = useRef(null);
   const messageInputRef = useRef(null);
@@ -40,7 +42,22 @@ const RoomChat = ({ roomId }) => {
   const commonEmojis = ['👍', '❤️', '😂', '😊', '😢', '😮', '😡', '👏', '🔥', '💯'];
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current && shouldAutoScroll) {
+      const container = messagesContainerRef.current;
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const checkIfUserAtBottom = () => {
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      const threshold = 100; // pixels from bottom
+      const isAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - threshold;
+      setShouldAutoScroll(isAtBottom);
+    }
   };
 
   useEffect(() => {
@@ -50,8 +67,49 @@ const RoomChat = ({ roomId }) => {
   }, [roomId]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only scroll to bottom for new messages or when user sends a message
+    // Don't scroll on every message update to avoid interrupting user reading
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [messages.length]); // Only trigger on new messages (length change), not on edits
+
+  // Realtime message polling
+  useEffect(() => {
+    if (!roomId) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await api.get(`/chat/room/${roomId}/messages`);
+        const fetchedMessages = response.data.messages;
+        
+        setMessages(prevMessages => {
+          // Check if we have new messages by comparing lengths and last message
+          if (fetchedMessages.length > prevMessages.length) {
+            return fetchedMessages;
+          }
+          
+          // Check if any existing messages were updated (edited, reactions, etc.)
+          const hasUpdates = prevMessages.some((prevMsg, index) => {
+            const fetchedMsg = fetchedMessages[index];
+            return fetchedMsg && JSON.stringify(prevMsg) !== JSON.stringify(fetchedMsg);
+          });
+          
+          if (hasUpdates) {
+            return fetchedMessages;
+          }
+          
+          return prevMessages;
+        });
+      } catch (error) {
+        console.error("Error polling messages:", error);
+      }
+    }, 2000); // Poll every 2 seconds for better responsiveness
+
+    return () => clearInterval(pollInterval);
+  }, [roomId]);
 
   // Add click outside handler to close emoji picker
   useEffect(() => {
@@ -112,6 +170,7 @@ const RoomChat = ({ roomId }) => {
       setNewMessage("");
       setSelectedFile(null);
       setReplyingTo(null);
+      setShouldAutoScroll(true); // Always scroll when user sends a message
       
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -521,7 +580,11 @@ const RoomChat = ({ roomId }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+        onScroll={checkIfUserAtBottom}
+      >
         {showSearch && searchResults.length > 0 ? (
           <div className="space-y-4">
             <div className="text-sm text-base-content/60">
