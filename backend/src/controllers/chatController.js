@@ -328,11 +328,16 @@ export const addReaction = async (req, res) => {
     );
     
     if (existingReaction) {
-      // Remove existing reaction
+      // Remove existing reaction with the same emoji
       message.reactions = message.reactions.filter(
         r => !(r.student.toString() === student._id.toString() && r.emoji === emoji)
       );
     } else {
+      // Remove any existing reaction from this user (different emoji)
+      message.reactions = message.reactions.filter(
+        r => r.student.toString() !== student._id.toString()
+      );
+      
       // Add new reaction
       message.reactions.push({
         student: student._id,
