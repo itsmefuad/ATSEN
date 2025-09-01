@@ -11,7 +11,11 @@
     "dev": "cd backend && npm run dev:all",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
   },
-  "keywords": ["education", "platform", "learning"],
+  "keywords": [
+    "education",
+    "platform",
+    "learning"
+  ],
   "author": "",
   "license": "ISC",
   "engines": {
@@ -23,6 +27,7 @@
     "cheerio": "^1.1.2",
     "jsonwebtoken": "^9.0.2",
     "lodash.debounce": "^4.0.8",
-    "slugify": "^1.6.6"
+    "slugify": "^1.6.6",
+    "vite": "^7.1.4"
   }
 }
