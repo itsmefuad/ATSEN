@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import { connectDB } from "./config/db.js";
 import rateLimiter from "./middlewares/rateLimiter.js";
@@ -42,7 +43,10 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-const __dirname = path.resolve();
+
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // enable CORS for all origins
 app.use(
@@ -74,6 +78,33 @@ app.get("/api/db-status", (req, res) => {
     port: conn.port,
     isAtlas: conn.host?.includes("mongodb.net"),
     message: conn.readyState === 1 ? "Connected" : "Disconnected",
+  });
+});
+
+// Health check endpoint for deployment platforms
+app.get("/health", (req, res) => {
+  const conn = mongoose.connection;
+  if (conn.readyState === 1) {
+    res.status(200).json({ 
+      status: "healthy", 
+      timestamp: new Date().toISOString(),
+      database: "connected"
+    });
+  } else {
+    res.status(503).json({ 
+      status: "unhealthy", 
+      timestamp: new Date().toISOString(),
+      database: "disconnected"
+    });
+  }
+});
+
+// Root API test route
+app.get("/api", (req, res) => {
+  res.json({ 
+    message: "ATSEN API is running", 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -139,11 +170,22 @@ app.use("/api/helpdesk", helpDeskRoutes);
 
 // Production: Serve React app (MUST be after all API routes)
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+  // Correct path to the built frontend files - they're in backend/public
+  const frontendPath = path.join(__dirname, '../public');
+  console.log(`📁 Serving static files from: ${frontendPath}`);
+  
+  app.use(express.static(frontendPath));
   
   // Handle React routing - catch all non-API routes using regex
   app.get(/^(?!\/api).*/, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    const indexPath = path.join(frontendPath, 'index.html');
+    console.log(`📄 Serving index.html from: ${indexPath}`);
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error('Error serving index.html:', err);
+        res.status(404).send('Page not found');
+      }
+    });
   });
 }
 
@@ -151,5 +193,10 @@ if (process.env.NODE_ENV === 'production') {
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log("Server started on PORT:", PORT);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📁 Static files path: ${path.join(__dirname, '../public')}`);
   });
+}).catch((error) => {
+  console.error("Failed to connect to database:", error);
+  process.exit(1);
 });
