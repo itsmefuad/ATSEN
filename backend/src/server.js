@@ -170,8 +170,8 @@ app.use("/api/helpdesk", helpDeskRoutes);
 
 // Production: Serve React app (MUST be after all API routes)
 if (process.env.NODE_ENV === 'production') {
-  // Correct path to the built frontend files - they're in backend/public
-  const frontendPath = path.join(__dirname, '../public');
+  // Serve from frontend/dist directory
+  const frontendPath = path.join(__dirname, '../../frontend/dist');
   console.log(`📁 Serving static files from: ${frontendPath}`);
   
   app.use(express.static(frontendPath));
@@ -194,7 +194,7 @@ connectDB().then(() => {
   app.listen(PORT, () => {
     console.log("Server started on PORT:", PORT);
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📁 Static files path: ${path.join(__dirname, '../public')}`);
+    console.log(`📁 Static files path: ${path.join(__dirname, '../../frontend/dist')}`);
   });
 }).catch((error) => {
   console.error("Failed to connect to database:", error);
