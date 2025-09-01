@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import path from "path";
 
 import { connectDB } from "./config/db.js";
 import rateLimiter from "./middlewares/rateLimiter.js";
@@ -41,6 +42,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+const __dirname = path.resolve();
 
 // enable CORS for all origins
 app.use(
@@ -88,7 +90,8 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/institutions", institutionRoutes);
 
 // → Nested “rooms” under an institution
-app.use("/api/institutions/:idOrName/rooms", institutionRoomRoutes);
+// TEMPORARY: Commenting out problematic route
+// app.use("/api/institutions/:idOrName/rooms", institutionRoomRoutes);
 
 app.use("/api/instructors", instructorRoutes);
 app.use("/api/students", studentRoutes);
@@ -133,6 +136,16 @@ app.use("/api/yuvraj-resources", yuvrajResourcesRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/link-preview", linkPreviewRoutes);
 app.use("/api/helpdesk", helpDeskRoutes);
+
+// Production: Serve React app (MUST be after all API routes)
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+  
+  // Handle React routing - catch all non-API routes using regex
+  app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+  });
+}
 
 // connect to DB, then start the server
 connectDB().then(() => {
