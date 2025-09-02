@@ -22,7 +22,7 @@ export default function StudentList() {
 
     try {
       const res = await fetch(
-        `/institutions/${encodeURIComponent(
+        `/api/institutions/${encodeURIComponent(
           idOrName
         )}/remove-student`,
         {
@@ -51,7 +51,7 @@ export default function StudentList() {
     if (!idOrName) return;
 
     fetch(
-      `/institutions/${encodeURIComponent(
+      `/api/institutions/${encodeURIComponent(
         idOrName
       )}/students`
     )
