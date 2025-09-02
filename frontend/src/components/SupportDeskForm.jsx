@@ -75,7 +75,7 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
 
     try {
       const submitData = new FormData();
-      submitData.append("studentId", student.id);
+      submitData.append("studentId", student._id);
       submitData.append("institutionId", institution._id);
       submitData.append("category", formData.category);
       submitData.append("subject", formData.subject);

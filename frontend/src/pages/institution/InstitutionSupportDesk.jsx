@@ -199,11 +199,11 @@ const InstitutionSupportDesk = () => {
 
   if (loading && tickets.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-base-200">
         <div className="max-w-7xl mx-auto p-6">
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading support tickets...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-base-content/70">Loading support tickets...</p>
           </div>
         </div>
       </div>
@@ -211,7 +211,7 @@ const InstitutionSupportDesk = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-base-200">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
@@ -219,19 +219,19 @@ const InstitutionSupportDesk = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate(-1)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-base-300 rounded-lg transition-colors"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800">Support Desk</h1>
-                <p className="text-gray-600">Manage student support requests</p>
+                <h1 className="text-3xl font-bold text-base-content">Support Desk</h1>
+                <p className="text-base-content/70">Manage student support requests</p>
               </div>
             </div>
             
             <div className="flex items-center gap-4">
-              <BarChart3 className="h-5 w-5 text-gray-500" />
-              <span className="text-sm text-gray-600">
+              <BarChart3 className="h-5 w-5 text-base-content/60" />
+              <span className="text-sm text-base-content/70">
                 {pagination.total} total tickets
               </span>
             </div>
@@ -244,11 +244,11 @@ const InstitutionSupportDesk = () => {
             {statusOptions.slice(1).map((status) => {
               const count = stats.statusStats.find(s => s._id === status.value)?.count || 0;
               return (
-                <div key={status.value} className="bg-white rounded-lg p-4 shadow-sm border">
+                <div key={status.value} className="bg-base-100 rounded-lg p-4 shadow-sm border border-base-300">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{status.label}</p>
-                      <p className="text-2xl font-bold text-gray-900">{count}</p>
+                      <p className="text-sm font-medium text-base-content/70">{status.label}</p>
+                      <p className="text-2xl font-bold text-base-content">{count}</p>
                     </div>
                     <div className={`p-2 rounded-lg bg-${status.color}-100`}>
                       {getStatusIcon(status.value)}
@@ -261,18 +261,18 @@ const InstitutionSupportDesk = () => {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg border shadow-sm p-4 mb-6">
+        <div className="bg-base-100 rounded-lg border border-base-300 shadow-sm p-4 mb-6">
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Filters:</span>
+              <Filter className="h-4 w-4 text-base-content/60" />
+              <span className="text-sm font-medium text-base-content">Filters:</span>
             </div>
             
             <div className="flex gap-2 flex-wrap">
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange("status", e.target.value)}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="px-3 py-1 border border-base-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-base-100 text-base-content"
               >
                 {statusOptions.map(option => (
                   <option key={option.value} value={option.value}>
@@ -284,7 +284,7 @@ const InstitutionSupportDesk = () => {
               <select
                 value={filters.category}
                 onChange={(e) => handleFilterChange("category", e.target.value)}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="px-3 py-1 border border-base-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-base-100 text-base-content"
               >
                 {categoryOptions.map(option => (
                   <option key={option.value} value={option.value}>
@@ -296,7 +296,7 @@ const InstitutionSupportDesk = () => {
               <select
                 value={filters.priority}
                 onChange={(e) => handleFilterChange("priority", e.target.value)}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="px-3 py-1 border border-base-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-base-100 text-base-content"
               >
                 {priorityOptions.map(option => (
                   <option key={option.value} value={option.value}>
@@ -308,13 +308,13 @@ const InstitutionSupportDesk = () => {
 
             <div className="flex-1 max-w-md">
               <div className="relative">
-                <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <Search className="h-4 w-4 text-base-content/40 absolute left-3 top-1/2 transform -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search tickets..."
                   value={filters.search}
                   onChange={(e) => handleFilterChange("search", e.target.value)}
-                  className="pl-10 pr-4 py-1 w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="pl-10 pr-4 py-1 w-full border border-base-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-base-100 text-base-content"
                 />
               </div>
             </div>
@@ -324,10 +324,10 @@ const InstitutionSupportDesk = () => {
         {/* Tickets List */}
         <div className="space-y-4">
           {tickets.length === 0 ? (
-            <div className="bg-white rounded-lg border shadow-sm p-12 text-center">
-              <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No support tickets</h3>
-              <p className="text-gray-500">
+            <div className="bg-base-100 rounded-lg border border-base-300 shadow-sm p-12 text-center">
+              <MessageCircle className="h-16 w-16 text-base-content/40 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-base-content mb-2">No support tickets</h3>
+              <p className="text-base-content/60">
                 {Object.values(filters).some(v => v) 
                   ? "No tickets match your current filters."
                   : "There are no support tickets yet."
@@ -336,7 +336,7 @@ const InstitutionSupportDesk = () => {
             </div>
           ) : (
             tickets.map((ticket) => (
-              <div key={ticket._id} className="bg-white rounded-lg border shadow-sm">
+              <div key={ticket._id} className="bg-base-100 rounded-lg border border-base-300 shadow-sm">
                 {/* Ticket Header */}
                 <div className="p-4 border-b border-gray-200">
                   <div className="flex items-start justify-between">
