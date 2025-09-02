@@ -231,6 +231,16 @@ export default function YuvrajForms({ hideNavbar = false }) {
     fetchFormDetail();
   }, [activeForm]);
 
+  // Reset custom questions when form type changes to evaluation
+  useEffect(() => {
+    if (createData.kind === 'evaluation') {
+      setCustomQuestions([
+        { type: 'slider', question: 'Rate your overall satisfaction with the instructor', min: 1, max: 10 },
+        { type: 'slider', question: 'How effectively was the content delivered?', min: 1, max: 10 }
+      ]);
+    }
+  }, [createData.kind]);
+
   const handleCreateForm = async (e) => {
     e.preventDefault();
     if (!createData.title.trim()) return;
@@ -422,29 +432,14 @@ export default function YuvrajForms({ hideNavbar = false }) {
       ? contentDeliveryRatings.reduce((a, b) => a + b, 0) / contentDeliveryRatings.length 
       : 0;
 
-    // Distribution data for charts
-    const satisfactionDistribution = {};
-    const contentDeliveryDistribution = {};
-    
-    for (let i = 1; i <= 10; i++) {
-      satisfactionDistribution[i] = satisfactionLevels.filter(level => level === i).length;
-      contentDeliveryDistribution[i] = contentDeliveryRatings.filter(level => level === i).length;
-    }
+    // Calculate overall performance percentage
+    const overallPerformance = Math.round(((avgSatisfaction + avgContentDelivery) / 2) * 10);
 
     return {
       totalResponses: responses.length,
       avgSatisfaction: avgSatisfaction.toFixed(1),
       avgContentDelivery: avgContentDelivery.toFixed(1),
-      satisfactionDistribution: Object.entries(satisfactionDistribution).map(([rating, count]) => ({
-        rating: parseInt(rating),
-        count,
-        percentage: Math.round((count / satisfactionLevels.length) * 100) || 0
-      })).filter(item => item.count > 0),
-      contentDeliveryDistribution: Object.entries(contentDeliveryDistribution).map(([rating, count]) => ({
-        rating: parseInt(rating),
-        count,
-        percentage: Math.round((count / contentDeliveryRatings.length) * 100) || 0
-      })).filter(item => item.count > 0)
+      overallPerformance
     };
   };
 
@@ -1083,113 +1078,80 @@ export default function YuvrajForms({ hideNavbar = false }) {
                               {(() => {
                                 const stats = getEvaluationStats();
                                 return stats && showChart && (
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Summary Cards */}
+                                  <div className="space-y-6">
+                                    {/* Overall Statistics */}
                                     <div className="card bg-base-100 shadow-sm">
                                       <div className="card-body">
                                         <h4 className="card-title text-lg">Overall Statistics</h4>
-                                        <div className="grid grid-cols-2 gap-4">
-                                          <div className="text-center p-4 bg-primary/10 rounded-lg">
-                                            <div className="text-2xl font-bold text-primary">
-                                              {stats.avgSatisfaction}
-                                            </div>
-                                            <div className="text-sm text-base-content/70">Avg Satisfaction</div>
-                                          </div>
-                                          <div className="text-center p-4 bg-success/10 rounded-lg">
-                                            <div className="text-2xl font-bold text-success">
-                                              {stats.avgContentDelivery}
-                                            </div>
-                                            <div className="text-sm text-base-content/70">Avg Content Delivery</div>
-                                          </div>
+                                        
+                                        {/* Response Count */}
+                                        <div className="text-center mb-6">
+                                          <div className="text-3xl font-bold text-primary">{stats.totalResponses}</div>
+                                          <div className="text-base-content/70">Total Responses</div>
                                         </div>
-                                        <div className="text-center mt-4">
-                                          <span className="text-lg font-semibold">{stats.totalResponses}</span>
-                                          <span className="text-base-content/70 ml-1">Total Responses</span>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                                                         {/* Satisfaction Distribution Chart */}
-                                     <div className="card bg-base-100 shadow-sm">
-                                       <div className="card-body">
-                                         <h4 className="card-title text-lg">Satisfaction Distribution</h4>
-                                         <div className="h-64">
-                                           <ResponsiveContainer width="100%" height="100%">
-                                             <RechartsPieChart>
-                                               <Pie
-                                                 data={stats.satisfactionDistribution}
-                                                 cx="50%"
-                                                 cy="50%"
-                                                 labelLine={false}
-                                                 label={({ rating, count, percentage }) => `${rating}: ${count} (${percentage}%)`}
-                                                 outerRadius={60}
-                                                 fill="#8884d8"
-                                                 dataKey="count"
-                                                 animationDuration={1000}
-                                                 animationBegin={0}
-                                               >
-                                                 {stats.satisfactionDistribution.map((entry, index) => (
-                                                   <Cell key={`satisfaction-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                 ))}
-                                               </Pie>
-                                               <Tooltip formatter={(value, name) => [value, 'Responses']} />
-                                               <Legend />
-                                             </RechartsPieChart>
-                                           </ResponsiveContainer>
-                                         </div>
-                                       </div>
-                                     </div>
-
-                                     {/* Content Delivery Distribution Chart */}
-                                     <div className="card bg-base-100 shadow-sm">
-                                       <div className="card-body">
-                                         <h4 className="card-title text-lg">Content Delivery Distribution</h4>
-                                         <div className="h-64">
-                                           <ResponsiveContainer width="100%" height="100%">
-                                             <RechartsPieChart>
-                                               <Pie
-                                                 data={stats.contentDeliveryDistribution}
-                                                 cx="50%"
-                                                 cy="50%"
-                                                 labelLine={false}
-                                                 label={({ rating, count, percentage }) => `${rating}: ${count} (${percentage}%)`}
-                                                 outerRadius={60}
-                                                 fill="#8884d8"
-                                                 dataKey="count"
-                                                 animationDuration={1000}
-                                                 animationBegin={0}
-                                               >
-                                                 {stats.contentDeliveryDistribution.map((entry, index) => (
-                                                   <Cell key={`content-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                 ))}
-                                               </Pie>
-                                               <Tooltip formatter={(value, name) => [value, 'Responses']} />
-                                               <Legend />
-                                             </RechartsPieChart>
-                                           </ResponsiveContainer>
-                                         </div>
-                                       </div>
-                                     </div>
-
-                                    {/* Percentage Breakdown */}
-                                    <div className="card bg-base-100 shadow-sm">
-                                      <div className="card-body">
-                                        <h4 className="card-title text-lg">Rating Percentages</h4>
-                                        <div className="space-y-3">
-                                          {stats.satisfactionDistribution.map((item) => (
-                                            <div key={`satisfaction-${item.rating}`} className="flex items-center justify-between">
-                                              <span className="text-sm">Rating {item.rating}</span>
-                                              <div className="flex items-center gap-2">
-                                                <div className="w-20 bg-base-300 rounded-full h-2">
-                                                  <div 
-                                                    className="bg-primary h-2 rounded-full" 
-                                                    style={{ width: `${item.percentage}%` }}
-                                                  />
-                                                </div>
-                                                <span className="text-sm font-medium">{item.percentage}%</span>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                          {/* Left side - Slider bars */}
+                                          <div className="space-y-4">
+                                            {/* Satisfaction Slider */}
+                                            <div>
+                                              <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium">Avg Satisfaction</span>
+                                                <span className="text-sm font-bold text-primary">{stats.avgSatisfaction}/10</span>
+                                              </div>
+                                              <div className="w-full bg-base-300 rounded-full h-3 overflow-hidden">
+                                                <div 
+                                                  className="bg-green-500 h-3 rounded-full transition-all duration-1000 ease-out" 
+                                                  style={{ width: `${(parseFloat(stats.avgSatisfaction) / 10) * 100}%` }}
+                                                ></div>
                                               </div>
                                             </div>
-                                          ))}
+                                            
+                                            {/* Content Delivery Slider */}
+                                            <div>
+                                              <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium">Avg Content Delivery</span>
+                                                <span className="text-sm font-bold text-success">{stats.avgContentDelivery}/10</span>
+                                              </div>
+                                              <div className="w-full bg-base-300 rounded-full h-3 overflow-hidden">
+                                                <div 
+                                                  className="bg-green-500 h-3 rounded-full transition-all duration-1000 ease-out" 
+                                                  style={{ width: `${(parseFloat(stats.avgContentDelivery) / 10) * 100}%` }}
+                                                ></div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          
+                                          {/* Right side - Performance Pie Chart */}
+                                          <div className="flex items-center justify-center">
+                                            <div className="text-center">
+                                              <div className="relative w-32 h-32 mb-2">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                  <RechartsPieChart>
+                                                    <Pie
+                                                      data={[
+                                                        { name: 'Performance', value: stats.overallPerformance, fill: '#10B981' },
+                                                        { name: 'Remaining', value: 100 - stats.overallPerformance, fill: '#6B7280' }
+                                                      ]}
+                                                      cx="50%"
+                                                      cy="50%"
+                                                      innerRadius={0}
+                                                      outerRadius={60}
+                                                      startAngle={90}
+                                                      endAngle={-270}
+                                                      dataKey="value"
+                                                      animationDuration={1500}
+                                                      animationBegin={800}
+                                                    />
+                                                  </RechartsPieChart>
+                                                </ResponsiveContainer>
+                                              </div>
+                                              <div className="text-center mb-2">
+                                                <span className="text-2xl font-bold text-green-500">{stats.overallPerformance}%</span>
+                                              </div>
+                                              <div className="text-sm text-base-content/70">Overall Performance</div>
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
@@ -1360,194 +1322,33 @@ export default function YuvrajForms({ hideNavbar = false }) {
                         </select>
                       </div>
 
-                      {/* Custom Evaluation Questions */}
+                      {/* Default Evaluation Questions */}
                       <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <label className="label">
-                              <span className="label-text font-semibold">Evaluation Questions</span>
-                            </label>
-                            <p className="text-xs text-base-content/60">Create custom questions to gather detailed feedback</p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCustomQuestions([...customQuestions, { type: 'slider', question: '', min: 1, max: 10 }]);
-                            }}
-                            className="btn btn-sm btn-primary"
-                          >
-                            <Plus className="h-4 w-4" />
-                            Add Question
-                          </button>
+                        <div className="mb-3">
+                          <label className="label">
+                            <span className="label-text font-semibold">Evaluation Questions</span>
+                          </label>
+                          <p className="text-xs text-base-content/60">Students will respond to these 2 sliders and a feedback text section</p>
                         </div>
                         
-                        <div className="space-y-3 max-h-64 overflow-y-auto">
-                          {customQuestions.map((question, index) => (
-                            <div key={index} className="p-3 border border-base-300 rounded-lg bg-base-50">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="badge badge-primary badge-sm">Q{index + 1}</span>
-                                  <select
-                                    className="select select-bordered select-sm"
-                                    value={question.type}
-                                    onChange={(e) => {
-                                      const newQuestions = [...customQuestions];
-                                      newQuestions[index] = { ...newQuestions[index], type: e.target.value };
-                                      if (e.target.value === 'slider') {
-                                        newQuestions[index] = { ...newQuestions[index], min: 1, max: 10 };
-                                        delete newQuestions[index].options;
-                                      } else if (e.target.value === 'multiple_choice') {
-                                        newQuestions[index] = { ...newQuestions[index], options: ['Option 1', 'Option 2'] };
-                                        delete newQuestions[index].min;
-                                        delete newQuestions[index].max;
-                                      } else if (e.target.value === 'text') {
-                                        delete newQuestions[index].options;
-                                        delete newQuestions[index].min;
-                                        delete newQuestions[index].max;
-                                      }
-                                      setCustomQuestions(newQuestions);
-                                    }}
-                                  >
-                                    <option value="slider">Level Slider (1-10)</option>
-                                    <option value="multiple_choice">Multiple Choice</option>
-                                    <option value="text">Text Answer</option>
-                                  </select>
-                                </div>
-                                
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setCustomQuestions(customQuestions.filter((_, i) => i !== index));
-                                  }}
-                                  className="btn btn-sm btn-ghost btn-circle text-error"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                              
-                              <input
-                                type="text"
-                                className="input input-bordered input-sm w-full mb-2"
-                                placeholder="Enter your question..."
-                                value={question.question}
-                                onChange={(e) => {
-                                  const newQuestions = [...customQuestions];
-                                  newQuestions[index] = { ...newQuestions[index], question: e.target.value };
-                                  setCustomQuestions(newQuestions);
-                                }}
-                              />
-                              
-                              {question.type === 'slider' && (
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div>
-                                    <label className="label label-text-alt">Min Value</label>
-                                    <input
-                                      type="number"
-                                      className="input input-bordered input-sm w-full"
-                                      value={question.min || 1}
-                                      onChange={(e) => {
-                                        const newQuestions = [...customQuestions];
-                                        newQuestions[index] = { ...newQuestions[index], min: parseInt(e.target.value) || 1 };
-                                        setCustomQuestions(newQuestions);
-                                      }}
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="label label-text-alt">Max Value</label>
-                                    <input
-                                      type="number"
-                                      className="input input-bordered input-sm w-full"
-                                      value={question.max || 10}
-                                      onChange={(e) => {
-                                        const newQuestions = [...customQuestions];
-                                        newQuestions[index] = { ...newQuestions[index], max: parseInt(e.target.value) || 10 };
-                                        setCustomQuestions(newQuestions);
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {question.type === 'multiple_choice' && (
-                                <div>
-                                  <div className="flex items-center justify-between mb-2">
-                                    <label className="label label-text-alt">Options</label>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const newQuestions = [...customQuestions];
-                                        const currentOptions = newQuestions[index].options || [];
-                                        newQuestions[index] = {
-                                          ...newQuestions[index],
-                                          options: [...currentOptions, '']
-                                        };
-                                        setCustomQuestions(newQuestions);
-                                      }}
-                                      className="btn btn-xs btn-primary"
-                                    >
-                                      <Plus className="h-3 w-3" />
-                                      Add Option
-                                    </button>
-                                  </div>
-                                  
-                                  <div className="space-y-2 max-h-32 overflow-y-auto">
-                                    {(question.options || ['Option 1', 'Option 2']).map((option, optIndex) => (
-                                      <div key={optIndex} className="flex items-center gap-2">
-                                        <span className="text-xs text-base-content/60 min-w-0 flex-shrink-0">
-                                          {optIndex + 1}.
-                                        </span>
-                                        <input
-                                          type="text"
-                                          className="input input-bordered input-xs flex-1"
-                                          placeholder={`Option ${optIndex + 1}`}
-                                          value={option}
-                                          onChange={(e) => {
-                                            const newQuestions = [...customQuestions];
-                                            const newOptions = [...(newQuestions[index].options || [])];
-                                            newOptions[optIndex] = e.target.value;
-                                            newQuestions[index] = {
-                                              ...newQuestions[index],
-                                              options: newOptions
-                                            };
-                                            setCustomQuestions(newQuestions);
-                                          }}
-                                        />
-                                        {(question.options || []).length > 2 && (
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              const newQuestions = [...customQuestions];
-                                              const newOptions = [...(newQuestions[index].options || [])];
-                                              newOptions.splice(optIndex, 1);
-                                              newQuestions[index] = {
-                                                ...newQuestions[index],
-                                                options: newOptions
-                                              };
-                                              setCustomQuestions(newQuestions);
-                                            }}
-                                            className="btn btn-xs btn-ghost btn-circle text-error"
-                                          >
-                                            ✕
-                                          </button>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                  
-                                  <div className="text-xs text-base-content/60 mt-2">
-                                    Add multiple choice options for students to select from.
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                        <div className="space-y-3 p-4 border border-base-300 rounded-lg bg-base-50">
+                          <div className="flex items-center gap-2">
+                            <span className="badge badge-primary badge-sm">Q1</span>
+                            <span className="text-sm">Rate your overall satisfaction with the instructor (1-10)</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="badge badge-primary badge-sm">Q2</span>
+                            <span className="text-sm">How effectively was the content delivered? (1-10)</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="badge badge-secondary badge-sm">Feedback</span>
+                            <span className="text-sm">Additional comments and suggestions (text)</span>
+                          </div>
                         </div>
                         
-                        {customQuestions.length === 0 && (
-                          <div className="text-center py-6 text-base-content/50">
-                            No custom questions added. Default satisfaction and content delivery questions will be used.
-                          </div>
-                        )}
+                        <div className="text-xs text-base-content/60 mt-2">
+                          Note: The feedback text section will not be considered in the overall performance pie chart.
+                        </div>
                       </div>
                     </div>
                   )}
