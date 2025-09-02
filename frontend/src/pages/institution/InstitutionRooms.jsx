@@ -11,6 +11,7 @@ import {
   Trash2,
   Calendar,
 } from "lucide-react";
+import api from "../../lib/axios.js";
 
 export default function InstitutionRooms() {
   const { idOrName } = useParams();
@@ -23,36 +24,23 @@ export default function InstitutionRooms() {
   useEffect(() => {
     if (!idOrName) return;
 
-    fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
-        idOrName
-      )}/rooms`
-    )
-      .then(async (res) => {
-        if (!res.ok) throw new Error(await res.text());
-        return res.json();
-      })
-      .then((json) => {
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/rooms`)
+      .then((response) => {
         console.log("=== ROOMS DATA ===");
-        console.log("Rooms received:", json);
-        json.forEach((room, index) => {
+        console.log("Rooms received:", response.data);
+        response.data.forEach((room, index) => {
           console.log(`Room ${index}:`, {
             id: room._id,
             name: room.room_name,
             idLength: room._id?.length,
           });
         });
-        setRooms(json);
+        setRooms(response.data);
         setLoading(false);
       })
-      .catch(async (err) => {
-        // try to pull the real error text
-        let msg = err.message;
-        if (err.response) {
-          msg = await err.response.text();
-        }
-        console.error("Error loading rooms:", msg);
-        setErrMsg(msg);
+      .catch((err) => {
+        console.error("Error loading rooms:", err);
+        setErrMsg(err.response?.data?.message || err.message);
         setLoading(false);
       });
   }, [idOrName]);
@@ -66,19 +54,7 @@ export default function InstitutionRooms() {
 
     setDeleting(true);
     try {
-      const response = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/rooms/${deleteConfirm.roomId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
+      await api.delete(`/institutions/${encodeURIComponent(idOrName)}/rooms/${deleteConfirm.roomId}`);
 
       // Remove the deleted room from the rooms state
       setRooms((prevRooms) =>

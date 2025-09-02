@@ -31,24 +31,13 @@ export default function I_Dashboard() {
 
   useEffect(() => {
     if (!idOrName) return;
-    fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
-        idOrName
-      )}/dashboard`
-    )
-      .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || `Error ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((json) => {
-        setData(json);
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/dashboard`)
+      .then((response) => {
+        setData(response.data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Failed to load institution name:", err);
         setErrMsg("Failed to load dashboard data.");
         setLoading(false);
       });
@@ -236,6 +225,12 @@ export default function I_Dashboard() {
               Institution Announcements
             </h2>
           </div>
+          <Link
+            to={`/${idOrName}/announcements`}
+            className="btn btn-outline btn-primary hover:btn-primary"
+          >
+            View All Announcements
+          </Link>
         </div>
 
         {/* Create Announcement Component */}

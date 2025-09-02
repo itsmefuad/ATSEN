@@ -6,7 +6,8 @@ import {
   getInstitutionDocuments,
   updateDocumentStatusByInstitution,
   getDocumentDetails,
-  getDocumentStatistics
+  getDocumentStatistics,
+  downloadDocument
 } from "../controllers/documentController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
@@ -24,5 +25,6 @@ router.get("/institution/statistics", authMiddleware, getDocumentStatistics);
 
 // Shared Routes
 router.get("/:documentId", authMiddleware, getDocumentDetails);
+router.get("/:documentId/download", authMiddleware, downloadDocument);
 
 export default router;

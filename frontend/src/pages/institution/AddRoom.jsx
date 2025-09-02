@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Plus, Home } from "lucide-react";
 import SectionManager from "../../components/SectionManager.jsx";
+import api from "../../lib/axios";
 
 export default function AddRoom() {
   const { idOrName } = useParams();
@@ -29,13 +30,8 @@ export default function AddRoom() {
   // load all instructors for this institution
   useEffect(() => {
     if (!idOrName) return;
-    fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
-        idOrName
-      )}/instructors`
-    )
-      .then((res) => res.json())
-      .then(setInstructors)
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/instructors`)
+      .then((res) => setInstructors(res.data))
       .catch((err) => console.error("Fetch instructors:", err));
   }, [idOrName]);
 
@@ -164,20 +160,10 @@ export default function AddRoom() {
     };
 
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/rooms`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
+      const res = await api.post(
+        `/institutions/${encodeURIComponent(idOrName)}/rooms`,
+        payload
       );
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Failed to create room");
-      }
       // redirect back to your dashboard or rooms list
       navigate(`/${encodeURIComponent(idOrName)}/dashboard`);
     } catch (err) {

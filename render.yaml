@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: atsen
+    env: node
+    plan: starter
+    buildCommand: npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    domains:
+      - atsen.app
+      - www.atsen.app

@@ -32,6 +32,39 @@ const institutionAnnouncementSchema = new Schema(
         trim: true,
       },
     ],
+    externalLinks: [
+      {
+        url: {
+          type: String,
+          trim: true,
+        },
+        title: {
+          type: String,
+          trim: true,
+        },
+        type: {
+          type: String,
+          enum: ['youtube', 'document', 'website'],
+          default: 'website',
+        },
+      },
+    ],
+    images: [
+      {
+        url: {
+          type: String,
+          trim: true,
+        },
+        alt: {
+          type: String,
+          trim: true,
+        },
+        caption: {
+          type: String,
+          trim: true,
+        },
+      },
+    ],
     isActive: {
       type: Boolean,
       default: true,

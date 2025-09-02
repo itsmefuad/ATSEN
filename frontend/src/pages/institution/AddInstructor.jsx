@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { Search, UserPlus, ArrowLeft, X, Check } from "lucide-react";
 import toast from "react-hot-toast";
+import api from "../../lib/axios";
 
 export default function AddInstructor() {
   const { idOrName } = useParams();
@@ -18,12 +19,10 @@ export default function AddInstructor() {
 
   // 1) load all instructors from your global collection
   useEffect(() => {
-    fetch(`http://localhost:5001/api/instructors`)
+    api.get("/instructors")
       .then((res) => {
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        return res.json();
+        setAllInstructors(res.data);
       })
-      .then((json) => setAllInstructors(json))
       .catch((err) => {
         console.error("Fetch all instructors failed:", err);
         setError("Could not load instructors.");
@@ -53,22 +52,12 @@ export default function AddInstructor() {
 
     setLoading(true);
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/add-instructor`,
+      const res = await api.post(
+        `/institutions/${encodeURIComponent(idOrName)}/add-instructor`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            instructorId: selectedInstructor._id,
-          }),
+          instructorId: selectedInstructor._id,
         }
       );
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Status ${res.status}`);
-      }
 
       toast.success("Instructor added successfully!");
       // on success, go back to the instructor list

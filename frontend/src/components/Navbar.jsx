@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronDown, LogOut, User, Trophy, Moon, Sun } from "lucide-react";
+import { ChevronDown, LogOut, User, Trophy, Moon, Sun, BarChart3, Users, MessageSquare } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { useTheme } from "../contexts/ThemeContext.jsx";
 
@@ -59,6 +59,50 @@ const Navbar = () => {
         return "Student";
       default:
         return "";
+    }
+  };
+
+  const getFormsLink = () => {
+    if (!user) return "/forms";
+
+    switch (user.role) {
+      case "institution":
+        return `/${user.slug}/forms`;
+      case "student":
+        // For students, try to get institution slug from their institutions array
+        if (user.institutions && user.institutions.length > 0) {
+          // If institutions array has objects with slug property
+          if (typeof user.institutions[0] === 'object' && user.institutions[0].slug) {
+            return `/student/${user.institutions[0].slug}/forms`;
+          }
+          // If institutions array has string IDs, we'll need to fetch the slug
+          // For now, use the legacy route
+        }
+        return "/forms";
+      default:
+        return "/forms";
+    }
+  };
+
+  const getHelpDeskLink = () => {
+    if (!user) return "/helpdesk";
+
+    switch (user.role) {
+      case "institution":
+        return `/${user.slug}/helpdesk`;
+      case "student":
+        // For students, try to get institution slug from their institutions array
+        if (user.institutions && user.institutions.length > 0) {
+          // If institutions array has objects with slug property
+          if (typeof user.institutions[0] === 'object' && user.institutions[0].slug) {
+            return `/student/${user.institutions[0].slug}/helpdesk`;
+          }
+          // If institutions array has string IDs, we'll need to fetch the slug
+          // For now, use the legacy route
+        }
+        return "/helpdesk";
+      default:
+        return "/helpdesk";
     }
   };
 
@@ -151,6 +195,32 @@ const Navbar = () => {
                       </Link>
                     </>
                   )}
+
+                  {/* Forms link for institutions and students only */}
+                  {user?.role !== "instructor" && (
+                    <>
+                      <Link
+                        to={getFormsLink()}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                        <span>Forms</span>
+                      </Link>
+
+                      {/* Help Desk link right under Forms */}
+                      <Link
+                        to={getHelpDeskLink()}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                        <span>Help Desk</span>
+                      </Link>
+                    </>
+                  )}
+
+
 
                   <button
                     onClick={handleLogout}

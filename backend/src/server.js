@@ -3,9 +3,17 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import { connectDB } from "./config/db.js";
 import rateLimiter from "./middlewares/rateLimiter.js";
+
+// Import all models to ensure they are registered
+import "./models/index.js";
+
+// Import all models to ensure they are registered
+import "./models/index.js";
 
 import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
@@ -25,11 +33,20 @@ import documentRoutes from "./routes/documentRoutes.js";
 import supportRoutes from "./routes/supportRoutes.js";
 import achievementRoutes from "./routes/achievementRoutes.js";
 import institutionAnnouncementRoutes from "./routes/institutionAnnouncementRoutes.js";
+import yuvrajPollsRoutes from "./routes/yuvraj_pollsRoutes.js";
+import yuvrajResourcesRoutes from "./routes/yuvraj_resourcesRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
+import linkPreviewRoutes from "./routes/linkPreviewRoutes.js";
+import helpDeskRoutes from "./routes/helpDeskRoutes.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // enable CORS for all origins
 app.use(
@@ -61,6 +78,33 @@ app.get("/api/db-status", (req, res) => {
     port: conn.port,
     isAtlas: conn.host?.includes("mongodb.net"),
     message: conn.readyState === 1 ? "Connected" : "Disconnected",
+  });
+});
+
+// Health check endpoint for deployment platforms
+app.get("/health", (req, res) => {
+  const conn = mongoose.connection;
+  if (conn.readyState === 1) {
+    res.status(200).json({ 
+      status: "healthy", 
+      timestamp: new Date().toISOString(),
+      database: "connected"
+    });
+  } else {
+    res.status(503).json({ 
+      status: "unhealthy", 
+      timestamp: new Date().toISOString(),
+      database: "disconnected"
+    });
+  }
+});
+
+// Root API test route
+app.get("/api", (req, res) => {
+  res.json({ 
+    message: "ATSEN API is running", 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -117,10 +161,41 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/achievements", achievementRoutes);
 app.use("/api/institution-announcements", institutionAnnouncementRoutes);
+app.use("/api/yuvraj-polls", yuvrajPollsRoutes);
+app.use("/api/yuvraj-resources", yuvrajResourcesRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/link-preview", linkPreviewRoutes);
+app.use("/api/helpdesk", helpDeskRoutes);
+
+// Production: Serve React app (MUST be after all API routes)
+if (process.env.NODE_ENV === 'production') {
+  // Serve from frontend/dist directory
+  const frontendPath = path.join(__dirname, '../../frontend/dist');
+  console.log(`📁 Serving static files from: ${frontendPath}`);
+  
+  app.use(express.static(frontendPath));
+  
+  // Handle React routing - catch all non-API routes using regex
+  app.get(/^(?!\/api).*/, (req, res) => {
+    const indexPath = path.join(frontendPath, 'index.html');
+    console.log(`📄 Serving index.html from: ${indexPath}`);
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error('Error serving index.html:', err);
+        res.status(404).send('Page not found');
+      }
+    });
+  });
+}
 
 // connect to DB, then start the server
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log("Server started on PORT:", PORT);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📁 Static files path: ${path.join(__dirname, '../../frontend/dist')}`);
   });
+}).catch((error) => {
+  console.error("Failed to connect to database:", error);
+  process.exit(1);
 });

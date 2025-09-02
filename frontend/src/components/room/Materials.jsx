@@ -4,8 +4,11 @@ import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import CreateMaterial from "./CreateMaterial";
 import MaterialCard from "./MaterialCard";
+import YuvrajResources from "./yuvraj_Resources";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Materials = ({ roomId }) => {
+  const { user } = useAuth();
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -120,6 +123,11 @@ const Materials = ({ roomId }) => {
           })}
         </div>
       )}
+      
+                  {/* Resources Section */}
+            <div className="mt-8 pt-8 border-t border-base-300">
+              <YuvrajResources roomId={roomId} user={user} />
+            </div>
     </div>
   );
 };

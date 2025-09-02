@@ -15,7 +15,7 @@ export default function InstructorList() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/remove-instructor`,
         {
@@ -41,7 +41,7 @@ export default function InstructorList() {
 
   useEffect(() => {
     fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
+      `/institutions/${encodeURIComponent(
         idOrName
       )}/instructors`
     )

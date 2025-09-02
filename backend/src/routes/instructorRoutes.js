@@ -16,6 +16,15 @@ router.post("/login", loginInstructor);
 
 router.get("/", async (req, res) => {
   try {
+    // const { institutionSlug } = req.query;
+    // let query = {};
+    
+    // // Filter by institution if provided
+    // if (institutionSlug) {
+    //   // Find instructors that belong to the specified institution
+    //   query.institutions = { $in: [institutionSlug] };
+    // }
+    
     const instructors = await Instructor.find({}, "name email"); // optional projection
     res.json(instructors);
   } catch (err) {
