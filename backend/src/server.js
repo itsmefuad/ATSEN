@@ -121,8 +121,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/institutions", institutionRoutes);
 
 // → Nested “rooms” under an institution
-// TEMPORARY: Commenting out problematic route
-// app.use("/api/institutions/:idOrName/rooms", institutionRoomRoutes);
+app.use("/api/institutions/:idOrName/rooms", institutionRoomRoutes);
 
 app.use("/api/instructors", instructorRoutes);
 app.use("/api/students", studentRoutes);
