@@ -24,7 +24,7 @@ export default function InstitutionRooms() {
     if (!idOrName) return;
 
     fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
+      `/institutions/${encodeURIComponent(
         idOrName
       )}/rooms`
     )
@@ -67,7 +67,7 @@ export default function InstitutionRooms() {
     setDeleting(true);
     try {
       const response = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${deleteConfirm.roomId}`,
         {

@@ -10,6 +10,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import api from "../../lib/axios";
 
 export default function AddStudent() {
   const { idOrName } = useParams();
@@ -25,12 +26,10 @@ export default function AddStudent() {
 
   // 1) load all students from your global collection
   useEffect(() => {
-    fetch(`http://localhost:5001/api/students`)
+    api.get("/students")
       .then((res) => {
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        return res.json();
+        setAllStudents(res.data);
       })
-      .then((json) => setAllStudents(json))
       .catch((err) => {
         console.error("Fetch all students failed:", err);
         setError("Could not load students.");
@@ -63,22 +62,12 @@ export default function AddStudent() {
 
     setLoading(true);
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/add-student`,
+      const res = await api.post(
+        `/institutions/${encodeURIComponent(idOrName)}/add-student`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            studentId: selectedStudent._id,
-          }),
+          studentId: selectedStudent._id,
         }
       );
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Status ${res.status}`);
-      }
 
       toast.success("Student added successfully!");
       // on success, go back to the student list

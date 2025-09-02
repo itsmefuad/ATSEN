@@ -13,6 +13,7 @@ import {
   Calendar,
   Edit,
 } from "lucide-react";
+import api from "../../lib/axios";
 import SectionManager from "../../components/SectionManager.jsx";
 
 export default function EditRoom() {
@@ -54,18 +55,10 @@ export default function EditRoom() {
   const refreshRoomData = () => {
     if (!idOrName || !roomId) return;
 
-    const url = `http://localhost:5001/api/institutions/${encodeURIComponent(
-      idOrName
-    )}/rooms/${roomId}`;
-
-    fetch(url)
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/rooms/${roomId}`)
       .then((res) => {
-        if (!res.ok) {
-          return res.text().then((text) => {
-            throw new Error(`Status ${res.status}: ${text}`);
-          });
-        }
-        return res.json();
+        setRoom(res.data);
+        setSections(res.data.sections || []);
       })
       .then((json) => {
         setRoom(json);
@@ -82,31 +75,19 @@ export default function EditRoom() {
   useEffect(() => {
     if (!idOrName || !roomId) return;
 
-    const url = `http://localhost:5001/api/institutions/${encodeURIComponent(
-      idOrName
-    )}/rooms/${roomId}`;
     console.log("=== FRONTEND ROOM FETCH ===");
-    console.log("Fetching URL:", url);
+    console.log("Fetching room:", roomId);
     console.log("idOrName:", idOrName);
     console.log("roomId:", roomId);
 
-    fetch(url)
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/rooms/${roomId}`)
       .then((res) => {
         console.log("Response status:", res.status);
-        if (!res.ok) {
-          return res.text().then((text) => {
-            console.log("Error response:", text);
-            throw new Error(`Status ${res.status}: ${text}`);
-          });
-        }
-        return res.json();
-      })
-      .then((json) => {
-        console.log("Room data received:", json);
-        setRoom(json);
-        setEditedRoomName(json.room_name || "");
-        setEditedDescription(json.description || "");
-        setSections(json.sections || []);
+        console.log("Room data:", res.data);
+        setRoom(res.data);
+        setSections(res.data.sections || []);
+        setEditedRoomName(res.data.room_name || "");
+        setEditedDescription(res.data.description || "");
         setLoading(false);
       })
       .catch((err) => {
@@ -121,15 +102,9 @@ export default function EditRoom() {
       return;
 
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/rooms/${roomId}/remove-student`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ studentId }),
-        }
+      const res = await api.post(
+        `/institutions/${encodeURIComponent(idOrName)}/rooms/${roomId}/remove-student`,
+        { studentId }
       );
 
       if (!res.ok) {
@@ -155,7 +130,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/remove-instructor`,
         {
@@ -188,7 +163,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/students?search=${encodeURIComponent(query)}`
       );
@@ -210,7 +185,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/instructors?search=${encodeURIComponent(query)}`
       );
@@ -252,7 +227,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/assign-student-section`,
         {
@@ -291,7 +266,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/assign-instructor-sections`,
         {
@@ -357,7 +332,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/assign-student-section`,
         {
@@ -393,7 +368,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/assign-instructor-sections`,
         {
@@ -433,7 +408,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/add-student`,
         {
@@ -464,7 +439,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/add-instructor`,
         {
@@ -500,7 +475,7 @@ export default function EditRoom() {
     setSavingRoom(true);
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}`,
         {
@@ -584,7 +559,7 @@ export default function EditRoom() {
     setSavingSections(true);
     try {
       const res = await fetch(
-        `http://localhost:5001/api/rooms/${roomId}/sections`,
+        `/rooms/${roomId}/sections`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

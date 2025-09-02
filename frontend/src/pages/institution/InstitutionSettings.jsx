@@ -31,7 +31,7 @@ export default function InstitutionSettings() {
   useEffect(() => {
     if (!idOrName) return;
     fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
+      `/institutions/${encodeURIComponent(
         idOrName
       )}/dashboard`
     )
@@ -60,7 +60,7 @@ export default function InstitutionSettings() {
   const handleSave = () => {
     setSaving(true);
     fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
+      `/institutions/${encodeURIComponent(
         idOrName
       )}/update`,
       {
@@ -88,7 +88,7 @@ export default function InstitutionSettings() {
     // Reset fields to original values by refetching
     if (!idOrName) return;
     fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
+      `/institutions/${encodeURIComponent(
         idOrName
       )}/dashboard`
     )

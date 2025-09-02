@@ -12,7 +12,7 @@ export default function InstitutionLayout() {
   useEffect(() => {
     if (!idOrName) return;
     fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
+      `/institutions/${encodeURIComponent(
         idOrName
       )}/dashboard`
     )
