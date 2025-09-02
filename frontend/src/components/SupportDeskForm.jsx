@@ -125,15 +125,15 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+      <div className="bg-base-100 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-base-100 border-b border-base-300 px-6 py-4 flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">Contact Support</h3>
-            <p className="text-sm text-gray-600">{institution.name}</p>
+            <h3 className="text-lg font-semibold text-base-content">Contact Support</h3>
+            <p className="text-sm text-base-content/70">{institution.name}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-base-content/40 hover:text-base-content/60 transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
@@ -142,7 +142,7 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Category Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-base-content mb-2">
               Query Category <span className="text-red-500">*</span>
             </label>
             <select
@@ -150,7 +150,7 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
               value={formData.category}
               onChange={handleInputChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+              className="w-full px-3 py-2 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 text-base-content"
             >
               <option value="">Select a category</option>
               {categories.map(category => (
@@ -163,7 +163,7 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
 
           {/* Priority Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-base-content mb-2">
               Priority Level
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -172,8 +172,8 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
                   key={priority.value}
                   className={`flex items-center p-3 border rounded-md cursor-pointer transition-colors ${
                     formData.priority === priority.value
-                      ? "border-sky-500 bg-sky-50"
-                      : "border-gray-300 hover:border-gray-400"
+                      ? "border-primary bg-primary/10"
+                      : "border-base-300 hover:border-base-content/40"
                   }`}
                 >
                   <input
@@ -201,7 +201,7 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
 
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-base-content mb-2">
               Subject <span className="text-red-500">*</span>
             </label>
             <input
@@ -212,16 +212,16 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
               required
               maxLength={200}
               placeholder="Brief description of your issue"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+              className="w-full px-3 py-2 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 text-base-content"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-base-content/60">
               {formData.subject.length}/200 characters
             </p>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-base-content mb-2">
               Query Details <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -232,19 +232,19 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
               rows={6}
               maxLength={2000}
               placeholder="Please provide detailed information about your query or issue..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 resize-none"
+              className="w-full px-3 py-2 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none bg-base-100 text-base-content"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-base-content/60">
               {formData.description.length}/2000 characters
             </p>
           </div>
 
           {/* File Attachments */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-base-content mb-2">
               Attachments (Optional)
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-md p-4">
+            <div className="border-2 border-dashed border-base-300 rounded-md p-4">
               <input
                 type="file"
                 multiple
@@ -257,11 +257,11 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
                 htmlFor="file-upload"
                 className="cursor-pointer flex flex-col items-center justify-center"
               >
-                <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-600">
+                <Upload className="h-8 w-8 text-base-content/40 mb-2" />
+                <span className="text-sm text-base-content/70">
                   Click to upload files or drag and drop
                 </span>
-                <span className="text-xs text-gray-500 mt-1">
+                <span className="text-xs text-base-content/60 mt-1">
                   Maximum 5 files, 10MB each
                 </span>
               </label>
@@ -273,14 +273,14 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
                 {attachments.map((file, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded border"
+                    className="flex items-center justify-between p-2 bg-base-200 rounded border border-base-300"
                   >
                     <div className="flex items-center">
-                      <FileText className="h-4 w-4 text-gray-500 mr-2" />
-                      <span className="text-sm text-gray-700 truncate">
+                      <FileText className="h-4 w-4 text-base-content/60 mr-2" />
+                      <span className="text-sm text-base-content truncate">
                         {file.name}
                       </span>
-                      <span className="text-xs text-gray-500 ml-2">
+                      <span className="text-xs text-base-content/60 ml-2">
                         ({formatFileSize(file.size)})
                       </span>
                     </div>
@@ -315,14 +315,14 @@ const SupportDeskForm = ({ institution, isOpen, onClose, onSuccess, student }) =
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+              className="px-4 py-2 text-sm font-medium text-base-content bg-base-100 border border-base-300 rounded-md hover:bg-base-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 text-sm font-medium text-primary-content bg-primary rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Submitting..." : "Submit Request"}
             </button>

@@ -54,21 +54,21 @@ const DocumentRequestForm = ({ institution, isOpen, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-base-100 rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-base-300">
           <div className="flex items-center">
-            <FileText className="h-6 w-6 text-sky-500 mr-3" />
+            <FileText className="h-6 w-6 text-primary mr-3" />
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Request Document</h2>
-              <p className="text-sm text-gray-600">From {institution.name}</p>
+              <h2 className="text-xl font-semibold text-base-content">Request Document</h2>
+              <p className="text-sm text-base-content/70">From {institution.name}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-2 hover:bg-base-200 rounded-md transition-colors"
           >
-            <X className="h-5 w-5 text-gray-500" />
+            <X className="h-5 w-5 text-base-content/60" />
           </button>
         </div>
 
@@ -76,7 +76,7 @@ const DocumentRequestForm = ({ institution, isOpen, onClose, onSuccess }) => {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Document Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-base-content mb-2">
               Document Type *
             </label>
             <input
@@ -85,14 +85,14 @@ const DocumentRequestForm = ({ institution, isOpen, onClose, onSuccess }) => {
               value={formData.documentType}
               onChange={handleInputChange}
               placeholder="e.g., Transcript, Certificate, Letter of Recommendation"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+              className="w-full px-3 py-2 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-base-100 text-base-content"
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-base-content mb-2">
               Description *
             </label>
             <textarea
@@ -101,14 +101,14 @@ const DocumentRequestForm = ({ institution, isOpen, onClose, onSuccess }) => {
               onChange={handleInputChange}
               rows={4}
               placeholder="Please provide additional details about your document request..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 resize-none"
+              className="w-full px-3 py-2 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none bg-base-100 text-base-content"
               required
             />
           </div>
 
           {/* Urgency */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-base-content mb-2">
               Urgency Level
             </label>
             <div className="space-y-2">
@@ -120,7 +120,7 @@ const DocumentRequestForm = ({ institution, isOpen, onClose, onSuccess }) => {
                     value={option.value}
                     checked={formData.urgency === option.value}
                     onChange={handleInputChange}
-                    className="h-4 w-4 text-sky-600 border-gray-300 focus:ring-sky-500"
+                    className="h-4 w-4 text-primary border-base-300 focus:ring-primary"
                   />
                   <span className={`ml-3 text-sm font-medium ${option.color}`}>
                     {option.label}
@@ -150,7 +150,7 @@ const DocumentRequestForm = ({ institution, isOpen, onClose, onSuccess }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-base-content border border-base-300 rounded-md hover:bg-base-200 transition-colors"
               disabled={isSubmitting}
             >
               Cancel
@@ -158,7 +158,7 @@ const DocumentRequestForm = ({ institution, isOpen, onClose, onSuccess }) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center px-4 py-2 bg-primary text-primary-content rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
