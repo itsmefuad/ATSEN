@@ -289,8 +289,8 @@ export const downloadMaterial = async (req, res) => {
       return res.status(400).json({ message: "Material is not a PDF or file not found" });
     }
 
-    // Redirect to the S3 URL for download
-    res.redirect(material.filePath);
+    // Return the direct URL instead of redirecting to avoid CORS issues
+    res.json({ downloadUrl: material.filePath });
   } catch (error) {
     console.error("Download error:", error);
     res.status(500).json({ message: "Internal server error" });

@@ -303,21 +303,10 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
                                 onClick={async () => {
                                   try {
                                     const response = await api.get(
-                                      `/materials/${material._id}/download`,
-                                      {
-                                        responseType: "blob",
-                                      }
+                                      `/materials/${material._id}/download`
                                     );
-                                    const blob = new Blob([response.data], { type: 'application/pdf' });
-                                    const url = window.URL.createObjectURL(blob);
-                                    
-                                    // Open in new tab for viewing
-                                    window.open(url, '_blank');
-                                    
-                                    // Clean up after a delay
-                                    setTimeout(() => {
-                                      window.URL.revokeObjectURL(url);
-                                    }, 1000);
+                                    // Open the direct URL in new tab
+                                    window.open(response.data.downloadUrl, '_blank');
                                   } catch (error) {
                                     console.error("View error:", error);
                                     toast.error("Failed to view PDF");
@@ -333,16 +322,11 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
                                 onClick={async () => {
                                   try {
                                     const response = await api.get(
-                                      `/materials/${material._id}/download`,
-                                      {
-                                        responseType: "blob",
-                                      }
+                                      `/materials/${material._id}/download`
                                     );
-                                    const url = window.URL.createObjectURL(
-                                      new Blob([response.data])
-                                    );
+                                    // Create a temporary link to trigger download
                                     const link = document.createElement("a");
-                                    link.href = url;
+                                    link.href = response.data.downloadUrl;
                                     link.setAttribute(
                                       "download",
                                       material.originalFileName ||
@@ -351,7 +335,6 @@ const MaterialCard = ({ material, onUpdate, onDelete, isStudent = false }) => {
                                     document.body.appendChild(link);
                                     link.click();
                                     link.remove();
-                                    window.URL.revokeObjectURL(url);
                                     toast.success("Download started!");
                                   } catch (error) {
                                     console.error("Download error:", error);
