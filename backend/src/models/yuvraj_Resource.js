@@ -9,12 +9,7 @@ const YuvrajResourceItemSchema = new mongoose.Schema(
       type: String,
       enum: [
         "youtube",
-        "slides", 
-        "text",
-        "pdf",
-        "doc",
-        "sheet",
-        "link",
+        "slides"
       ],
       required: true,
     },

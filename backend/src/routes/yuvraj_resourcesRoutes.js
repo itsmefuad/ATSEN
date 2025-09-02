@@ -174,7 +174,7 @@ router.get("/room/:roomId/grouped", async (req, res) => {
 
     const grouped = {
       videos: resources.filter(r => r.type === 'youtube'),
-      documents: resources.filter(r => r.type !== 'youtube')
+      documents: resources.filter(r => r.type === 'slides')
     };
       
     res.json(grouped);

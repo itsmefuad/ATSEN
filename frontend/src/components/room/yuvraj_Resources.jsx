@@ -61,6 +61,21 @@ const YuvrajResources = ({ roomId, user }) => {
      e.preventDefault();
      if (!formData.url.trim()) return;
 
+     // Validate URL format based on type
+     if (formData.type === 'youtube') {
+       const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/;
+       if (!youtubeRegex.test(formData.url.trim())) {
+         toast.error("Please enter a valid YouTube URL");
+         return;
+       }
+     } else if (formData.type === 'slides') {
+       const slidesRegex = /^(https?:\/\/)?(www\.)?docs\.google\.com\/presentation\/d\/([^\/\n?#]+)/;
+       if (!slidesRegex.test(formData.url.trim())) {
+         toast.error("Please enter a valid Google Slides URL");
+         return;
+       }
+     }
+
 
 
          try {
@@ -113,6 +128,11 @@ const YuvrajResources = ({ roomId, user }) => {
       const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
       if (videoId) {
         return `YouTube Video - ${videoId}`;
+      }
+    } else if (type === "slides") {
+      const slideId = url.match(/\/presentation\/d\/([^\/\n?#]+)/)?.[1];
+      if (slideId) {
+        return `Google Slides - ${slideId}`;
       }
     }
     return `New ${type.charAt(0).toUpperCase() + type.slice(1)} Resource`;
@@ -324,7 +344,7 @@ const YuvrajResources = ({ roomId, user }) => {
              <button
                                            onClick={() => {
                  // Set the correct resource type based on section
-                 const resourceType = type === "videos" ? "youtube" : "pdf";
+                 const resourceType = type === "videos" ? "youtube" : "slides";
                  setSelectedType(resourceType);
                  setFormData({ title: "", type: resourceType, url: "" });
                  setEditingResource(null);
@@ -405,7 +425,7 @@ const YuvrajResources = ({ roomId, user }) => {
           <div>
             <h2 className="text-2xl font-bold">Additional Resources</h2>
             <p className="text-sm text-base-content/60 mt-1">
-              Click on any resource to view it in the integrated player below
+              Click on any resource to view it in the integrated player below. Only YouTube videos and Google Slides are supported.
             </p>
           </div>
           <div className="flex gap-2">
@@ -448,9 +468,9 @@ const YuvrajResources = ({ roomId, user }) => {
               <div className="stat-figure text-blue-500">
                 <FileText className="h-8 w-8" />
               </div>
-              <div className="stat-title">Document Resources</div>
+              <div className="stat-title">Slide Resources</div>
               <div className="stat-value text-blue-500">{resources.documents.length}</div>
-              <div className="stat-desc">Available for download</div>
+              <div className="stat-desc">Available for viewing</div>
             </div>
             
             {(selectedVideo || selectedDocument) && (
@@ -478,7 +498,7 @@ const YuvrajResources = ({ roomId, user }) => {
          
          {renderResourceSection(
            "documents",
-           "Document Resources", 
+           "Slide Resources", 
            <FileText className="h-5 w-5 text-blue-500" />,
            resources.documents || []
          )}
@@ -599,11 +619,11 @@ const YuvrajResources = ({ roomId, user }) => {
         <div className="card bg-base-100 shadow-sm">
           <div className="card-header p-4 border-b border-base-300">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-blue-500" />
-                <h3 className="text-lg font-semibold">Document Viewer</h3>
-                <span className="badge badge-info badge-sm">{selectedDocument.type.toUpperCase()}</span>
-              </div>
+                        <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-blue-500" />
+            <h3 className="text-lg font-semibold">Slide Viewer</h3>
+            <span className="badge badge-info badge-sm">{selectedDocument.type.toUpperCase()}</span>
+          </div>
               <div className="flex items-center gap-2">
                 <div className="dropdown dropdown-end">
                   <label tabIndex={0} className="btn btn-ghost btn-sm">
@@ -736,12 +756,7 @@ const YuvrajResources = ({ roomId, user }) => {
                    disabled={!!editingResource}
                  >
                   <option value="youtube">YouTube Video</option>
-                  <option value="pdf">PDF Document</option>
-                  <option value="doc">Google Doc</option>
                   <option value="slides">Google Slides</option>
-                  <option value="sheet">Google Sheet</option>
-                  <option value="link">Web Link</option>
-                  <option value="text">Text Content</option>
                 </select>
               </div>
 
@@ -766,10 +781,15 @@ const YuvrajResources = ({ roomId, user }) => {
                   type="url"
                   value={formData.url}
                   onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                  placeholder="Enter URL or content"
+                  placeholder={formData.type === 'slides' ? "Enter Google Slides URL (e.g., https://docs.google.com/presentation/d/...)" : "Enter YouTube URL"}
                   className="input input-bordered w-full"
                   required
                 />
+                {formData.type === 'slides' && (
+                  <div className="text-xs text-base-content/60 mt-1">
+                    Only Google Slides URLs are accepted. Make sure the slides are set to "Anyone with the link can view".
+                  </div>
+                )}
               </div>
 
               <div className="modal-action">
