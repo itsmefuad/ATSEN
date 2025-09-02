@@ -11,8 +11,8 @@ const s3Client = new S3Client({
   endpoint: process.env.DO_SPACES_ENDPOINT,
   region: 'sgp1',
   credentials: {
-    accessKeyId: process.env.DO_SPACES_KEY,
-    secretAccessKey: process.env.DO_SPACES_SECRET,
+    accessKeyId: process.env.DO_SPACES_ACCESS_KEY_ID,
+    secretAccessKey: process.env.DO_SPACES_SECRET_ACCESS_KEY,
   },
   forcePathStyle: false,
 });
@@ -21,8 +21,8 @@ const s3Client = new S3Client({
 console.log('Spaces Config:', {
   endpoint: process.env.DO_SPACES_ENDPOINT,
   bucket: process.env.DO_SPACES_BUCKET,
-  hasKey: !!process.env.DO_SPACES_KEY,
-  hasSecret: !!process.env.DO_SPACES_SECRET
+  hasKey: !!process.env.DO_SPACES_ACCESS_KEY_ID,
+  hasSecret: !!process.env.DO_SPACES_SECRET_ACCESS_KEY
 });
 
 // Configure multer for DigitalOcean Spaces uploads
