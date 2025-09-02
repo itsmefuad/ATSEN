@@ -11,6 +11,7 @@ import {
   FileText,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import api from "../../lib/axios.js";
 
 export default function InstitutionSettings() {
   const { idOrName } = useParams();
@@ -30,20 +31,12 @@ export default function InstitutionSettings() {
 
   useEffect(() => {
     if (!idOrName) return;
-    fetch(
-      `/institutions/${encodeURIComponent(
-        idOrName
-      )}/dashboard`
-    )
-      .then(async (res) => {
-        if (!res.ok) throw new Error(await res.text());
-        return res.json();
-      })
-      .then((data) => {
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/dashboard`)
+      .then((response) => {
         setFields({
-          phone: data.phone || "",
-          address: data.address || "",
-          description: data.description || "",
+          phone: response.data.phone || "",
+          address: response.data.address || "",
+          description: response.data.description || "",
         });
         setLoading(false);
       })
@@ -59,18 +52,8 @@ export default function InstitutionSettings() {
 
   const handleSave = () => {
     setSaving(true);
-    fetch(
-      `/institutions/${encodeURIComponent(
-        idOrName
-      )}/update`,
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fields),
-      }
-    )
-      .then(async (res) => {
-        if (!res.ok) throw new Error(await res.text());
+    api.patch(`/institutions/${encodeURIComponent(idOrName)}/settings`, fields)
+      .then(() => {
         setEdit({});
         toast.success("Institution settings updated successfully!");
       })
@@ -87,20 +70,12 @@ export default function InstitutionSettings() {
     setEdit({});
     // Reset fields to original values by refetching
     if (!idOrName) return;
-    fetch(
-      `/institutions/${encodeURIComponent(
-        idOrName
-      )}/dashboard`
-    )
-      .then(async (res) => {
-        if (!res.ok) throw new Error(await res.text());
-        return res.json();
-      })
-      .then((data) => {
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/dashboard`)
+      .then((response) => {
         setFields({
-          phone: data.phone || "",
-          address: data.address || "",
-          description: data.description || "",
+          phone: response.data.phone || "",
+          address: response.data.address || "",
+          description: response.data.description || "",
         });
       })
       .catch(() => {

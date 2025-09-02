@@ -31,24 +31,13 @@ export default function I_Dashboard() {
 
   useEffect(() => {
     if (!idOrName) return;
-    fetch(
-      `/institutions/${encodeURIComponent(
-        idOrName
-      )}/dashboard`
-    )
-      .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || `Error ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((json) => {
-        setData(json);
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/dashboard`)
+      .then((response) => {
+        setData(response.data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Failed to load institution name:", err);
         setErrMsg("Failed to load dashboard data.");
         setLoading(false);
       });

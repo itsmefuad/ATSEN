@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Outlet } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import Navbar from "../../components/Navbar.jsx";
+import api from "../../lib/axios.js";
 
 export default function InstitutionLayout() {
   const { idOrName } = useParams();
@@ -11,13 +12,8 @@ export default function InstitutionLayout() {
 
   useEffect(() => {
     if (!idOrName) return;
-    fetch(
-      `/institutions/${encodeURIComponent(
-        idOrName
-      )}/dashboard`
-    )
-      .then((res) => res.json())
-      .then((json) => setInstName(json.name))
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/dashboard`)
+      .then((response) => setInstName(response.data.name))
       .catch((err) => console.error("Failed to load institution name:", err));
   }, [idOrName]);
 
