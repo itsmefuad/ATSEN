@@ -110,23 +110,23 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 bg-neutral border-b border-neutral-content/20 px-4 py-3 shadow-md">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Left side - Logo and User Info */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Logo */}
           <Link to="/">
             <img
               src="/Atsenlogo.png"
               alt="ATSEN"
-              className="h-8 w-auto cursor-pointer"
+              className="h-6 sm:h-8 w-auto cursor-pointer max-w-[120px] sm:max-w-none"
             />
           </Link>
 
           {/* Divider and User Info - only show when logged in */}
           {currentUser && (
             <>
-              <div className="text-neutral-content/40 text-xl font-light">|</div>
+              <div className="hidden sm:block text-neutral-content/40 text-xl font-light">|</div>
               <Link
                 to={getDashboardLink()}
-                className="text-neutral-content hover:text-primary font-medium transition-colors duration-200"
+                className="hidden sm:block text-neutral-content hover:text-primary font-medium transition-colors duration-200"
               >
                 {getUserDisplayText()}
               </Link>
@@ -135,7 +135,7 @@ const Navbar = () => {
         </div>
 
         {/* Right side - Theme Toggle and User Dropdown or Login/Signup buttons */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
@@ -234,7 +234,7 @@ const Navbar = () => {
             </div>
           ) : (
             // Not logged in - show login/signup buttons
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <Link
                 to="/auth/login"
                 className="text-neutral-content hover:text-primary font-medium transition-colors duration-200"
