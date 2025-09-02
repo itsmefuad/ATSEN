@@ -1,22 +1,30 @@
 import Material from "../models/Material.js";
 import Room from "../models/Room.js";
 import multer from "multer";
+import multerS3 from "multer-s3";
+import { S3Client } from "@aws-sdk/client-s3";
 import path from "path";
 import fs from "fs";
 
-// Configure multer for PDF uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = 'uploads/materials';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
+// Configure S3 client for DigitalOcean Spaces
+const s3Client = new S3Client({
+  endpoint: process.env.DO_SPACES_ENDPOINT,
+  region: 'sgp1',
+  credentials: {
+    accessKeyId: process.env.DO_SPACES_KEY,
+    secretAccessKey: process.env.DO_SPACES_SECRET,
   },
-  filename: (req, file, cb) => {
+});
+
+// Configure multer for DigitalOcean Spaces uploads
+const storage = multerS3({
+  s3: s3Client,
+  bucket: process.env.DO_SPACES_BUCKET,
+  acl: 'public-read',
+  key: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+    cb(null, `materials/${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
 });
 
 const upload = multer({ 
@@ -87,14 +95,22 @@ export const createMaterial = async (req, res) => {
     if (fileUrl && req.file) {
       materialFileType = 'link_and_pdf';
       materialFileUrl = fileUrl;
-      materialFilePath = req.file.path;
+      // Convert origin URL to CDN URL for faster access
+      materialFilePath = req.file.location.replace(
+        process.env.DO_SPACES_ENDPOINT,
+        process.env.DO_SPACES_CDN_ENDPOINT
+      );
       materialFileName = req.file.originalname;
       originalFileName = req.file.originalname;
     }
     // Handle only PDF
     else if (req.file) {
       materialFileType = 'pdf';
-      materialFilePath = req.file.path;
+      // Convert origin URL to CDN URL for faster access
+      materialFilePath = req.file.location.replace(
+        process.env.DO_SPACES_ENDPOINT,
+        process.env.DO_SPACES_CDN_ENDPOINT
+      );
       materialFileName = req.file.originalname;
       originalFileName = req.file.originalname;
     }
@@ -172,16 +188,11 @@ export const updateMaterial = async (req, res) => {
 
     // Handle PDF upload
     if (req.file) {
-      // Delete old PDF file if exists
-      if (material.filePath && fs.existsSync(material.filePath)) {
-        try {
-          fs.unlinkSync(material.filePath);
-        } catch (error) {
-          console.error("Error deleting old file:", error);
-        }
-      }
-      
-      material.filePath = req.file.path;
+      // Convert origin URL to CDN URL for faster access
+      material.filePath = req.file.location.replace(
+        process.env.DO_SPACES_ENDPOINT,
+        process.env.DO_SPACES_CDN_ENDPOINT
+      );
       material.fileName = req.file.originalname;
       material.originalFileName = req.file.originalname;
       hasPdf = true;
@@ -224,15 +235,8 @@ export const deleteMaterial = async (req, res) => {
       return res.status(404).json({ message: "Material not found" });
     }
 
-    // Delete associated PDF file if exists
-    if ((material.fileType === 'pdf' || material.fileType === 'link_and_pdf') && material.filePath && fs.existsSync(material.filePath)) {
-      try {
-        fs.unlinkSync(material.filePath);
-        console.log("Deleted PDF file:", material.filePath);
-      } catch (error) {
-        console.error("Error deleting PDF file:", error);
-      }
-    }
+    // Note: S3 files are not automatically deleted to prevent data loss
+    // Consider implementing S3 deletion if needed
 
     await Material.findByIdAndDelete(id);
     res.status(200).json({ message: "Material deleted successfully" });
@@ -276,11 +280,8 @@ export const downloadMaterial = async (req, res) => {
       return res.status(400).json({ message: "Material is not a PDF or file not found" });
     }
 
-    if (!fs.existsSync(material.filePath)) {
-      return res.status(404).json({ message: "File not found on server" });
-    }
-
-    res.download(material.filePath, material.originalFileName || material.fileName);
+    // Redirect to the S3 URL for download
+    res.redirect(material.filePath);
   } catch (error) {
     console.error("Download error:", error);
     res.status(500).json({ message: "Internal server error" });
