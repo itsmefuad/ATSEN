@@ -1,0 +1,18 @@
+{
+  "name": "ATSEN - Learning Management System",
+  "short_name": "ATSEN LMS",
+  "description": "Complete Learning Management System for educational institutions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "/AtsenIconTransparent.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "en"
+}

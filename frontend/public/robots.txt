@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /signup
+Allow: /institution/register
+Allow: /help
+
+Disallow: /admin/
+Disallow: /student/
+Disallow: /teacher/
+Disallow: /*/dashboard
+Disallow: /*/rooms/
+Disallow: /api/
+
+Sitemap: https://atsen.app/sitemap.xml

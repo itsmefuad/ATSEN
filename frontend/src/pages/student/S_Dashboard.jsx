@@ -16,8 +16,10 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePageTitle } from "../../hooks/usePageTitle";
 const S_Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
+  usePageTitle("Student Dashboard - Manage Courses & Documents");
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [roomsByInstitution, setRoomsByInstitution] = useState({});

@@ -3,10 +3,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import Navbar from "../components/Navbar.jsx";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 export default function Home() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  usePageTitle("Educational Management Platform for Institutions & Students");
 
   const handleLogin = () => {
     navigate("/auth/login");
@@ -84,13 +86,13 @@ export default function Home() {
             <div className={user ? "flex-1" : "flex-1 pr-8"}>
               <div className="animate-fade-in-up">
                 <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-                  Welcome to{" "}
+                  Educational Management Platform{" "}
                   <span className="text-blue-400 font-extrabold">
                     ATSEN
                   </span>
                 </h1>
                 <p className="text-lg text-gray-200 mt-4 font-light animate-fade-in-delayed-2">
-                  The comprehensive learning management system designed for modern educational institutions.
+                  Complete Learning Management System (LMS) for schools, colleges, and universities. Streamline student enrollment, course management, and academic administration.
                 </p>
                 
                 {/* Register Institution Button - Show for non-logged-in users */}
@@ -137,10 +139,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-base-content mb-4">
-              What is ATSEN?
+              Learning Management System for Educational Institutions
             </h2>
             <p className="text-xl text-base-content/70 max-w-3xl mx-auto">
-              A comprehensive learning management system designed to transform modern educational institutions
+              Complete Student Information System (SIS) and Learning Management System (LMS) for educational institutions, schools, and universities
             </p>
           </div>
 
@@ -152,9 +154,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-base-content mb-2">Room Management</h3>
+              <h3 className="text-xl font-semibold text-base-content mb-2">Course & Classroom Management</h3>
               <p className="text-base-content/70">
-                Create, organize, and deliver lessons with interactive materials, assignments, and assessments.
+                Create virtual classrooms, organize course materials, manage assignments, and conduct online assessments for effective e-learning.
               </p>
             </div>
 
@@ -165,9 +167,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-base-content mb-2">Student & Instructor Portal</h3>
+              <h3 className="text-xl font-semibold text-base-content mb-2">Student Information System (SIS)</h3>
               <p className="text-base-content/70">
-                Dedicated dashboards for students and instructors with role-based access and functionality.
+                Comprehensive student portal and instructor dashboard for managing academic records, enrollment, and educational progress tracking.
               </p>
             </div>
 
