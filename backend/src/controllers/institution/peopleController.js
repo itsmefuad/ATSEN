@@ -6,6 +6,21 @@ import Instructor from "../../models/instructor.js";
 import Institution from "../../models/institution.js";
 import { findInstitutionByIdOrName } from "./utils.js";
 
+function institutionMembershipFilter(instId) {
+  return {
+    $or: [{ institutions: instId }, { "institutions.institution": instId }],
+  };
+}
+
+function getInstitutionRef(entry) {
+  return entry?.institution || entry;
+}
+
+function matchesInstitution(entry, instId) {
+  const ref = getInstitutionRef(entry);
+  return ref && ref.toString() === instId.toString();
+}
+
 // List all instructors attached to an institution
 export async function getInstitutionInstructors(req, res) {
   try {
@@ -26,9 +41,7 @@ export async function getInstitutionInstructors(req, res) {
     const instId = institution._id;
     const term = search.trim();
 
-    const filter = {
-      institutions: instId
-    };
+    const filter = institutionMembershipFilter(instId);
 
     if (term) {
       filter.name = { $regex: term, $options: "i" };
@@ -60,9 +73,7 @@ export async function getInstitutionStudents(req, res) {
     const instId = institution._id;
     const term = search.trim();
 
-    const filter = {
-      institutions: instId
-    };
+    const filter = institutionMembershipFilter(instId);
 
     if (term) {
       filter.name = { $regex: term, $options: "i" };
@@ -140,16 +151,16 @@ export async function addStudent(req, res) {
       return res.status(404).json({ message: "Student not found." });
     }
 
-    const alreadyLinked = (student.institutions || [])
-      .map(id => id.toString())
-      .includes(inst._id.toString());
+    const alreadyLinked = (student.institutions || []).some((entry) =>
+      matchesInstitution(entry, inst._id)
+    );
 
     if (alreadyLinked) {
       return res.status(400).json({ message: "Student already linked to this institution." });
     }
 
     student.institutions = student.institutions || [];
-    student.institutions.push(inst._id);
+    student.institutions.push({ institution: inst._id, enrolledAt: new Date() });
     await student.save();
 
     res.json({ message: "Student added to institution successfully." });
@@ -179,8 +190,9 @@ export async function removeStudent(req, res) {
       return res.status(404).json({ message: "Student not found." });
     }
 
-    student.institutions = (student.institutions || [])
-      .filter(id => id.toString() !== inst._id.toString());
+    student.institutions = (student.institutions || []).filter(
+      (entry) => !matchesInstitution(entry, inst._id)
+    );
     await student.save();
 
     res.json({ message: "Student removed from institution successfully." });

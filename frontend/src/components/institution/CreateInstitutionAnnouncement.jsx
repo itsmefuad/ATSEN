@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, Tag, Pin } from "lucide-react";
+import { Plus, X, Tag, Pin, Link, Youtube, FileText, Globe, Eye } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
@@ -13,8 +13,29 @@ const CreateInstitutionAnnouncement = ({
     content: "",
     tags: "",
     isPinned: false,
+    externalLinks: [],
   });
   const [loading, setLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewData, setPreviewData] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+
+  // Function to fetch link preview
+  const fetchLinkPreview = async (url) => {
+    if (!url || !url.trim()) return;
+    
+    setPreviewLoading(true);
+    setPreviewUrl(url);
+    try {
+      const response = await api.post('/link-preview', { url });
+      setPreviewData(response.data);
+    } catch (error) {
+      console.error('Error fetching link preview:', error);
+      setPreviewData({ error: 'Failed to load preview' });
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,12 +58,13 @@ const CreateInstitutionAnnouncement = ({
           title: formData.title,
           content: formData.content,
           tags,
+          externalLinks: formData.externalLinks,
           isPinned: formData.isPinned,
         }
       );
 
       toast.success("Announcement created successfully!");
-      setFormData({ title: "", content: "", tags: "", isPinned: false });
+      setFormData({ title: "", content: "", tags: "", isPinned: false, externalLinks: [] });
       setIsOpen(false);
       if (onAnnouncementCreated) {
         onAnnouncementCreated(response.data);
@@ -62,7 +84,7 @@ const CreateInstitutionAnnouncement = ({
   };
 
   const handleCancel = () => {
-    setFormData({ title: "", content: "", tags: "", isPinned: false });
+    setFormData({ title: "", content: "", tags: "", isPinned: false, externalLinks: [] });
     setIsOpen(false);
   };
 
@@ -161,6 +183,142 @@ const CreateInstitutionAnnouncement = ({
             />
           </div>
 
+                     <div className="form-control">
+             <label className="label">
+               <span className="label-text font-medium flex items-center gap-2">
+                 <Link className="h-4 w-4" />
+                 External Links
+               </span>
+             </label>
+             <div className="space-y-4">
+               {formData.externalLinks.map((link, index) => (
+                 <div key={index} className="border border-base-300 rounded-lg p-4 bg-base-50">
+                   <div className="flex gap-2 mb-3">
+                     <select
+                       className="select select-bordered select-sm"
+                       value={link.type}
+                       onChange={(e) => {
+                         const newLinks = [...formData.externalLinks];
+                         newLinks[index] = { ...newLinks[index], type: e.target.value };
+                         setFormData({ ...formData, externalLinks: newLinks });
+                       }}
+                     >
+                       <option value="youtube">YouTube</option>
+                       <option value="document">Document</option>
+                       <option value="website">Website</option>
+                     </select>
+                     <input
+                       type="text"
+                       placeholder="Link title"
+                       className="input input-bordered input-sm flex-1"
+                       value={link.title}
+                       onChange={(e) => {
+                         const newLinks = [...formData.externalLinks];
+                         newLinks[index] = { ...newLinks[index], title: e.target.value };
+                         setFormData({ ...formData, externalLinks: newLinks });
+                       }}
+                     />
+                     <input
+                       type="url"
+                       placeholder="URL"
+                       className="input input-bordered input-sm flex-1"
+                       value={link.url}
+                       onChange={(e) => {
+                         const newLinks = [...formData.externalLinks];
+                         newLinks[index] = { ...newLinks[index], url: e.target.value };
+                         setFormData({ ...formData, externalLinks: newLinks });
+                       }}
+                     />
+                     <button
+                       type="button"
+                       onClick={() => fetchLinkPreview(link.url)}
+                       className="btn btn-sm btn-outline"
+                       disabled={!link.url || previewLoading}
+                     >
+                       {previewLoading ? (
+                         <span className="loading loading-spinner loading-xs"></span>
+                       ) : (
+                         <Eye className="h-3 w-3" />
+                       )}
+                       Preview
+                     </button>
+                     <button
+                       type="button"
+                       onClick={() => {
+                         setFormData({
+                           ...formData,
+                           externalLinks: formData.externalLinks.filter((_, i) => i !== index)
+                         });
+                       }}
+                       className="btn btn-sm btn-ghost btn-circle text-error"
+                     >
+                       <X className="h-3 w-3" />
+                     </button>
+                   </div>
+                   
+                   {/* Link Preview Section */}
+                   {previewData && previewUrl === link.url && (
+                     <div className="mt-3 p-3 bg-base-100 rounded border">
+                       <div className="flex items-center justify-between mb-2">
+                         <h4 className="text-sm font-medium">Link Preview</h4>
+                         <button
+                           type="button"
+                           onClick={() => {
+                             setPreviewData(null);
+                             setPreviewUrl("");
+                           }}
+                           className="btn btn-xs btn-ghost"
+                         >
+                           <X className="h-2 w-2" />
+                         </button>
+                       </div>
+                       
+                       {previewData.error ? (
+                         <div className="text-sm text-error">{previewData.error}</div>
+                       ) : (
+                         <div className="space-y-2">
+                           {previewData.image && (
+                             <img 
+                               src={previewData.image} 
+                               alt="Preview" 
+                               className="w-full h-32 object-cover rounded"
+                             />
+                           )}
+                           {previewData.title && (
+                             <h5 className="text-sm font-medium">{previewData.title}</h5>
+                           )}
+                           {previewData.description && (
+                             <p className="text-xs text-base-content/70 line-clamp-2">
+                               {previewData.description}
+                             </p>
+                           )}
+                           {previewData.siteName && (
+                             <p className="text-xs text-base-content/50">{previewData.siteName}</p>
+                           )}
+                         </div>
+                       )}
+                     </div>
+                   )}
+                 </div>
+               ))}
+               <button
+                 type="button"
+                 onClick={() => {
+                   setFormData({
+                     ...formData,
+                     externalLinks: [...formData.externalLinks, { type: 'website', title: '', url: '' }]
+                   });
+                 }}
+                 className="btn btn-sm btn-primary"
+               >
+                 <Plus className="h-3 w-3" />
+                 Add External Link
+               </button>
+             </div>
+           </div>
+
+
+
           <div className="form-control">
             <label className="label cursor-pointer">
               <span className="label-text font-medium flex items-center gap-2">
@@ -192,7 +350,14 @@ const CreateInstitutionAnnouncement = ({
               className="btn bg-[#00A2E8] hover:bg-[#0082c4] text-white border-none"
               disabled={loading}
             >
-              {loading ? "Creating..." : "Create Announcement"}
+              {loading ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  Creating...
+                </>
+              ) : (
+                "Create Announcement"
+              )}
             </button>
           </div>
         </form>

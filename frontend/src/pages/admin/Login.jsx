@@ -21,8 +21,11 @@ export default function Login() {
 
     try {
       const { data } = await api.post("/admin/login", form);
+      // Clear all existing sessions
+      localStorage.clear();
+      // Set new admin session
       localStorage.setItem("token", data.token);
-      localStorage.setItem("adminData", JSON.stringify(data.admin));
+      localStorage.setItem("adminData", JSON.stringify(data.devAdmin));
       navigate("/admin/dashboard");
     } catch (error) {
       console.error("Login error:", error);
@@ -66,7 +69,7 @@ export default function Login() {
                     <input
                       type="email"
                       name="email"
-                      className="input input-bordered"
+                      className="input input-bordered w-full"
                       value={form.email}
                       onChange={handleChange}
                       required
@@ -82,7 +85,7 @@ export default function Login() {
                       <input
                         type={showPassword ? "text" : "password"}
                         name="password"
-                        className="input input-bordered pr-10"
+                        className="input input-bordered w-full pr-10"
                         value={form.password}
                         onChange={handleChange}
                         required
@@ -94,9 +97,9 @@ export default function Login() {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-base-content/40" />
+                          <EyeOff className="h-5 w-5 text-base-content/40" />
                         ) : (
-                          <Eye className="h-4 w-4 text-base-content/40" />
+                          <Eye className="h-5 w-5 text-base-content/40" />
                         )}
                       </button>
                     </div>
@@ -114,7 +117,7 @@ export default function Login() {
 
               <div className="text-center mt-6">
                 <Link to="/auth/login" className="link link-primary text-sm">
-                  ← Back to General Login
+                  &lt; Back to General Login
                 </Link>
               </div>
             </div>

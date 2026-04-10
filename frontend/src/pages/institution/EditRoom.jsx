@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  ArrowLeft,
+  ChevronLeft,
   Users,
   GraduationCap,
   Plus,
@@ -13,7 +13,57 @@ import {
   Calendar,
   Edit,
 } from "lucide-react";
+import api from "../../lib/axios";
 import SectionManager from "../../components/SectionManager.jsx";
+
+// ── Toast notification ────────────────────────────────────────────────────────
+function Toast({ toast, onClose }) {
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(onClose, 3500);
+    return () => clearTimeout(t);
+  }, [toast, onClose]);
+
+  if (!toast) return null;
+
+  const colors = {
+    success: "alert-success",
+    error: "alert-error",
+    info: "alert-info",
+  };
+
+  return (
+    <div className="toast toast-top toast-center z-[9999]">
+      <div className={`alert ${colors[toast.type] ?? "alert-info"} shadow-lg flex flex-row items-center gap-3 max-w-sm w-max`}>
+        <span className="flex-1">{toast.message}</span>
+        <button className="btn btn-neutral btn-circle btn-xs shrink-0 text-neutral-content" onClick={onClose}>✕</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Confirm modal ─────────────────────────────────────────────────────────────
+function ConfirmModal({ modal, onConfirm, onCancel }) {
+  if (!modal) return null;
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <h3 className="font-bold text-lg text-base-content mb-2">{modal.title}</h3>
+        <p className="text-base-content/70">{modal.message}</p>
+        <div className="modal-action">
+          <button className="btn btn-neutral text-neutral-content" onClick={onCancel}>Cancel</button>
+          <button
+            className={`btn ${modal.danger ? "btn-error text-error-content" : "btn-primary text-primary-content"}`}
+            onClick={onConfirm}
+          >
+            {modal.confirmLabel ?? "Confirm"}
+          </button>
+        </div>
+      </div>
+      <div className="modal-backdrop" onClick={onCancel} />
+    </div>
+  );
+}
 
 export default function EditRoom() {
   const { idOrName, roomId } = useParams();
@@ -26,6 +76,11 @@ export default function EditRoom() {
   const [instructorResults, setInstructorResults] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
+
+  // Toast + confirm modal state
+  const [toast, setToast] = useState(null);
+  const [confirmModal, setConfirmModal] = useState(null);
+  const showToast = (message, type = "info") => setToast({ message, type });
 
   // Section selection states for assignment
   const [selectedStudentSections, setSelectedStudentSections] = useState([]);
@@ -54,18 +109,10 @@ export default function EditRoom() {
   const refreshRoomData = () => {
     if (!idOrName || !roomId) return;
 
-    const url = `http://localhost:5001/api/institutions/${encodeURIComponent(
-      idOrName
-    )}/rooms/${roomId}`;
-
-    fetch(url)
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/rooms/${roomId}`)
       .then((res) => {
-        if (!res.ok) {
-          return res.text().then((text) => {
-            throw new Error(`Status ${res.status}: ${text}`);
-          });
-        }
-        return res.json();
+        setRoom(res.data);
+        setSections(res.data.sections || []);
       })
       .then((json) => {
         setRoom(json);
@@ -82,31 +129,19 @@ export default function EditRoom() {
   useEffect(() => {
     if (!idOrName || !roomId) return;
 
-    const url = `http://localhost:5001/api/institutions/${encodeURIComponent(
-      idOrName
-    )}/rooms/${roomId}`;
     console.log("=== FRONTEND ROOM FETCH ===");
-    console.log("Fetching URL:", url);
+    console.log("Fetching room:", roomId);
     console.log("idOrName:", idOrName);
     console.log("roomId:", roomId);
 
-    fetch(url)
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/rooms/${roomId}`)
       .then((res) => {
         console.log("Response status:", res.status);
-        if (!res.ok) {
-          return res.text().then((text) => {
-            console.log("Error response:", text);
-            throw new Error(`Status ${res.status}: ${text}`);
-          });
-        }
-        return res.json();
-      })
-      .then((json) => {
-        console.log("Room data received:", json);
-        setRoom(json);
-        setEditedRoomName(json.room_name || "");
-        setEditedDescription(json.description || "");
-        setSections(json.sections || []);
+        console.log("Room data:", res.data);
+        setRoom(res.data);
+        setSections(res.data.sections || []);
+        setEditedRoomName(res.data.room_name || "");
+        setEditedDescription(res.data.description || "");
         setLoading(false);
       })
       .catch((err) => {
@@ -116,68 +151,64 @@ export default function EditRoom() {
       });
   }, [idOrName, roomId]);
 
-  const handleRemoveStudent = async (studentId) => {
-    if (!confirm("Are you sure you want to remove this student from the room?"))
-      return;
-
-    try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/rooms/${roomId}/remove-student`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ studentId }),
+  const handleRemoveStudent = (studentId) => {
+    setConfirmModal({
+      title: "Remove Student",
+      message: "Are you sure you want to remove this student from the room?",
+      danger: true,
+      confirmLabel: "Remove",
+      onConfirm: async () => {
+        setConfirmModal(null);
+        try {
+          await api.post(
+            `/institutions/${encodeURIComponent(idOrName)}/rooms/${roomId}/remove-student`,
+            { studentId }
+          );
+          setRoom((prev) => ({
+            ...prev,
+            students: prev.students.filter((s) => s._id !== studentId),
+          }));
+          showToast("Student removed from room.", "success");
+        } catch (err) {
+          console.error("Remove student failed:", err);
+          showToast(
+            err.response?.data?.message || "Could not remove student from room.",
+            "error"
+          );
         }
-      );
-
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Status ${res.status}`);
-      }
-
-      setRoom((prev) => ({
-        ...prev,
-        students: prev.students.filter((s) => s._id !== studentId),
-      }));
-    } catch (err) {
-      console.error("Remove student failed:", err);
-      setError("Could not remove student from room.");
-    }
+      },
+    });
   };
 
-  const handleRemoveInstructor = async (instructorId) => {
-    if (
-      !confirm("Are you sure you want to remove this instructor from the room?")
-    )
-      return;
-
-    try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/rooms/${roomId}/remove-instructor`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ instructorId }),
+  const handleRemoveInstructor = (instructorId) => {
+    setConfirmModal({
+      title: "Remove Instructor",
+      message: "Are you sure you want to remove this instructor from the room?",
+      danger: true,
+      confirmLabel: "Remove",
+      onConfirm: async () => {
+        setConfirmModal(null);
+        try {
+          await api.post(
+            `/institutions/${encodeURIComponent(
+              idOrName
+            )}/rooms/${roomId}/remove-instructor`,
+            { instructorId }
+          );
+          setRoom((prev) => ({
+            ...prev,
+            instructors: prev.instructors.filter((i) => i._id !== instructorId),
+          }));
+          showToast("Instructor removed from room.", "success");
+        } catch (err) {
+          console.error("Remove instructor failed:", err);
+          showToast(
+            err.response?.data?.message || "Could not remove instructor from room.",
+            "error"
+          );
         }
-      );
-
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Status ${res.status}`);
-      }
-
-      setRoom((prev) => ({
-        ...prev,
-        instructors: prev.instructors.filter((i) => i._id !== instructorId),
-      }));
-    } catch (err) {
-      console.error("Remove instructor failed:", err);
-      setError("Could not remove instructor from room.");
-    }
+      },
+    });
   };
 
   const searchStudents = async (query) => {
@@ -187,16 +218,12 @@ export default function EditRoom() {
     }
 
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+      const res = await api.get(
+        `/institutions/${encodeURIComponent(
           idOrName
-        )}/students?search=${encodeURIComponent(query)}`
+        )}/rooms/${roomId}/search-students?search=${encodeURIComponent(query)}`
       );
-      const students = await res.json();
-      const filtered = students
-        .filter((s) => s.email.toLowerCase().includes(query.toLowerCase()))
-        .slice(0, 5);
-      setStudentResults(filtered);
+      setStudentResults((res.data || []).slice(0, 5));
     } catch (err) {
       console.error("Search students failed:", err);
     }
@@ -209,16 +236,14 @@ export default function EditRoom() {
     }
 
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+      const res = await api.get(
+        `/institutions/${encodeURIComponent(
           idOrName
-        )}/instructors?search=${encodeURIComponent(query)}`
+        )}/rooms/${roomId}/search-instructors?search=${encodeURIComponent(
+          query
+        )}`
       );
-      const instructors = await res.json();
-      const filtered = instructors
-        .filter((i) => i.email.toLowerCase().includes(query.toLowerCase()))
-        .slice(0, 5);
-      setInstructorResults(filtered);
+      setInstructorResults((res.data || []).slice(0, 5));
     } catch (err) {
       console.error("Search instructors failed:", err);
     }
@@ -251,24 +276,15 @@ export default function EditRoom() {
     }
 
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+      await api.post(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/assign-student-section`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            studentId: selectedStudent._id,
-            sectionNumber: selectedStudentSections[0],
-          }),
+          studentId: selectedStudent._id,
+          sectionNumber: selectedStudentSections[0],
         }
       );
-
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Status ${res.status}`);
-      }
 
       alert("Student assigned to section successfully!");
       setSelectedStudent(null);
@@ -278,7 +294,7 @@ export default function EditRoom() {
       refreshRoomData();
     } catch (err) {
       console.error("Assign student to section failed:", err);
-      alert("Error: " + err.message);
+      alert("Error: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -290,24 +306,15 @@ export default function EditRoom() {
     }
 
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+      await api.post(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/assign-instructor-sections`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            instructorId: selectedInstructor._id,
-            sectionNumbers: selectedInstructorSections,
-          }),
+          instructorId: selectedInstructor._id,
+          sectionNumbers: selectedInstructorSections,
         }
       );
-
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Status ${res.status}`);
-      }
 
       alert("Instructor assigned to sections successfully!");
       setSelectedInstructor(null);
@@ -317,7 +324,7 @@ export default function EditRoom() {
       refreshRoomData();
     } catch (err) {
       console.error("Assign instructor to sections failed:", err);
-      alert("Error: " + err.message);
+      alert("Error: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -357,7 +364,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/assign-student-section`,
         {
@@ -393,7 +400,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/assign-instructor-sections`,
         {
@@ -433,7 +440,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/add-student`,
         {
@@ -464,7 +471,7 @@ export default function EditRoom() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}/add-instructor`,
         {
@@ -500,7 +507,7 @@ export default function EditRoom() {
     setSavingRoom(true);
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/institutions/${encodeURIComponent(
           idOrName
         )}/rooms/${roomId}`,
         {
@@ -584,7 +591,7 @@ export default function EditRoom() {
     setSavingSections(true);
     try {
       const res = await fetch(
-        `http://localhost:5001/api/rooms/${roomId}/sections`,
+        `/rooms/${roomId}/sections`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -638,13 +645,20 @@ export default function EditRoom() {
 
   return (
     <div className="max-w-7xl mx-auto p-4 mt-6">
+      <Toast toast={toast} onClose={() => setToast(null)} />
+      <ConfirmModal
+        modal={confirmModal}
+        onConfirm={() => confirmModal?.onConfirm?.()}
+        onCancel={() => setConfirmModal(null)}
+      />
+
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <Link
           to={`/${encodeURIComponent(idOrName)}/rooms`}
           className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
         </Link>
         <div>
           <h1 className="text-3xl font-bold text-base-content">
@@ -799,7 +813,7 @@ export default function EditRoom() {
                         }}
                         className={`p-3 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
                           selectedStudent?._id === student._id
-                            ? "bg-green-50"
+                            ? "bg-success/10"
                             : ""
                         }`}
                       >
@@ -819,8 +833,8 @@ export default function EditRoom() {
             {/* Selected Student Display and Section Selection */}
             {selectedStudent && (
               <div className="mt-4 space-y-4">
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <span className="text-green-800">
+                <div className="p-3 bg-success/10 border border-success/30 rounded-lg">
+                  <span className="text-base-content">
                     Selected: <strong>{selectedStudent.name}</strong> (
                     {selectedStudent.email})
                   </span>
@@ -844,7 +858,7 @@ export default function EditRoom() {
                             selectedStudentSections.includes(
                               section.sectionNumber
                             )
-                              ? "border-green-500 bg-green-50"
+                              ? "border-success bg-success/10"
                               : "border-base-300 hover:border-green-300"
                           }`}
                         >
@@ -964,8 +978,8 @@ export default function EditRoom() {
 
                   {/* Student Section Edit Interface */}
                   {editingStudentId === student._id && (
-                    <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <h4 className="font-medium text-green-800 mb-3">
+                    <div className="mt-4 p-4 bg-success/10 border border-success/30 rounded-lg">
+                      <h4 className="font-medium text-base-content mb-3">
                         Edit Section Assignment for {student.name}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -979,8 +993,8 @@ export default function EditRoom() {
                                 editStudentSections.includes(
                                   section.sectionNumber
                                 )
-                                  ? "border-green-500 bg-green-100"
-                                  : "border-gray-300 hover:border-green-300"
+                                  ? "border-success bg-success/20"
+                                  : "border-base-300 hover:border-green-300"
                               }`}
                             >
                               <div className="flex items-center gap-2">
@@ -1001,7 +1015,7 @@ export default function EditRoom() {
                                   Section {section.sectionNumber}
                                 </span>
                               </div>
-                              <div className="text-sm text-gray-600 mt-1">
+                              <div className="text-sm text-base-content/70 mt-1">
                                 {section.classTimings?.length || 0} class
                                 timing(s)
                               </div>
@@ -1077,7 +1091,7 @@ export default function EditRoom() {
                         }}
                         className={`p-3 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
                           selectedInstructor?._id === instructor._id
-                            ? "bg-blue-50"
+                            ? "bg-primary/10"
                             : ""
                         }`}
                       >
@@ -1097,8 +1111,8 @@ export default function EditRoom() {
             {/* Selected Instructor Display and Section Selection */}
             {selectedInstructor && (
               <div className="mt-4 space-y-4">
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <span className="text-blue-800">
+                <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                  <span className="text-base-content">
                     Selected: <strong>{selectedInstructor.name}</strong> (
                     {selectedInstructor.email})
                   </span>
@@ -1122,7 +1136,7 @@ export default function EditRoom() {
                             selectedInstructorSections.includes(
                               section.sectionNumber
                             )
-                              ? "border-blue-500 bg-blue-50"
+                              ? "border-primary bg-primary/10"
                               : "border-base-300 hover:border-blue-300"
                           }`}
                         >
@@ -1244,8 +1258,8 @@ export default function EditRoom() {
 
                   {/* Instructor Section Edit Interface */}
                   {editingInstructorId === instructor._id && (
-                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <h4 className="font-medium text-blue-800 mb-3">
+                    <div className="mt-4 p-4 bg-primary/10 border border-primary/30 rounded-lg">
+                      <h4 className="font-medium text-base-content mb-3">
                         Edit Section Assignments for {instructor.name}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -1259,8 +1273,8 @@ export default function EditRoom() {
                                 editInstructorSections.includes(
                                   section.sectionNumber
                                 )
-                                  ? "border-blue-500 bg-blue-100"
-                                  : "border-gray-300 hover:border-blue-300"
+                                  ? "border-primary bg-primary/20"
+                                  : "border-base-300 hover:border-blue-300"
                               }`}
                             >
                               <div className="flex items-center gap-2">
@@ -1280,7 +1294,7 @@ export default function EditRoom() {
                                   Section {section.sectionNumber}
                                 </span>
                               </div>
-                              <div className="text-sm text-gray-600 mt-1">
+                              <div className="text-sm text-base-content/70 mt-1">
                                 {section.classTimings?.length || 0} class
                                 timing(s)
                               </div>

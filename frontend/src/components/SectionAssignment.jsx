@@ -1,6 +1,7 @@
 // Component for managing section assignments for students and instructors
 import React, { useState } from "react";
 import { Users, GraduationCap, Clock, Calendar } from "lucide-react";
+import api from "../lib/axios";
 
 const SectionAssignment = ({ room, onUserSectionUpdate }) => {
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -17,15 +18,11 @@ const SectionAssignment = ({ room, onUserSectionUpdate }) => {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `http://localhost:5001/api/institutions/${room.institution}/rooms/${room._id}/assign-student-section`,
+      const response = await api.post(
+        `/institutions/${room.institution}/rooms/${room._id}/assign-student-section`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            studentId: selectedStudent._id,
-            sectionNumber: parseInt(studentSection),
-          }),
+          studentId: selectedStudent._id,
+          sectionNumber: parseInt(studentSection),
         }
       );
 
@@ -59,22 +56,13 @@ const SectionAssignment = ({ room, onUserSectionUpdate }) => {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `http://localhost:5001/api/institutions/${room.institution}/rooms/${room._id}/assign-instructor-sections`,
+      const response = await api.post(
+        `/institutions/${room.institution}/rooms/${room._id}/assign-instructor-sections`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            instructorId: selectedInstructor._id,
-            sectionNumbers: instructorSections.map((s) => parseInt(s)),
-          }),
+          instructorId: selectedInstructor._id,
+          sectionNumbers: instructorSections.map((s) => parseInt(s)),
         }
       );
-
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
-      }
 
       alert("Instructor assigned to sections successfully!");
       setSelectedInstructor(null);

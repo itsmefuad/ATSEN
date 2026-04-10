@@ -31,24 +31,13 @@ export default function I_Dashboard() {
 
   useEffect(() => {
     if (!idOrName) return;
-    fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
-        idOrName
-      )}/dashboard`
-    )
-      .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || `Error ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((json) => {
-        setData(json);
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/dashboard`)
+      .then((response) => {
+        setData(response.data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Failed to load institution name:", err);
         setErrMsg("Failed to load dashboard data.");
         setLoading(false);
       });
@@ -132,27 +121,42 @@ export default function I_Dashboard() {
       </div>
     );
 
+  // Compute master admin email for access control button
+  const masterEmail = data.superadminEmail || (data.admins && data.admins.find(a => a.role === 'master') && data.admins.find(a => a.role === 'master').email) || null;
+
   return (
     <div className="max-w-7xl mx-auto p-4 mt-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-base-content mb-2">
-          {data.name} Dashboard
-        </h1>
-        <p className="text-base-content/70">
-          Manage your institution's resources and data
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-base-content mb-2">
+            {data.name} Dashboard
+          </h1>
+          <p className="text-base-content/70">
+            Manage your institution's resources and data
+          </p>
+        </div>
+        {/* Access Control Button (right aligned) */}
+        {user?.email && masterEmail && user.email.toLowerCase() === masterEmail.toLowerCase() && (
+          <Link
+            to={`/${encodeURIComponent(idOrName)}/access-control`}
+            className="btn btn-accent flex items-center justify-center px-6 py-3 font-medium group self-start md:self-auto"
+          >
+            <Settings className="h-5 w-5 mr-2" />
+            Manage Access Control
+          </Link>
+        )}
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Link
           to={`/${encodeURIComponent(idOrName)}/rooms`}
-          className="card bg-base-100 hover:bg-blue-50 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-blue-300 group p-6"
+          className="card bg-base-100 hover:brightness-110 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-blue-300 group p-6"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-base-content/70 group-hover:text-blue-600">
-                Total Rooms
+                Rooms
               </p>
               <p className="text-3xl font-bold text-base-content group-hover:text-blue-700">
                 {data.totalRooms ?? 0}
@@ -164,12 +168,12 @@ export default function I_Dashboard() {
 
         <Link
           to={`/${encodeURIComponent(idOrName)}/students`}
-          className="card bg-base-100 hover:bg-green-50 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-green-300 group p-6"
+          className="card bg-base-100 hover:brightness-110 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-green-300 group p-6"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-base-content/70 group-hover:text-green-600">
-                Active Students
+                Students
               </p>
               <p className="text-3xl font-bold text-base-content group-hover:text-green-700">
                 {data.activeStudents ?? 0}
@@ -181,12 +185,12 @@ export default function I_Dashboard() {
 
         <Link
           to={`/${encodeURIComponent(idOrName)}/instructors`}
-          className="card bg-base-100 hover:bg-purple-50 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-purple-300 group p-6"
+          className="card bg-base-100 hover:brightness-110 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-purple-300 group p-6"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-base-content/70 group-hover:text-purple-600">
-                Total Instructors
+                Instruvctors
               </p>
               <p className="text-3xl font-bold text-base-content group-hover:text-purple-700">
                 {data.totalInstructors ?? 0}
@@ -205,23 +209,23 @@ export default function I_Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             to={`/${encodeURIComponent(idOrName)}/add-room`}
-            className="btn btn-primary flex items-center justify-center px-6 py-4 font-medium group"
+            className="btn btn-primary min-w-[100px] hover:scale-105 hover:shadow-lg transition-all duration-200"
           >
-            <Plus className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+            <Plus className="h-5 w-5 mr-2" />
             Add Room
           </Link>
           <Link
             to={`/${encodeURIComponent(idOrName)}/add-student`}
-            className="btn btn-success flex items-center justify-center px-6 py-4 font-medium group"
+            className="btn btn-outline min-w-[100px] hover:scale-105 hover:shadow-lg transition-all duration-200"
           >
-            <UserPlus className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+            <UserPlus className="h-5 w-5 mr-2" />
             Add Student
           </Link>
           <Link
             to={`/${encodeURIComponent(idOrName)}/add-instructor`}
-            className="btn btn-secondary flex items-center justify-center px-6 py-4 font-medium group"
+            className="btn btn-outline min-w-[100px] hover:scale-105 hover:shadow-lg transition-all duration-200"
           >
-            <Users className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+            <Users className="h-5 w-5 mr-2" />
             Add Instructor
           </Link>
         </div>
@@ -236,6 +240,12 @@ export default function I_Dashboard() {
               Institution Announcements
             </h2>
           </div>
+          <Link
+            to={`/${idOrName}/announcements`}
+            className="btn btn-outline btn-primary hover:btn-primary"
+          >
+            View All Announcements
+          </Link>
         </div>
 
         {/* Create Announcement Component */}
@@ -352,12 +362,12 @@ export default function I_Dashboard() {
                 <p className="text-base-content">{data.address}</p>
               </div>
             )}
-            {data.email && (
+            {data.superadminEmail && (
               <div>
                 <p className="text-sm font-medium text-base-content/60">
                   Email
                 </p>
-                <p className="text-base-content">{data.email}</p>
+                <p className="text-base-content">{data.superadminEmail}</p>
               </div>
             )}
             {data.phone && (

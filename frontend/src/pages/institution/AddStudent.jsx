@@ -4,12 +4,12 @@ import { useParams, useNavigate, Link } from "react-router";
 import {
   Search,
   UserPlus,
-  ArrowLeft,
+  ChevronLeft,
   X,
-  Check,
   GraduationCap,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import api from "../../lib/axios";
 
 export default function AddStudent() {
   const { idOrName } = useParams();
@@ -25,12 +25,10 @@ export default function AddStudent() {
 
   // 1) load all students from your global collection
   useEffect(() => {
-    fetch(`http://localhost:5001/api/students`)
+    api.get("/students")
       .then((res) => {
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        return res.json();
+        setAllStudents(res.data);
       })
-      .then((json) => setAllStudents(json))
       .catch((err) => {
         console.error("Fetch all students failed:", err);
         setError("Could not load students.");
@@ -63,22 +61,12 @@ export default function AddStudent() {
 
     setLoading(true);
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/add-student`,
+      const res = await api.post(
+        `/institutions/${encodeURIComponent(idOrName)}/add-student`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            studentId: selectedStudent._id,
-          }),
+          studentId: selectedStudent._id,
         }
       );
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Status ${res.status}`);
-      }
 
       toast.success("Student added successfully!");
       // on success, go back to the student list
@@ -100,7 +88,7 @@ export default function AddStudent() {
           to={`/${encodeURIComponent(idOrName)}/students`}
           className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
         </Link>
         <div>
           <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
@@ -139,7 +127,7 @@ export default function AddStudent() {
                   setSelectedStudent(null);
                   setError("");
                 }}
-                className="block w-full pl-10 pr-3 py-3 border border-base-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-base-100 text-base-content"
+                className="block w-full pl-10 pr-3 py-3 border border-base-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-base-200 text-base-content placeholder:text-base-content/40"
                 autoComplete="off"
               />
 
@@ -156,7 +144,7 @@ export default function AddStudent() {
                           setError("");
                         }}
                         className={`p-4 cursor-pointer hover:bg-base-200 border-b border-base-300 last:border-b-0 ${
-                          selectedStudent?._id === stu._id ? "bg-green-50" : ""
+                          selectedStudent?._id === stu._id ? "bg-primary/10" : ""
                         }`}
                       >
                         <div className="font-medium text-base-content">
@@ -184,18 +172,18 @@ export default function AddStudent() {
 
           {/* Selected Student Display */}
           {selectedStudent && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="mb-6 p-4 rounded-lg border border-success/30 bg-success/10">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-green-900">
+                  <h3 className="font-medium text-success">
                     Selected Student
                   </h3>
-                  <p className="text-green-700">{selectedStudent.name}</p>
-                  <p className="text-sm text-green-600">
+                  <p className="text-base-content">{selectedStudent.name}</p>
+                  <p className="text-sm text-base-content/70">
                     {selectedStudent.email}
                   </p>
                   {selectedStudent.studentId && (
-                    <p className="text-sm text-green-600">
+                    <p className="text-sm text-base-content/70">
                       Student ID: {selectedStudent.studentId}
                     </p>
                   )}
@@ -203,7 +191,7 @@ export default function AddStudent() {
                 <button
                   type="button"
                   onClick={() => setSelectedStudent(null)}
-                  className="p-1 text-green-400 hover:text-green-600 hover:bg-green-100 rounded"
+                  className="rounded p-1 text-success/70 hover:bg-success/10 hover:text-success transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -216,7 +204,7 @@ export default function AddStudent() {
             <button
               type="submit"
               disabled={!selectedStudent || loading}
-              className="flex items-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              className="flex items-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:text-gray-700 disabled:cursor-not-allowed transition-colors font-medium"
             >
               {loading ? (
                 <>
@@ -224,10 +212,7 @@ export default function AddStudent() {
                   Adding...
                 </>
               ) : (
-                <>
-                  <Check className="h-5 w-5 mr-2" />
-                  Add to Institution
-                </>
+                "Add to Institution"
               )}
             </button>
 

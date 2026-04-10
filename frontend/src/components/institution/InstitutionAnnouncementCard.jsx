@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Pin, Tag, Edit, Trash2, Calendar } from "lucide-react";
+import { Pin, Tag, Edit, Trash2, Calendar, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
@@ -263,9 +264,20 @@ const InstitutionAnnouncementCard = ({
           )}
         </div>
 
-        <p className="text-base-content/80 mb-3 whitespace-pre-wrap">
+        <p className="text-base-content/80 mb-3 line-clamp-3">
           {announcement.content}
         </p>
+        
+        {/* View Full Content Link */}
+        <div className="flex items-center justify-between mb-3">
+          <Link
+            to={`/${announcement.institution}/announcements/${announcement._id}`}
+            className="btn btn-sm btn-outline btn-primary hover:btn-primary"
+          >
+            View Full Content
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Link>
+        </div>
 
         {announcement.tags && announcement.tags.length > 0 && (
           <div className="flex items-center gap-2 mb-3 flex-wrap">

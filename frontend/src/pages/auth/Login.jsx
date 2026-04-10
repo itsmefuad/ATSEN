@@ -5,11 +5,13 @@ import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useAuthNavigation } from "../../hooks/useAuthNavigation.js";
 import api from "../../lib/axios";
 import Navbar from "../../components/Navbar.jsx";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 export default function Login() {
   const [form, setForm] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  usePageTitle("Login - Access Your Educational Account");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -119,10 +121,9 @@ export default function Login() {
         >
           <div className="max-w-md w-full bg-base-100/95 backdrop-blur-sm shadow-lg rounded-lg p-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold text-base-content mb-2">
-                Welcome Back
-              </h2>
-              <p className="text-base-content/70">Sign in to your account</p>
+              <h1 className="text-2xl font-semibold text-base-content mb-2">
+                Login to your ATSEN account
+              </h1>
             </div>
 
           {error && (
@@ -173,7 +174,7 @@ export default function Login() {
               to="/"
               className="text-sm text-gray-500 hover:text-gray-700 hover:underline"
             >
-              ← Back to Home
+              &lt; Back to Home
             </Link>
           </div>
         </div>

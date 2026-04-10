@@ -2,9 +2,23 @@
 
 import jwt from "jsonwebtoken";
 import slugify from "slugify";
-import Admin from "../models/Admin.js";
+import DevAdmin from "../models/Admin.js";
 import Institution from "../models/institution.js";
 import PendingInstitute from "../models/PendingInstitute.js";
+import Room from "../models/Room.js";
+import Student from "../models/student.js";
+import Instructor from "../models/instructor.js";
+import ContactMessage from "../models/ContactMessage.js";
+import mongoose from "mongoose";
+import { Redis } from '@upstash/redis';
+import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import fs from 'fs';
+
+function studentInstitutionMembershipFilter(instId) {
+  return {
+    $or: [{ institutions: instId }, { "institutions.institution": instId }],
+  };
+}
 
 // POST /api/admin/login
 export async function loginAdmin(req, res) {
@@ -15,8 +29,8 @@ export async function loginAdmin(req, res) {
       return res.status(400).json({ message: "Email and password are required" });
     }
     
-    // Find admin by email
-    const admin = await Admin.findOne({ email: email.toLowerCase() });
+    // Find devAdmin by email
+    const admin = await DevAdmin.findOne({ email: email.toLowerCase() });
     if (!admin) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -45,7 +59,7 @@ export async function loginAdmin(req, res) {
 
     res.json({ 
       token, 
-      admin: {
+      devAdmin: {
         id: admin._id,
         name: admin.name,
         email: admin.email,
@@ -62,7 +76,7 @@ export async function loginAdmin(req, res) {
 export async function getPendingInstitutions(req, res) {
   try {
     const pendingInstitutes = await PendingInstitute.find({ status: 'pending' })
-      .select('name eiin email phone address description createdAt')
+      .select('name eiin superadminEmail phone address description createdAt')
       .sort({ createdAt: -1 });
     
     res.json(pendingInstitutes);
@@ -97,12 +111,13 @@ export async function approveInstitution(req, res) {
     const institutionData = {
       name: pendingInstitute.name,
       eiin: pendingInstitute.eiin,
-      email: pendingInstitute.email,
+      superadminEmail: pendingInstitute.superadminEmail,
       password: pendingInstitute.password, // Already hashed
       phone: pendingInstitute.phone,
       address: pendingInstitute.address,
       description: pendingInstitute.description,
       active: true,
+      admins: [],
       // Generate a unique loginId based on name + timestamp
       loginId: slugify(pendingInstitute.name, { 
         lower: true, 
@@ -133,7 +148,7 @@ export async function approveInstitution(req, res) {
         id: institution._id,
         name: institution.name,
         eiin: institution.eiin,
-        email: institution.email,
+        superadminEmail: institution.superadminEmail,
         slug: institution.slug
       }
     });
@@ -184,12 +199,193 @@ export async function rejectInstitution(req, res) {
 export async function getAllInstitutions(req, res) {
   try {
     const institutions = await Institution.find({})
-      .select('name eiin email active createdAt')
+      .select('name eiin superadminEmail active createdAt')
       .sort({ createdAt: -1 });
+
+    const institutionsWithCounts = await Promise.all(
+      institutions.map(async (institution) => {
+        const [roomCount, studentCount, instructorCount] = await Promise.all([
+          Room.countDocuments({ institution: institution._id }),
+          Student.countDocuments(studentInstitutionMembershipFilter(institution._id)),
+          Instructor.countDocuments({ institutions: institution._id }),
+        ]);
+
+        return {
+          ...institution.toObject(),
+          roomCount,
+          studentCount,
+          instructorCount,
+        };
+      })
+    );
     
-    res.json(institutions);
+    res.json(institutionsWithCounts);
   } catch (error) {
     console.error("Error fetching institutions:", error);
     res.status(500).json({ message: "Failed to fetch institutions" });
+  }
+}
+
+// DELETE /api/admin/institutions/:id - remove approved institution
+export async function deleteInstitution(req, res) {
+  try {
+    const { id } = req.params;
+
+    // require superadmin
+    if (!req.admin || req.admin.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only root superadmin can delete institutions' });
+    }
+
+    const inst = await Institution.findById(id);
+    if (!inst) return res.status(404).json({ message: 'Institution not found' });
+
+    // Remove institution document
+    await Institution.findByIdAndDelete(id);
+    return res.json({ message: 'Institution removed' });
+  } catch (err) {
+    console.error('deleteInstitution error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+
+// GET /api/admin/system-status - aggregated system checks
+export async function getSystemStatus(req, res) {
+  try {
+    // Basic DB status
+    const conn = mongoose.connection;
+    const dbStatus = {
+      readyState: conn.readyState,
+      host: conn.host,
+      name: conn.name,
+      port: conn.port,
+      isAtlas: conn.host?.includes('mongodb.net'),
+      message: conn.readyState === 1 ? 'Connected' : 'Disconnected'
+    };
+
+    // Uptime
+    const uptime = process.uptime();
+
+    // Redis (Upstash) check
+    let redisStatus = { ok: false };
+    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      try {
+        const redis = new Redis({ 
+          url: process.env.UPSTASH_REDIS_REST_URL, 
+          token: process.env.UPSTASH_REDIS_REST_TOKEN
+        });
+        const pong = await Promise.race([
+          redis.ping(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+        ]);
+        redisStatus = { ok: true, message: 'Connected' };
+      } catch (e) {
+        // In development, network issues are common
+        const isDev = process.env.NODE_ENV !== 'production';
+        redisStatus = { 
+          ok: false, 
+          message: isDev ? 'Unreachable (local network)' : 'Connection failed',
+          note: isDev ? 'Will work in production' : undefined
+        };
+      }
+    } else {
+      redisStatus = { ok: false, message: 'Not configured' };
+    }
+
+    // S3 / DigitalOcean Spaces check
+    let storageStatus = { ok: false };
+    try {
+      if (process.env.DO_SPACES_BUCKET && process.env.DO_SPACES_ENDPOINT && process.env.DO_SPACES_ACCESS_KEY_ID && process.env.DO_SPACES_SECRET_ACCESS_KEY) {
+        const s3 = new S3Client({
+          endpoint: process.env.DO_SPACES_ENDPOINT,
+          region: 'auto',
+          credentials: {
+            accessKeyId: process.env.DO_SPACES_ACCESS_KEY_ID,
+            secretAccessKey: process.env.DO_SPACES_SECRET_ACCESS_KEY
+          }
+        });
+        const cmd = new ListObjectsV2Command({ Bucket: process.env.DO_SPACES_BUCKET, MaxKeys: 1 });
+        await s3.send(cmd);
+        storageStatus = { ok: true };
+      } else {
+        storageStatus = { ok: false, message: 'Spaces not configured' };
+      }
+    } catch (e) {
+      storageStatus = { ok: false, error: e.message || e };
+    }
+
+    // Package version (try to read backend package.json)
+    let version = null;
+    try {
+      const p = JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url)));
+      version = p.version;
+    } catch (e) {
+      version = null;
+    }
+
+    res.json({
+      dbStatus,
+      redisStatus,
+      storageStatus,
+      uptime,
+      version
+    });
+  } catch (err) {
+    console.error('getSystemStatus error:', err);
+    res.status(500).json({ message: 'Failed to run system checks' });
+  }
+}
+
+// PATCH /api/admin/institutions/:id/active - set active flag
+export async function setInstitutionActive(req, res) {
+  try {
+    const { id } = req.params;
+    const { active } = req.body;
+
+    if (typeof active !== 'boolean') return res.status(400).json({ message: 'active (boolean) is required' });
+
+    if (!req.admin || req.admin.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only root superadmin can change institution active state' });
+    }
+
+    const inst = await Institution.findById(id);
+    if (!inst) return res.status(404).json({ message: 'Institution not found' });
+
+    inst.active = active;
+    await inst.save();
+    return res.json({ message: 'Institution updated', institution: { id: inst._id, active: inst.active } });
+  } catch (err) {
+    console.error('setInstitutionActive error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+
+// GET /api/admin/support-messages
+export async function getSupportMessages(req, res) {
+  try {
+    const messages = await ContactMessage.find({})
+      .select("name email message createdAt")
+      .sort({ createdAt: -1 });
+
+    return res.json(messages);
+  } catch (error) {
+    console.error("Error fetching support messages:", error);
+    return res.status(500).json({ message: "Failed to fetch support messages" });
+  }
+}
+
+// DELETE /api/admin/support-messages/:id
+export async function deleteSupportMessage(req, res) {
+  try {
+    const { id } = req.params;
+
+    const deleted = await ContactMessage.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Support message not found" });
+    }
+
+    return res.json({ message: "Support message deleted" });
+  } catch (error) {
+    console.error("Error deleting support message:", error);
+    return res.status(500).json({ message: "Failed to delete support message" });
   }
 }

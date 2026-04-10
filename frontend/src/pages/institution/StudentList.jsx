@@ -7,7 +7,7 @@ import {
   Phone,
   Trash2,
   UserPlus,
-  ArrowLeft,
+  ChevronLeft,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -22,7 +22,7 @@ export default function StudentList() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/api/institutions/${encodeURIComponent(
           idOrName
         )}/remove-student`,
         {
@@ -51,7 +51,7 @@ export default function StudentList() {
     if (!idOrName) return;
 
     fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
+      `/api/institutions/${encodeURIComponent(
         idOrName
       )}/students`
     )
@@ -94,7 +94,7 @@ export default function StudentList() {
             to={`/${encodeURIComponent(idOrName)}`}
             className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5" />
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">

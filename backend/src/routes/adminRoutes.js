@@ -4,7 +4,12 @@ import {
   getPendingInstitutions,
   approveInstitution,
   rejectInstitution,
-  getAllInstitutions
+  getAllInstitutions,
+  deleteInstitution,
+  getSystemStatus,
+  setInstitutionActive,
+  getSupportMessages,
+  deleteSupportMessage,
 } from "../controllers/adminController.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 
@@ -37,5 +42,18 @@ router.post(
   verifyToken,
   rejectInstitution
 );
+
+// Delete an approved institution
+router.delete("/institutions/:id", verifyToken, deleteInstitution);
+
+// Activate/Deactivate an institution
+router.patch("/institutions/:id/active", verifyToken, setInstitutionActive);
+
+// System status checks
+router.get("/system-status", verifyToken, getSystemStatus);
+
+// Contact/support messages from public contact page
+router.get("/support-messages", verifyToken, getSupportMessages);
+router.delete("/support-messages/:id", verifyToken, deleteSupportMessage);
 
 export default router;

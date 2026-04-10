@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  ArrowLeft,
+  ChevronLeft,
   BookOpen,
   Plus,
   Users,
@@ -11,6 +11,7 @@ import {
   Trash2,
   Calendar,
 } from "lucide-react";
+import api from "../../lib/axios.js";
 
 export default function InstitutionRooms() {
   const { idOrName } = useParams();
@@ -23,36 +24,23 @@ export default function InstitutionRooms() {
   useEffect(() => {
     if (!idOrName) return;
 
-    fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
-        idOrName
-      )}/rooms`
-    )
-      .then(async (res) => {
-        if (!res.ok) throw new Error(await res.text());
-        return res.json();
-      })
-      .then((json) => {
+    api.get(`/institutions/${encodeURIComponent(idOrName)}/rooms`)
+      .then((response) => {
         console.log("=== ROOMS DATA ===");
-        console.log("Rooms received:", json);
-        json.forEach((room, index) => {
+        console.log("Rooms received:", response.data);
+        response.data.forEach((room, index) => {
           console.log(`Room ${index}:`, {
             id: room._id,
             name: room.room_name,
             idLength: room._id?.length,
           });
         });
-        setRooms(json);
+        setRooms(response.data);
         setLoading(false);
       })
-      .catch(async (err) => {
-        // try to pull the real error text
-        let msg = err.message;
-        if (err.response) {
-          msg = await err.response.text();
-        }
-        console.error("Error loading rooms:", msg);
-        setErrMsg(msg);
+      .catch((err) => {
+        console.error("Error loading rooms:", err);
+        setErrMsg(err.response?.data?.message || err.message);
         setLoading(false);
       });
   }, [idOrName]);
@@ -66,19 +54,7 @@ export default function InstitutionRooms() {
 
     setDeleting(true);
     try {
-      const response = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/rooms/${deleteConfirm.roomId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
+      await api.delete(`/institutions/${encodeURIComponent(idOrName)}/rooms/${deleteConfirm.roomId}`);
 
       // Remove the deleted room from the rooms state
       setRooms((prevRooms) =>
@@ -121,7 +97,7 @@ export default function InstitutionRooms() {
             to={`/${encodeURIComponent(idOrName)}`}
             className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5" />
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
@@ -136,7 +112,7 @@ export default function InstitutionRooms() {
 
         <Link
           to={`/${encodeURIComponent(idOrName)}/add-room`}
-          className="flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium group"
+          className="btn btn-primary px-6 py-3 font-medium group"
         >
           <Plus className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
           Add Room
@@ -155,7 +131,7 @@ export default function InstitutionRooms() {
           </p>
           <Link
             to={`/${encodeURIComponent(idOrName)}/add-room`}
-            className="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+            className="btn btn-primary inline-flex items-center px-6 py-3 font-medium"
           >
             <Plus className="h-5 w-5 mr-2" />
             Create First Room
@@ -186,7 +162,7 @@ export default function InstitutionRooms() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-base-content group-hover:text-blue-700 mb-2">
+                    <h3 className="text-xl font-bold text-base-content group-hover:text-blue-700 mb-2 leading-tight">
                       {room.room_name}
                     </h3>
 
@@ -224,14 +200,14 @@ export default function InstitutionRooms() {
                     to={`/${encodeURIComponent(idOrName)}/rooms/${
                       room._id
                     }/edit`}
-                    className="flex-1 flex items-center justify-center px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
+                    className="btn btn-sm btn-outline btn-info flex-1"
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </Link>
                   <button
                     onClick={() => handleDeleteClick(room._id, room.room_name)}
-                    className="flex-1 flex items-center justify-center px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
+                    className="btn btn-sm btn-error flex-1"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete

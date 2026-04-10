@@ -310,6 +310,23 @@ export async function deleteRoom(req, res) {
       { $pull: { rooms: roomId } }
     );
 
+    // Clean up related room data
+    // Import the models at the top if not already imported
+    const { default: Material } = await import("../../models/Material.js");
+    const { default: RoomResource } = await import("../../models/RoomResource.js");
+    const { default: Assessment } = await import("../../models/Assessment.js");
+    const { default: ForumContent } = await import("../../models/ForumContent.js");
+    const { default: FormEntry } = await import("../../models/Form.js");
+
+    // Delete all room-related data
+    await Promise.all([
+      Material.deleteMany({ room: roomId }),
+      RoomResource.deleteMany({ room: roomId }),
+      Assessment.deleteMany({ room: roomId }),
+      ForumContent.deleteMany({ room: roomId }),
+      FormEntry.deleteMany({ targetRoomId: roomId })
+    ]);
+
     // 9. Finally, delete the room itself
     await Room.findByIdAndDelete(roomId);
 

@@ -1,0 +1,11 @@
+{
+  "name": "deployment-scripts",
+  "scripts": {
+    "deploy:test": "echo 'Testing deployment build...' && npm run build && echo 'Build successful! Ready for deployment.'",
+    "deploy:verify": "echo 'Verifying deployment setup...' && node -e \"console.log('Node version:', process.version); console.log('Environment:', process.env.NODE_ENV || 'development');\"",
+    "start:production": "cross-env NODE_ENV=production npm run start"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}

@@ -1,8 +1,9 @@
 // frontend/src/pages/institution/AddInstructor.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
-import { Search, UserPlus, ArrowLeft, X, Check } from "lucide-react";
+import { Search, UserPlus, ChevronLeft, X } from "lucide-react";
 import toast from "react-hot-toast";
+import api from "../../lib/axios";
 
 export default function AddInstructor() {
   const { idOrName } = useParams();
@@ -18,12 +19,10 @@ export default function AddInstructor() {
 
   // 1) load all instructors from your global collection
   useEffect(() => {
-    fetch(`http://localhost:5001/api/instructors`)
+    api.get("/instructors")
       .then((res) => {
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        return res.json();
+        setAllInstructors(res.data);
       })
-      .then((json) => setAllInstructors(json))
       .catch((err) => {
         console.error("Fetch all instructors failed:", err);
         setError("Could not load instructors.");
@@ -53,22 +52,12 @@ export default function AddInstructor() {
 
     setLoading(true);
     try {
-      const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
-          idOrName
-        )}/add-instructor`,
+      const res = await api.post(
+        `/institutions/${encodeURIComponent(idOrName)}/add-instructor`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            instructorId: selectedInstructor._id,
-          }),
+          instructorId: selectedInstructor._id,
         }
       );
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Status ${res.status}`);
-      }
 
       toast.success("Instructor added successfully!");
       // on success, go back to the instructor list
@@ -90,7 +79,7 @@ export default function AddInstructor() {
           to={`/${encodeURIComponent(idOrName)}/instructors`}
           className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" />
         </Link>
         <div>
           <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
@@ -129,7 +118,7 @@ export default function AddInstructor() {
                   setSelectedInstructor(null);
                   setError("");
                 }}
-                className="block w-full pl-10 pr-3 py-3 border border-base-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-base-100 text-base-content"
+                className="block w-full pl-10 pr-3 py-3 border border-base-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-base-200 text-base-content placeholder:text-base-content/40"
                 autoComplete="off"
               />
 
@@ -171,21 +160,21 @@ export default function AddInstructor() {
 
           {/* Selected Instructor Display */}
           {selectedInstructor && (
-            <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="mb-6 rounded-lg border border-primary/30 bg-primary/10 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-purple-900">
+                  <h3 className="font-medium text-primary">
                     Selected Instructor
                   </h3>
-                  <p className="text-purple-700">{selectedInstructor.name}</p>
-                  <p className="text-sm text-purple-600">
+                  <p className="text-base-content">{selectedInstructor.name}</p>
+                  <p className="text-sm text-base-content/70">
                     {selectedInstructor.email}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedInstructor(null)}
-                  className="p-1 text-purple-400 hover:text-purple-600 hover:bg-purple-100 rounded"
+                  className="rounded p-1 text-primary/70 hover:bg-primary/10 hover:text-primary transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -198,7 +187,7 @@ export default function AddInstructor() {
             <button
               type="submit"
               disabled={!selectedInstructor || loading}
-              className="flex items-center px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              className="flex items-center px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-300 disabled:text-gray-700 disabled:cursor-not-allowed transition-colors font-medium"
             >
               {loading ? (
                 <>
@@ -206,10 +195,7 @@ export default function AddInstructor() {
                   Adding...
                 </>
               ) : (
-                <>
-                  <Check className="h-5 w-5 mr-2" />
-                  Add to Institution
-                </>
+                "Add to Institution"
               )}
             </button>
 

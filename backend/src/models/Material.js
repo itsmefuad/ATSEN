@@ -18,7 +18,7 @@ const materialSchema = new Schema(
     fileUrl: { type: String, required: false, default: "" },
     fileName: { type: String, required: true },
     // PDF-specific fields
-    filePath: { type: String, required: false }, // File system path for PDFs
+    filePath: { type: String, required: false }, // S3/Spaces URL for PDFs
     originalFileName: { type: String, required: false }, // Original uploaded filename
     room: { type: Schema.Types.ObjectId, ref: "Room", required: true },
     uploadedBy: {

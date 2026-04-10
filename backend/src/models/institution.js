@@ -18,11 +18,13 @@ const institutionSchema = new mongoose.Schema(
       trim: true,
       uppercase: true
     },
-    email: {
+    // Superadmin email (single email for institution owner)
+    superadminEmail: {
       type: String,
       required: true,
-      trim: true,
-      lowercase: true
+      unique: true,
+      lowercase: true,
+      trim: true
     },
     password: {
       type: String,
@@ -76,12 +78,25 @@ const institutionSchema = new mongoose.Schema(
         ref: "StudentDocument"
       }
     ]
+    ,
+    // Additional admins (can be added by superadmin)
+    admins: [
+      {
+        email: { type: String, required: true, lowercase: true, trim: true },
+        name: { type: String, trim: true },
+        // hashed password (bcrypt) for institution-level admin accounts — hidden by default
+        password: { type: String, trim: true, select: false },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ]
   },
   {
     collection: "institutions",
     timestamps: true // auto-manages createdAt & updatedAt
   }
 );
+
+
 
 // Auto-generate a URL-safe slug from the institution name
 institutionSchema.pre("validate", async function () {

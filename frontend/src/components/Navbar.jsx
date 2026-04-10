@@ -1,18 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronDown, LogOut, User, Trophy, Moon, Sun } from "lucide-react";
+import { ChevronDown, LogOut, User, Trophy, Moon, Sun, BarChart3, Users, MessageSquare, Settings, FileText, MessageCircle, Building2 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { useTheme } from "../contexts/ThemeContext.jsx";
+import api from "../lib/axios.js";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isInstitutionDropdownOpen, setIsInstitutionDropdownOpen] = useState(false);
+  const [studentInstitutions, setStudentInstitutions] = useState([]);
+  const [selectedInstitution, setSelectedInstitution] = useState(
+    localStorage.getItem('selectedInstitutionId') || ''
+  );
 
-  // Check for admin user in localStorage
-  const adminData = JSON.parse(localStorage.getItem("adminData") || "null");
-  const currentUser = user || (adminData ? { ...adminData, role: "admin" } : null);
+  // Fetch institutions for students
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      if (user?.role === 'student' && user?._id) {
+        try {
+          const res = await api.get(`/students/${user._id}`);
+          if (res.data.institutions && res.data.institutions.length > 0) {
+            setStudentInstitutions(res.data.institutions);
+            // Set first institution as default if none selected
+            if (!selectedInstitution) {
+              const firstInstId = res.data.institutions[0]._id || res.data.institutions[0];
+              setSelectedInstitution(firstInstId);
+              localStorage.setItem('selectedInstitutionId', firstInstId);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching student institutions:', error);
+        }
+      }
+    };
+    fetchInstitutions();
+  }, [user]);
+
+  // Check for admin user in localStorage - prioritize admin over regular user
+  const adminDataStr = localStorage.getItem("adminData");
+  const adminData = adminDataStr && adminDataStr !== "undefined" ? JSON.parse(adminDataStr) : null;
+  const currentUser = adminData ? { ...adminData, role: "admin" } : user;
 
   const handleLogout = () => {
     if (adminData) {
@@ -62,36 +92,135 @@ const Navbar = () => {
     }
   };
 
+  const getFormsLink = () => {
+    if (!user) return "/forms";
+
+    switch (user.role) {
+      case "institution":
+        return `/${user.slug}/forms`;
+      case "student":
+        // For students, try to get institution slug from their institutions array
+        if (user.institutions && user.institutions.length > 0) {
+          // If institutions array has objects with slug property
+          if (typeof user.institutions[0] === 'object' && user.institutions[0].slug) {
+            return `/student/${user.institutions[0].slug}/forms`;
+          }
+          // If institutions array has string IDs, we'll need to fetch the slug
+          // For now, use the legacy route
+        }
+        return "/forms";
+      default:
+        return "/forms";
+    }
+  };
+
+  const getHelpDeskLink = () => {
+    if (!user) return "/helpdesk";
+
+    switch (user.role) {
+      case "institution":
+        return `/${user.slug}/helpdesk`;
+      case "student":
+        // For students, try to get institution slug from their institutions array
+        if (user.institutions && user.institutions.length > 0) {
+          // If institutions array has objects with slug property
+          if (typeof user.institutions[0] === 'object' && user.institutions[0].slug) {
+            return `/student/${user.institutions[0].slug}/helpdesk`;
+          }
+          // If institutions array has string IDs, we'll need to fetch the slug
+          // For now, use the legacy route
+        }
+        return "/helpdesk";
+      default:
+        return "/helpdesk";
+    }
+  };
+
   return (
-    <nav className="sticky top-0 z-50 bg-neutral border-b border-neutral-content/20 px-4 py-3 shadow-md">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+    <nav className="sticky top-0 z-50 bg-neutral border-b border-neutral-content/20 px-6 py-3 shadow-md">
+      <div className="flex items-center justify-between w-full">
         {/* Left side - Logo and User Info */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Logo */}
           <Link to="/">
             <img
               src="/Atsenlogo.png"
               alt="ATSEN"
-              className="h-8 w-auto cursor-pointer"
+              className="h-6 sm:h-8 w-auto cursor-pointer max-w-[120px] sm:max-w-none"
             />
           </Link>
 
           {/* Divider and User Info - only show when logged in */}
           {currentUser && (
             <>
-              <div className="text-neutral-content/40 text-xl font-light">|</div>
+              <div className="hidden sm:block text-neutral-content/40 text-xl font-light">|</div>
               <Link
                 to={getDashboardLink()}
-                className="text-neutral-content hover:text-primary font-medium transition-colors duration-200"
+                className="hidden sm:block text-neutral-content hover:text-primary font-medium transition-colors duration-200"
               >
                 {getUserDisplayText()}
               </Link>
+              
+              {/* Institution Selector for Students */}
+              {currentUser.role === "student" && studentInstitutions.length > 0 && (
+                <>
+                  <div className="text-neutral-content/40 text-xl font-light">|</div>
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsInstitutionDropdownOpen(!isInstitutionDropdownOpen)}
+                      className="flex items-center space-x-1 sm:space-x-2 text-neutral-content hover:text-primary transition-colors duration-200 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md hover:bg-neutral-focus font-medium"
+                    >
+                      <span className="text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">
+                        {studentInstitutions.find(i => (i._id || i) === selectedInstitution)?.name || 'Select'}
+                      </span>
+                      <ChevronDown
+                        className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200 flex-shrink-0 ${
+                          isInstitutionDropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isInstitutionDropdownOpen && (
+                      <div className="absolute left-0 sm:left-auto right-0 mt-2 w-56 sm:w-64 bg-base-100 rounded-lg shadow-xl border border-base-300 py-2 z-50">
+                        {studentInstitutions.map((inst) => {
+                          const instId = inst._id || inst;
+                          const instName = inst.name || 'Institution';
+                          const isSelected = instId === selectedInstitution;
+                          return (
+                            <button
+                              key={instId}
+                              onClick={() => {
+                                setSelectedInstitution(instId);
+                                localStorage.setItem('selectedInstitutionId', instId);
+                                window.dispatchEvent(new Event('institutionChanged'));
+                                setIsInstitutionDropdownOpen(false);
+                                window.location.reload();
+                              }}
+                              className={`w-full text-left px-4 py-3 text-base transition-all duration-200 flex items-center justify-between border-l-4 ${
+                                isSelected
+                                  ? 'border-l-primary font-semibold text-primary'
+                                  : 'border-l-transparent text-base-content hover:bg-blue-50 hover:border-l-blue-600'
+                              }`}
+                            >
+                              <span>{instName}</span>
+                              {isSelected && (
+                                <span className="text-primary">✓</span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>
 
         {/* Right side - Theme Toggle and User Dropdown or Login/Signup buttons */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
@@ -149,8 +278,62 @@ const Navbar = () => {
                         <Trophy className="h-4 w-4" />
                         <span>My Progress</span>
                       </Link>
+
+                      <Link
+                        to="/student/documents"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-base-content hover:bg-base-200 flex items-center space-x-2"
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span>My Documents</span>
+                      </Link>
+
+                      <Link
+                        to="/student/support-tickets"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-base-content hover:bg-base-200 flex items-center space-x-2"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        <span>My Support Tickets</span>
+                      </Link>
                     </>
                   )}
+
+                  {/* Account Settings for all users */}
+                  <Link
+                    to={currentUser.role === "admin" ? "/admin/settings" : currentUser.role === "institution" ? `/${currentUser.slug}/settings` : currentUser.role === "instructor" ? "/teacher/settings" : "/student/settings"}
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="w-full text-left px-4 py-2 text-sm text-base-content hover:bg-base-200 flex items-center space-x-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Account Settings</span>
+                  </Link>
+
+                  {/* Forms link for institutions and students only - not for admin */}
+                  {currentUser.role !== "admin" && currentUser.role !== "instructor" && (
+                    <>
+                      <Link
+                        to={getFormsLink()}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-base-content hover:bg-base-200 flex items-center space-x-2"
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                        <span>Forms</span>
+                      </Link>
+
+                      {/* Help Desk link right under Forms */}
+                      <Link
+                        to={getHelpDeskLink()}
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full text-left px-4 py-2 text-sm text-base-content hover:bg-base-200 flex items-center space-x-2"
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                        <span>Help Desk</span>
+                      </Link>
+                    </>
+                  )}
+
+
 
                   <button
                     onClick={handleLogout}
@@ -164,7 +347,7 @@ const Navbar = () => {
             </div>
           ) : (
             // Not logged in - show login/signup buttons
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <Link
                 to="/auth/login"
                 className="text-neutral-content hover:text-primary font-medium transition-colors duration-200"
@@ -182,11 +365,17 @@ const Navbar = () => {
         </div>
         {/* End of flex container */}
 
-        {/* Click outside to close dropdown */}
+        {/* Click outside to close dropdowns */}
         {isDropdownOpen && (
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsDropdownOpen(false)}
+          />
+        )}
+        {isInstitutionDropdownOpen && (
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsInstitutionDropdownOpen(false)}
           />
         )}
       </div>

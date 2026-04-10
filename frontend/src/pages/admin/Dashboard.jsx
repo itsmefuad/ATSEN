@@ -1,15 +1,102 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building, Clock, CheckCircle, XCircle, Calendar, Shield, Activity, AlertCircle } from "lucide-react";
+import { Building, Clock, CheckCircle, XCircle, Calendar, Shield, Activity, AlertCircle, Mail, Trash2 } from "lucide-react";
 import api from "../../lib/axios";
 import Navbar from "../../components/Navbar";
+
+// ── Toast notification ────────────────────────────────────────────────────────
+function Toast({ toast, onClose }) {
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(onClose, 3500);
+    return () => clearTimeout(t);
+  }, [toast, onClose]);
+
+  if (!toast) return null;
+
+  const colors = {
+    success: "alert-success",
+    error: "alert-error",
+    info: "alert-info",
+  };
+
+  return (
+    <div className="toast toast-top toast-center z-[9999]">
+      <div className={`alert ${colors[toast.type] ?? "alert-info"} shadow-lg flex flex-row items-center gap-3 max-w-sm w-max`}>
+        <span className="flex-1">{toast.message}</span>
+        <button className="btn btn-neutral btn-circle btn-xs shrink-0 text-neutral-content" onClick={onClose}>✕</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Confirm modal ─────────────────────────────────────────────────────────────
+function ConfirmModal({ modal, onConfirm, onCancel }) {
+  if (!modal) return null;
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <h3 className="font-bold text-lg text-base-content mb-2">{modal.title}</h3>
+        <p className="text-base-content/70">{modal.message}</p>
+        <div className="modal-action">
+          <button className="btn btn-neutral text-neutral-content" onClick={onCancel}>Cancel</button>
+          <button className={`btn ${modal.danger ? "btn-error text-error-content" : "btn-primary text-primary-content"}`} onClick={onConfirm}>
+            {modal.confirmLabel ?? "Confirm"}
+          </button>
+        </div>
+      </div>
+      <div className="modal-backdrop" onClick={onCancel} />
+    </div>
+  );
+}
+
+// ── Reject-reason modal ───────────────────────────────────────────────────────
+function RejectModal({ open, onConfirm, onCancel }) {
+  const [reason, setReason] = useState("");
+  if (!open) return null;
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <h3 className="font-bold text-lg text-base-content mb-2">Reject Institution</h3>
+        <p className="text-base-content/70 mb-4">Provide a reason for rejection (optional).</p>
+        <textarea
+          className="textarea textarea-bordered w-full"
+          rows={3}
+          placeholder="Reason…"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+        <div className="modal-action">
+          <button className="btn btn-neutral text-neutral-content" onClick={onCancel}>Cancel</button>
+          <button className="btn btn-error text-error-content" onClick={() => onConfirm(reason)}>Reject</button>
+        </div>
+      </div>
+      <div className="modal-backdrop" onClick={onCancel} />
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [institutions, setInstitutions] = useState([]);
   const [pendingInstitutions, setPendingInstitutions] = useState([]);
+  const [supportMessages, setSupportMessages] = useState([]);
+  const [systemStatus, setSystemStatus] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'approved'
+  const [activeTab, setActiveTab] = useState('pending');
   const navigate = useNavigate();
+  const tabsRef = useRef(null);
+
+  // Modal / toast state
+  const [toast, setToast] = useState(null);
+  const [confirmModal, setConfirmModal] = useState(null); // { title, message, danger, confirmLabel, onConfirm }
+  const [rejectModal, setRejectModal] = useState(null);  // { id }
+
+  const showToast = useCallback((message, type = "info") => {
+    setToast({ message, type });
+  }, []);
+
+  const openConfirm = (opts) => setConfirmModal(opts);
+  const closeConfirm = () => setConfirmModal(null);
 
   useEffect(() => {
     fetchData();
@@ -18,12 +105,16 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [institutionsRes, pendingRes] = await Promise.all([
+      const [institutionsRes, pendingRes, systemRes, supportMessagesRes] = await Promise.all([
         api.get("/admin/institutions"),
-        api.get("/admin/institutions/pending")
+        api.get("/admin/institutions/pending"),
+        api.get("/admin/system-status"),
+        api.get("/admin/support-messages"),
       ]);
       setInstitutions(institutionsRes.data);
       setPendingInstitutions(pendingRes.data);
+      setSystemStatus(systemRes.data);
+      setSupportMessages(supportMessagesRes.data || []);
     } catch (error) {
       console.error("Error fetching data:", error);
       if (error.response?.status === 401) {
@@ -37,29 +128,106 @@ export default function Dashboard() {
 
   const handleApprove = async (id) => {
     try {
-      const response = await api.post(`/admin/institutions/${id}/approve`);
-      alert(`✅ Institution approved successfully!\nThe institution can now log in using their email and password.`);
-      fetchData(); // Refresh data
+      await api.post(`/admin/institutions/${id}/approve`);
+      showToast("Institution approved successfully! They can now log in.", "success");
+      fetchData();
     } catch (error) {
       console.error("Error approving institution:", error);
-      alert("Failed to approve institution. Please try again.");
+      showToast("Failed to approve institution. Please try again.", "error");
     }
   };
 
-  const handleReject = async (id) => {
-    const reason = prompt("Please provide a reason for rejection (optional):");
+  const handleReject = (id) => {
+    setRejectModal({ id });
+  };
+
+  const confirmReject = async (reason) => {
+    const { id } = rejectModal;
+    setRejectModal(null);
     try {
       await api.post(`/admin/institutions/${id}/reject`, { reason });
-      alert("Institution rejected successfully.");
-      fetchData(); // Refresh data
+      showToast("Institution rejected successfully.", "info");
+      fetchData();
     } catch (error) {
       console.error("Error rejecting institution:", error);
-      alert("Failed to reject institution. Please try again.");
+      showToast("Failed to reject institution. Please try again.", "error");
     }
+  };
+
+  const handleDeleteInstitution = (id) => {
+    openConfirm({
+      title: "Delete Institution",
+      message: "Are you sure you want to permanently delete this institution? This action cannot be undone.",
+      danger: true,
+      confirmLabel: "Delete",
+      onConfirm: async () => {
+        closeConfirm();
+        try {
+          await api.delete(`/admin/institutions/${id}`);
+          showToast("Institution deleted.", "success");
+          fetchData();
+        } catch (err) {
+          console.error('Error deleting institution:', err);
+          showToast("Failed to delete institution.", "error");
+        }
+      },
+    });
+  };
+
+  const handleToggleActive = (id, currentActive) => {
+    const action = currentActive ? 'deactivate' : 'activate';
+    openConfirm({
+      title: `${action.charAt(0).toUpperCase() + action.slice(1)} Institution`,
+      message: `Are you sure you want to ${action} this institution?`,
+      danger: currentActive,
+      confirmLabel: action.charAt(0).toUpperCase() + action.slice(1),
+      onConfirm: async () => {
+        closeConfirm();
+        try {
+          await api.patch(`/admin/institutions/${id}/active`, { active: !currentActive });
+          showToast(`Institution ${action}d successfully.`, "success");
+          fetchData();
+        } catch (err) {
+          console.error('Error toggling active state:', err);
+          showToast("Failed to update institution state.", "error");
+        }
+      },
+    });
+  };
+
+  const handleDeleteSupportMessage = (id) => {
+    openConfirm({
+      title: "Delete Support Message",
+      message: "Are you sure you want to delete this support message?",
+      danger: true,
+      confirmLabel: "Delete",
+      onConfirm: async () => {
+        closeConfirm();
+        try {
+          await api.delete(`/admin/support-messages/${id}`);
+          showToast("Support message deleted.", "success");
+          fetchData();
+        } catch (err) {
+          console.error("Error deleting support message:", err);
+          showToast("Failed to delete support message.", "error");
+        }
+      },
+    });
   };
 
   return (
     <div className="min-h-screen bg-base-200">
+      <Toast toast={toast} onClose={() => setToast(null)} />
+      <ConfirmModal
+        modal={confirmModal}
+        onConfirm={() => confirmModal?.onConfirm?.()}
+        onCancel={closeConfirm}
+      />
+      <RejectModal
+        open={!!rejectModal}
+        onConfirm={confirmReject}
+        onCancel={() => setRejectModal(null)}
+      />
       <Navbar />
       <div className="max-w-7xl mx-auto p-4 mt-6">
         <div className="mb-8">
@@ -73,7 +241,13 @@ export default function Dashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-orange-300 group p-6">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => { setActiveTab('pending'); tabsRef.current?.scrollIntoView({ behavior: 'smooth' }); }}
+            onKeyDown={(e) => { if (e.key === 'Enter') { setActiveTab('pending'); tabsRef.current?.scrollIntoView({ behavior: 'smooth' }); } }}
+            className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-orange-300 group p-6 cursor-pointer"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-base-content/70 group-hover:text-orange-600">
@@ -87,11 +261,17 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-blue-300 group p-6">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => { setActiveTab('total'); tabsRef.current?.scrollIntoView({ behavior: 'smooth' }); }}
+            onKeyDown={(e) => { if (e.key === 'Enter') { setActiveTab('approved'); tabsRef.current?.scrollIntoView({ behavior: 'smooth' }); } }}
+            className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-blue-300 group p-6 cursor-pointer"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-base-content/70 group-hover:text-blue-600">
-                  Total Institutions
+                  Registered Institutions
                 </p>
                 <p className="text-3xl font-bold text-base-content group-hover:text-blue-700">
                   {institutions.length}
@@ -101,7 +281,13 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-green-300 group p-6">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => { setActiveTab('active'); tabsRef.current?.scrollIntoView({ behavior: 'smooth' }); }}
+            onKeyDown={(e) => { if (e.key === 'Enter') { setActiveTab('active'); tabsRef.current?.scrollIntoView({ behavior: 'smooth' }); } }}
+            className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-green-300 group p-6 cursor-pointer"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-base-content/70 group-hover:text-green-600">
@@ -115,14 +301,20 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-purple-300 group p-6">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => { setActiveTab('system'); tabsRef.current?.scrollIntoView({ behavior: 'smooth' }); }}
+            onKeyDown={(e) => { if (e.key === 'Enter') { setActiveTab('system'); tabsRef.current?.scrollIntoView({ behavior: 'smooth' }); } }}
+            className="card bg-base-100 hover:bg-base-200 hover:shadow-lg transition-all duration-200 border border-base-300 hover:border-purple-300 group p-6 cursor-pointer"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-base-content/70 group-hover:text-purple-600">
                   System Status
                 </p>
                 <p className="text-xl font-bold text-base-content group-hover:text-purple-700">
-                  Online
+                  {systemStatus ? (systemStatus.dbStatus?.message === 'Connected' && systemStatus.redisStatus?.ok && systemStatus.storageStatus?.ok ? 'Healthy' : 'Degraded') : 'Checking...'}
                 </p>
               </div>
               <Shield className="h-12 w-12 text-purple-500 group-hover:text-purple-600" />
@@ -130,23 +322,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="tabs tabs-boxed mb-6 bg-base-100 border border-base-300">
-          <button 
-            className={`tab ${activeTab === 'pending' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('pending')}
-          >
-            <Clock className="h-4 w-4 mr-2" />
-            Pending Requests ({pendingInstitutions.length})
-          </button>
-          <button 
-            className={`tab ${activeTab === 'approved' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('approved')}
-          >
-            <Building className="h-4 w-4 mr-2" />
-            Approved Institutions ({institutions.length})
-          </button>
-        </div>
+        {/* Tab Navigation removed as requested; spacer retained for scrolling */}
+        <div ref={tabsRef} className="mb-6" />
 
         {/* Content based on active tab */}
         <div className="card bg-base-100 border border-base-300 p-6">
@@ -199,8 +376,8 @@ export default function Dashboard() {
                                 </span>
                               </div>
                               <div>
-                                <span className="font-medium text-base-content/80">Email:</span>
-                                <span className="ml-2 text-base-content/70">{pending.email}</span>
+                                <span className="font-medium text-base-content/80">Email(s):</span>
+                                <span className="ml-2 text-base-content/70">{pending.superadminEmail || ''}</span>
                               </div>
                               {pending.phone && (
                                 <div>
@@ -234,14 +411,14 @@ export default function Dashboard() {
                           <div className="flex flex-col space-y-3 ml-4">
                             <button
                               onClick={() => handleApprove(pending._id)}
-                              className="btn btn-success hover:btn-success text-white font-medium shadow-md hover:shadow-lg min-w-[100px]"
+                              className="btn btn-primary min-w-[100px]"
                             >
                               <CheckCircle className="h-4 w-4 mr-1" />
                               Approve
                             </button>
                             <button
                               onClick={() => handleReject(pending._id)}
-                              className="btn btn-error hover:btn-error text-white font-medium shadow-md hover:shadow-lg min-w-[100px]"
+                              className="btn btn-outline min-w-[100px]"
                             >
                               <XCircle className="h-4 w-4 mr-1" />
                               Reject
@@ -253,21 +430,69 @@ export default function Dashboard() {
                   ))}
                 </div>
               )}
-            </>
-          ) : (
-            // Approved Institutions Tab
-            <>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <Building className="h-6 w-6 text-primary mr-3" />
-                  <h2 className="text-xl font-semibold text-base-content">
-                    Approved Institutions
-                  </h2>
+
+              <div className="mt-10 border-t border-base-300 pt-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <Mail className="h-6 w-6 text-primary mr-3" />
+                    <h2 className="text-xl font-semibold text-base-content">
+                      Support Messages
+                    </h2>
+                  </div>
+                  <div className="text-sm text-base-content/70">
+                    {supportMessages.length} total
+                  </div>
                 </div>
-                <div className="text-sm text-base-content/70">
-                  Total: {institutions.length}
-                </div>
+
+                {supportMessages.length === 0 ? (
+                  <div className="text-center py-10 rounded-lg border border-base-300 bg-base-200/50">
+                    <p className="text-base-content/60">No support messages yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {supportMessages.map((msg) => (
+                      <div
+                        key={msg._id}
+                        className="rounded-lg border border-base-300 bg-base-100 p-4"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-semibold text-base-content">{msg.name}</span>
+                              <span className="text-base-content/40">|</span>
+                              <a
+                                href={`mailto:${msg.email}`}
+                                className="text-sm text-primary hover:underline"
+                              >
+                                {msg.email}
+                              </a>
+                            </div>
+                            <p className="text-xs text-base-content/50 mt-1">
+                              {new Date(msg.createdAt).toLocaleString()}
+                            </p>
+                            <p className="mt-3 whitespace-pre-wrap text-sm text-base-content/80">
+                              {msg.message}
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={() => handleDeleteSupportMessage(msg._id)}
+                            className="btn btn-sm btn-error"
+                            title="Delete message"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+            </>
+          ) : activeTab === 'total' ? (
+            // Registered Institutions Tab
+            <>
 
               {loading ? (
                 <div className="flex justify-center items-center py-12">
@@ -307,9 +532,19 @@ export default function Dashboard() {
                           </div>
                           <div className="flex items-center">
                             <span className="font-medium text-base-content/80 min-w-[50px]">Email:</span>
-                            <span className="ml-2 text-base-content/70 truncate">
-                              {institution.email}
-                            </span>
+                            <span className="ml-2 text-base-content/70 truncate">{institution.superadminEmail || ''}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="font-medium text-base-content/80 min-w-[80px]">Rooms:</span>
+                            <span className="ml-2 text-base-content/70">{institution.roomCount ?? 0}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="font-medium text-base-content/80 min-w-[80px]">Students:</span>
+                            <span className="ml-2 text-base-content/70">{institution.studentCount ?? 0}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="font-medium text-base-content/80 min-w-[80px]">Instructors:</span>
+                            <span className="ml-2 text-base-content/70">{institution.instructorCount ?? 0}</span>
                           </div>
                           <div className="flex items-center">
                             <Calendar className="h-4 w-4 text-base-content/60 mr-2" />
@@ -318,13 +553,179 @@ export default function Dashboard() {
                             </span>
                           </div>
                         </div>
+                        <div className="card-actions justify-end p-4 pt-0">
+                          <button
+                            onClick={() => handleToggleActive(institution._id, institution.active)}
+                            className={`btn btn-sm ${institution.active ? 'btn-warning' : 'btn-success'}`}
+                          >
+                            {institution.active ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteInstitution(institution._id)}
+                            className="btn btn-sm btn-error"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
             </>
-          )}
+          ) : activeTab === 'active' ? (
+            // Active Institutions Tab
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <Activity className="h-6 w-6 text-green-500 mr-3" />
+                  <h2 className="text-xl font-semibold text-base-content">
+                    Active Institutions
+                  </h2>
+                </div>
+                <div className="text-sm text-base-content/70">
+                  Total: {institutions.filter(inst => inst.active).length}
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="flex justify-center items-center py-12">
+                  <span className="loading loading-spinner loading-lg"></span>
+                </div>
+              ) : institutions.filter(inst => inst.active).length === 0 ? (
+                <div className="text-center py-12">
+                  <Building className="h-12 w-12 text-base-content/30 mx-auto mb-4" />
+                  <p className="text-base-content/60">No active institutions found.</p>
+                  <p className="text-sm text-base-content/40">
+                    Active institutions will appear here
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {institutions.filter(inst => inst.active).map((institution) => (
+                    <div
+                      key={institution._id}
+                      className="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all duration-200 hover:bg-base-200 hover:border-blue-300 group"
+                    >
+                      <div className="card-body p-6">
+                        <div className="flex justify-between items-start mb-3">
+                          <h3 className="card-title text-lg font-semibold text-base-content group-hover:text-blue-700">
+                            {institution.name}
+                          </h3>
+                          <div className={`badge ${institution.active ? 'badge-success' : 'badge-error'} badge-sm`}>
+                            {institution.active ? 'Active' : 'Inactive'}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3 text-sm">
+                          <div className="flex items-center">
+                            <span className="font-medium text-base-content/80 min-w-[50px]">EIIN:</span>
+                            <span className="ml-2 text-base-content/70 font-mono bg-base-200 px-2 py-1 rounded text-xs">
+                              {institution.eiin}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="font-medium text-base-content/80 min-w-[50px]">Email:</span>
+                            <span className="ml-2 text-base-content/70 truncate">{institution.superadminEmail || ''}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 text-base-content/60 mr-2" />
+                            <span className="text-base-content/70">
+                              {new Date(institution.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="card-actions justify-end p-4 pt-0">
+                          <button
+                            onClick={() => handleToggleActive(institution._id, institution.active)}
+                            className={`btn btn-sm ${institution.active ? 'btn-warning' : 'btn-success'}`}
+                          >
+                            {institution.active ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteInstitution(institution._id)}
+                            className="btn btn-sm btn-error"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : activeTab === 'system' ? (
+            // System Status Tab
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <Shield className="h-6 w-6 text-purple-500 mr-3" />
+                  <h2 className="text-xl font-semibold text-base-content">System Status Details</h2>
+                </div>
+                <div className="text-sm text-base-content/70">Overview of resource connectivity</div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="card bg-base-100 p-4 border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Database</p>
+                      <p className="text-sm text-base-content/70">{systemStatus?.dbStatus?.message || 'Unknown'}</p>
+                    </div>
+                    <div>
+                      {systemStatus?.dbStatus?.message === 'Connected' ? (
+                        <span className="badge badge-success">Connected</span>
+                      ) : (
+                        <span className="badge badge-error">Disconnected</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card bg-base-100 p-4 border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-medium">Redis (Upstash)</p>
+                      <p className="text-sm text-base-content/70">
+                        {systemStatus?.redisStatus?.ok ? 'OK' : (systemStatus?.redisStatus?.message || 'Not configured')}
+                      </p>
+                      {systemStatus?.redisStatus?.note && (
+                        <p className="text-xs text-base-content/50 mt-1">
+                          {systemStatus.redisStatus.note}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      {systemStatus?.redisStatus?.ok ? (
+                        <span className="badge badge-success">OK</span>
+                      ) : systemStatus?.redisStatus?.message?.includes('local network') ? (
+                        <span className="badge badge-info">Dev Mode</span>
+                      ) : (
+                        <span className="badge badge-warning">Unavailable</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card bg-base-100 p-4 border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Storage (Spaces/S3)</p>
+                      <p className="text-sm text-base-content/70">{systemStatus?.storageStatus?.ok ? 'OK' : (systemStatus?.storageStatus?.message || systemStatus?.storageStatus?.error || 'Not configured')}</p>
+                    </div>
+                    <div>
+                      {systemStatus?.storageStatus?.ok ? (
+                        <span className="badge badge-success">OK</span>
+                      ) : (
+                        <span className="badge badge-warning">Unavailable</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </div>

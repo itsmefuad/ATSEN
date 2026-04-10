@@ -2,10 +2,12 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../../components/Navbar.jsx";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 export default function Signup() {
   const [showRoleModal, setShowRoleModal] = useState(true);
   const navigate = useNavigate();
+  usePageTitle("Sign Up - Join Educational Platform");
 
   const handleRoleSelect = (role) => {
     setShowRoleModal(false);
@@ -38,9 +40,9 @@ export default function Signup() {
             <div className="bg-base-100/95 backdrop-blur-sm rounded-lg shadow-xl max-w-md w-full p-6">
             {/* Close button */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-base-content">
-                Choose Your Role
-              </h2>
+              <h1 className="text-2xl font-semibold text-base-content">
+                Sign Up for Educational Platform
+              </h1>
               <button
                 onClick={handleClose}
                 className="btn btn-sm btn-circle btn-ghost"

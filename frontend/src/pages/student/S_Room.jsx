@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation, useNavigate } from "react-router";
 import {
-  ArrowLeft,
+  ChevronLeft,
   Loader,
-  MessageSquare,
   BookOpen,
   Calendar,
   TrendingUp,
   Trophy,
   Info,
   Users,
+  FileText,
+  MessageSquare,
 } from "lucide-react";
 import api from "../../lib/axios";
 import toast from "react-hot-toast";
@@ -20,6 +21,8 @@ import StudentAssessment from "../../components/room/StudentAssessment";
 import StudentGrades from "../../components/room/StudentGrades";
 import CourseTimeline from "../../components/room/CourseTimeline";
 import RoomStandings from "../../components/room/RoomStandings";
+import FormsHub from "../FormsHub";
+
 
 const S_Room = () => {
   const [room, setRoom] = useState(null);
@@ -59,6 +62,13 @@ const S_Room = () => {
         setLastActiveTab("standings");
       }
       setActiveTab("standings");
+    } else if (location.pathname.includes("/forms")) {
+      // Store as last active tab if not coming from details
+      if (activeTab !== "details") {
+        setLastActiveTab("forms");
+      }
+      setActiveTab("forms");
+
     } else {
       // Store as last active tab if not coming from details
       if (activeTab !== "details") {
@@ -107,10 +117,10 @@ const S_Room = () => {
     <div className="min-h-screen bg-base-200">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        {/* Back to Dashboard Button - Floating left */}
-        <div className="mb-6 flex justify-start">
-          <Link to="/student/dashboard" className="btn btn-ghost">
-            <ArrowLeft className="h-5 w-5 mr-2" />
+        {/* Back to Dashboard Button */}
+        <div className="mb-6">
+          <Link to="/student/dashboard" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-base-content/70 hover:text-base-content rounded-md hover:bg-base-100 border border-base-300 transition-colors">
+            <ChevronLeft className="h-4 w-4" />
             Back to Dashboard
           </Link>
         </div>
@@ -191,6 +201,15 @@ const S_Room = () => {
                 >
                   <Trophy className="h-4 w-4 mr-2" />
                   Standings
+                </Link>
+                <Link
+                  to={`/student/room/${id}/forms`}
+                  className={`tab ${
+                    activeTab === "forms" ? "tab-active" : ""
+                  }`}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Forms
                 </Link>
               </div>
 
@@ -342,6 +361,10 @@ const S_Room = () => {
               {activeTab === "grades" && <StudentGrades roomId={id} />}
 
               {activeTab === "standings" && <RoomStandings roomId={id} />}
+
+              {activeTab === "forms" && <FormsHub hideNavbar={true} />}
+              
+
             </div>
 
             {/* Timeline Sidebar */}

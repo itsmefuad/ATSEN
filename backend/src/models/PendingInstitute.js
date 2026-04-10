@@ -18,10 +18,10 @@ const pendingInstituteSchema = new mongoose.Schema(
       trim: true,
       uppercase: true
     },
-    email: {
+    // Superadmin email for the pending registration
+    superadminEmail: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
       lowercase: true
     },

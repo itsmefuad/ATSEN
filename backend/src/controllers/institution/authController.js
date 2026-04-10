@@ -39,14 +39,15 @@ export async function registerInstitution(req, res) {
 
   try {
     // Check if institution already exists (approved) or is pending
-    const existingInstitution = await Institution.findOne({ $or: [{ eiin }, { email }] });
+    const emailNormalized = email.toLowerCase().trim();
+    const existingInstitution = await Institution.findOne({ $or: [{ eiin }, { superadminEmail: emailNormalized }] });
     if (existingInstitution) {
       return res.status(409).json({
         message: "Institution with same EIIN or Email already exists."
       });
     }
 
-    const existingPending = await PendingInstitute.findOne({ $or: [{ eiin }, { email }] });
+    const existingPending = await PendingInstitute.findOne({ $or: [{ eiin }, { superadminEmail: emailNormalized }] });
     if (existingPending) {
       return res.status(409).json({
         message: "Registration request with same EIIN or Email is already pending approval."
@@ -57,7 +58,7 @@ export async function registerInstitution(req, res) {
     const pendingInstitute = await PendingInstitute.create({
       name,
       eiin: eiin.toUpperCase().trim(),
-      email: email.toLowerCase().trim(),
+      superadminEmail: emailNormalized,
       password, // Will be hashed by the model's pre-save hook
       phone,
       address,
@@ -75,32 +76,55 @@ export async function registerInstitution(req, res) {
   }
 }
 
-// Login an existing institution
+// Login an existing institution (superadmin or admin)
 export async function loginInstitution(req, res) {
   const { email, password } = req.body;
 
   try {
-    const inst = await Institution.findOne({ email });
+    const emailNormalized = email.toLowerCase().trim();
+    
+    // First try superadmin login
+    let inst = await Institution.findOne({ superadminEmail: emailNormalized });
+    let isSuperadmin = false;
+    if (inst) {
+      const matches = await bcrypt.compare(password, inst.password);
+      if (matches) {
+        isSuperadmin = true;
+      } else {
+        inst = null; // treat as not found for superadmin
+      }
+    }
+
+    // If not superadmin, try matching an institution admin
+    let adminEmail = null;
+    if (!inst) {
+      const instWithAdmin = await Institution.findOne({ 'admins.email': emailNormalized }).select('+admins.password');
+      if (instWithAdmin) {
+        const admin = (instWithAdmin.admins || []).find(a => a.email.toLowerCase() === emailNormalized);
+        if (admin) {
+          const ok = await bcrypt.compare(password, admin.password || '');
+          if (ok) {
+            inst = instWithAdmin;
+            adminEmail = admin.email;
+            isSuperadmin = false;
+          }
+        }
+      }
+    }
+
     if (!inst) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
-    const matches = await bcrypt.compare(password, inst.password);
-    if (!matches) {
-      return res.status(401).json({ message: "Invalid credentials." });
-    }
-
     const slug = await ensureSlug(inst);
-
-    const token = jwt.sign(
-      { id: inst._id, role: "institution" },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    // Include the email in the token so downstream auth checks can identify the requester
+    const tokenPayload = { id: inst._id, role: "institution", email: emailNormalized, isSuperadmin };
+    if (adminEmail) tokenPayload.adminEmail = adminEmail;
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     return res.json({
       token,
-      institution: { id: inst._id, slug, name: inst.name }
+      institution: { id: inst._id, slug, name: inst.name, isSuperadmin, email: emailNormalized }
     });
   } catch (err) {
     console.error("Login institution error:", err);

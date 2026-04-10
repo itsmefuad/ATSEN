@@ -66,3 +66,27 @@ export const getDocumentDetails = async (documentId) => {
     throw error.response?.data || error.message;
   }
 };
+
+// Download document file
+export const downloadDocument = async (documentId, filename) => {
+  try {
+    const response = await api.get(`/documents/${documentId}/download`, {
+      responseType: 'blob'
+    });
+    
+    // Create a blob URL and trigger download
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename || 'document.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    return true;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};

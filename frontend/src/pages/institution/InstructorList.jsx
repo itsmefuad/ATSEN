@@ -1,7 +1,7 @@
 // frontend/src/pages/institution/InstructorList.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router";
-import { Users, Mail, Phone, Trash2, UserPlus, ArrowLeft } from "lucide-react";
+import { Users, Mail, Phone, Trash2, UserPlus, ChevronLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function InstructorList() {
@@ -15,7 +15,7 @@ export default function InstructorList() {
 
     try {
       const res = await fetch(
-        `http://localhost:5001/api/institutions/${encodeURIComponent(
+        `/api/institutions/${encodeURIComponent(
           idOrName
         )}/remove-instructor`,
         {
@@ -41,7 +41,7 @@ export default function InstructorList() {
 
   useEffect(() => {
     fetch(
-      `http://localhost:5001/api/institutions/${encodeURIComponent(
+      `/api/institutions/${encodeURIComponent(
         idOrName
       )}/instructors`
     )
@@ -84,7 +84,7 @@ export default function InstructorList() {
             to={`/${encodeURIComponent(idOrName)}`}
             className="p-2 text-base-content/60 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5" />
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">

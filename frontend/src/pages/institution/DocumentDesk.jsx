@@ -155,60 +155,60 @@ const DocumentDesk = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-base-200">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-base-200">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Document Desk</h1>
-            <p className="text-gray-600">Manage student document requests and track their progress</p>
+            <h1 className="text-3xl font-bold text-base-content mb-2">Document Desk</h1>
+            <p className="text-base-content/70">Manage student document requests and track their progress</p>
           </div>
 
           {/* Statistics Cards */}
           {statistics && (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-base-100 rounded-lg shadow-sm border border-base-300 p-6">
                 <div className="flex items-center">
                   <FileText className="h-8 w-8 text-sky-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                    <p className="text-2xl font-bold text-gray-900">{statistics.totalDocuments}</p>
+                    <p className="text-sm font-medium text-base-content/70">Total Requests</p>
+                    <p className="text-2xl font-bold text-base-content">{statistics.totalDocuments}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-base-100 rounded-lg shadow-sm border border-base-300 p-6">
                 <div className="flex items-center">
                   <Calendar className="h-8 w-8 text-blue-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Today</p>
-                    <p className="text-2xl font-bold text-gray-900">{statistics.todayRequests}</p>
+                    <p className="text-sm font-medium text-base-content/70">Today</p>
+                    <p className="text-2xl font-bold text-base-content">{statistics.todayRequests}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-base-100 rounded-lg shadow-sm border border-base-300 p-6">
                 <div className="flex items-center">
                   <AlertTriangle className="h-8 w-8 text-red-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Urgent</p>
-                    <p className="text-2xl font-bold text-gray-900">{statistics.urgentCount}</p>
+                    <p className="text-sm font-medium text-base-content/70">Urgent</p>
+                    <p className="text-2xl font-bold text-base-content">{statistics.urgentCount}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-base-100 rounded-lg shadow-sm border border-base-300 p-6">
                 <div className="flex items-center">
                   <Clock className="h-8 w-8 text-amber-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Pending</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm font-medium text-base-content/70">Pending</p>
+                    <p className="text-2xl font-bold text-base-content">
                       {statistics.statusStatistics
                         .filter(s => !["Document Received"].includes(s._id))
                         .reduce((sum, s) => sum + s.count, 0)}
@@ -216,12 +216,12 @@ const DocumentDesk = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-base-100 rounded-lg shadow-sm border border-base-300 p-6">
                 <div className="flex items-center">
                   <Package className="h-8 w-8 text-green-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Completed</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm font-medium text-base-content/70">Completed</p>
+                    <p className="text-2xl font-bold text-base-content">
                       {statistics.statusStatistics
                         .find(s => s._id === "Document Received")?.count || 0}
                     </p>
@@ -234,7 +234,7 @@ const DocumentDesk = () => {
           {/* Filters */}
           <div className="mb-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+              <label className="block text-sm font-medium text-base-content mb-2">Filter by Status</label>
               <div className="flex space-x-2">
                 {[
                   { key: "all", label: "All" },
@@ -249,8 +249,8 @@ const DocumentDesk = () => {
                     onClick={() => setFilter(filterOption.key)}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                       filter === filterOption.key
-                        ? "bg-sky-500 text-white"
-                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                        ? "bg-primary text-primary-content"
+                        : "bg-base-100 text-base-content border border-base-300 hover:bg-base-200"
                     }`}
                   >
                     {filterOption.label}
@@ -260,7 +260,7 @@ const DocumentDesk = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Urgency</label>
+              <label className="block text-sm font-medium text-base-content mb-2">Filter by Urgency</label>
               <div className="flex space-x-2">
                 {[
                   { key: "all", label: "All" },
@@ -273,8 +273,8 @@ const DocumentDesk = () => {
                     onClick={() => setUrgencyFilter(filterOption.key)}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                       urgencyFilter === filterOption.key
-                        ? "bg-sky-500 text-white"
-                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                        ? "bg-primary text-primary-content"
+                        : "bg-base-100 text-base-content border border-base-300 hover:bg-base-200"
                     }`}
                   >
                     {filterOption.label}
@@ -287,10 +287,10 @@ const DocumentDesk = () => {
           {/* Documents List */}
           <div className="space-y-4">
             {sortedDocuments.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No documents found</h3>
-                <p className="text-gray-600">No document requests match your current filters.</p>
+              <div className="bg-base-100 rounded-lg shadow-sm border border-base-300 p-12 text-center">
+                <FileText className="h-12 w-12 text-base-content/40 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-base-content mb-2">No documents found</h3>
+                <p className="text-base-content/70">No document requests match your current filters.</p>
               </div>
             ) : (
               sortedDocuments.map(document => (
